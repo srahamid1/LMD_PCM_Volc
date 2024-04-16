@@ -1294,7 +1294,7 @@ include "netcdf.inc"
 !        write(*,*) 'nlay or nlayer:', nlayer
 !        write(*,*) 'zzlev', zzlev
 !        -----------------------------------------
-!        Volcanism : Ash source -MARS PALEOCLIMATE
+!        Volcanism : Source - MARS
 !        -----------------------------------------
          if (callvolcano) then
          if (.not.tracer) then
@@ -1302,49 +1302,14 @@ include "netcdf.inc"
             call abort
          endif
             
-          
-!            write(*,*) 'pdq(1,10,volc1)', pdq(1,10,igcm_volc_1)
-!            write(*,*) 'pdq(577,10,volc1)', pdq(577,10,igcm_volc_1)
 !            call volcano(nq,ngrid,nlayer,pplev,pu,pv,pt,zzlev,zdqvolc,ivolc)
             call volcano(ngrid,nlayer,pplev,pu,pv,pt,zzlev,zdqvolc,nq,massarea) 
-!           do l = 1,nlayer
-!             WRITE(*,*) mpi_rank, pdq(ivolc,l,:)
-!           end do
+
 
 ! UNCOMMENT THIS!!
             pdq(1:ngrid,1:nlayer,1:nq) = pdq(1:ngrid,1:nlayer,1:nq)       &
                                                + zdqvolc(1:ngrid,1:nlayer,1:nq)
-       
-!           do l = 1,nlayer
-!             WRITE(*,*) mpi_rank,'after', pdq(ivolc,l,:)
-!           end do
 
-           !do l = 1,nlayer
-           !  WRITE(*,*) mpi_rank, zdqvolc(ivolc,l,:)
-           !end do
-!            pdq(1:ngrid,1:nlayer,igcm_volc_2) = pdq(1:ngrid,1:nlayer,igcm_volc_2)       &
-!                                               +zdqvolc(1:ngrid,1:nlayer,igcm_volc_2)
-
-!            pdq(1:ngrid,1:nlayer,igcm_h2o_vap) =pdq(1:ngrid,1:nlayer,igcm_h2o_vap)       &
-!                                               +zdqvolc(1:ngrid,1:nlayer,igcm_h2o_vap)
- 
-!            write(*,*) 'pdq(1,10,volc1)', pdq(1,10,igcm_volc_1)
-!            write(*,*) 'pdq(577,10,volc1)', pdq(577,10,igcm_volc_1)
-!            DO iq=1,nq
-!              DO ig=1, ngrid
-!                DO l=1, nlayer
-!                        pdq(ig,l,iq)=pdq(ig,l,iq) + zdqvolc(ig,l,iq)
-!                ENDDO
-!              ENDDO
-!            ENDDO
-
-!            WRITE(*,*)  'Volcano Erupting'
-!            WRITE(*,*) 'zdqvolc(577,15,volc_1)', zdqvolc(577,10,2)
-!            WRITE(*,*) 'zdqvolc(577,15,volc_1)',zdqvolc(577,10,igcm_volc_1)
-!            WRITE(*,*) 'zdqvolc(577,15,h2o) ',zdqvolc(577,10,igcm_h2o_vap)
-!            WRITE(*,*) 'pdqvolc(577,15,volc_1)', pdq(577,10,igcm_volc_1)
-!          write(*,*) 'physiqvolclatlon',':LAT=',latitude(577)*180/pi
-!          write(*,*)      'xLON=',longitude(577)*180/pi
          ENDIF
 
  ! ---------------------
