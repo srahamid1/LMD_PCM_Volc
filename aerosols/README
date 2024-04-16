@@ -1,8 +1,10 @@
-To generate the tables of param. of diffusion used by the GCM
+MIE Scattering Code
+
+To generate the tables of param. of diffusion used by the PCM
 -------------------------------------------------------------------
 
 From the attached code, named optpropgen.f. It generates
-the diffusion parameter table used by the GCM.
+the diffusion parameter table used by the PCM.
 To generate this table:
 
 - Once the archive has been unzipped (tar -xvzf MIE_BH_v2.tar.gz),
