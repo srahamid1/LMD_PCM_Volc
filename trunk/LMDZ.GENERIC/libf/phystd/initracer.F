@@ -2,7 +2,7 @@
 
       use surfdat_h, ONLY: dryness, watercaptag
       USE tracer_h
-      USE callkeys_mod, only: water
+      USE callkeys_mod, only: water,rho_volc
       IMPLICIT NONE
 c=======================================================================
 c   subject:
@@ -39,6 +39,7 @@ c  alpha_devil(nq) ! lifting coeeficient by dust devil
 c  rho_dust          ! Mars dust density
 c  rho_ice           ! Water ice density
 c  rho_volc          ! Volcanic ash density
+c  rho_h2so4         ! H2SO4 density
 c  doubleq           ! if method with mass (iq=1) and number(iq=2) mixing ratio
 c  varian            ! Characteristic variance of log-normal distribution
 c-----------------------------------------------------------------------
@@ -366,7 +367,7 @@ c------------------------------------------------------------
       rho_dust=2500.  ! Mars dust density (kg.m-3)
       rho_ice=920.    ! Water ice density (kg.m-3)
       rho_co2=1620.   ! CO2 ice density (kg.m-3)
-      rho_volc=3000.   ! Basaltic volcanic ash density (kg.m-3) Vogel_2017 
+c      rho_volc=2980.   ! Basaltic volcanic ash density (kg.m-3) Vogel et al. 2017 
       rho_h2so4=1840. ! H2SO4 density (kg.m-3)
         
         write(*,*) 'rho_q before allocation', rho_q
@@ -419,7 +420,7 @@ c------------------------------------------------------------
         if (noms(iq).eq."h2so4") then
           igcm_h2so4=iq
           rho_q(igcm_h2so4) = rho_h2so4
-          radius(igcm_h2so4) = 1.e-6 ! 1 um
+          radius(igcm_h2so4) = 3.e-7 ! 0.3 um
           mmol(igcm_h2so4) = 98.079 ! g/mol
          count=count+1
         endif
