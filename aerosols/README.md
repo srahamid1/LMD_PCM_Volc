@@ -1,4 +1,4 @@
-## MIE Scattering Code
+### MIE Scattering Code
 
 To generate the tables of param. of diffusion used by the PCM
 -------------------------------------------------------------------
