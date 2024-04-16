@@ -28,7 +28,7 @@ Intructions on how to download and use the LMD PCM can be found here https://lmd
 
 `trunk/LMDZ.COMMON/libf/phystd/radii_mod.F90` - Added volcanic ash and h2so4 radii to compute effective radii of particles
 
-`trunk/LMDZ.COMMON/libf/phystd/suaer_corrk.F90` - Added names of volcanic ash and h2so4 optical property data files to be used by PCM 
+`trunk/LMDZ.COMMON/libf/phystd/suaer_corrk.F90` - Added names of volcanic ash and h2so4 optical data files to be used by PCM 
 
 `trunk/LMDZ.COMMON/libf/phystd/tracer_h.F90` - Added volcanic ash and h2so4 tracer variables
 
