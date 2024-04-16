@@ -1,6 +1,6 @@
 # LMD Generic PCM Code Modified to Erupt Volcanoes on Mars
 
-Modified version of the Generic LMD PCM used in Hamid et al. 2024. Based on the Generic LMD SVN revision: 2289.
+Modified version of the Laboratoire de Météorologie Dynamique (LMD) Generic Planetary Climate Model (PCM) used in Hamid et al. 2024. Based on the Generic LMD subversion revision: 2289.
 
 Intructions on how to download and use the LMD PCM can be found here https://lmdz-forge.lmd.jussieu.fr/mediawiki/Planets/index.php/Quick_Install_and_Run
 
