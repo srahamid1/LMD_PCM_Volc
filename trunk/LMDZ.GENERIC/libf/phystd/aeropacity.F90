@@ -3,14 +3,14 @@
 
        use radinc_h, only : L_TAUMAX,naerkind
        use aerosol_mod
-       USE tracer_h, only: noms,rho_co2,rho_ice,rho_volc
+       USE tracer_h, only: noms,rho_co2,rho_ice,rho_h2so4
        use comcstfi_mod, only: g, pi
        use geometry_mod, only: latitude
        use callkeys_mod, only: aerofixco2,aerofixh2o,aerofixash,kastprof, &
-		cloudlvl,CLFvarying,CLFfixval,dusttau,			&
+		cloudlvl,CLFvarying,CLFfixval,dusttau,h2so4tau,		&
 		pres_bottom_tropo,pres_top_tropo,obs_tau_col_tropo,	&
 		pres_bottom_strato,pres_top_strato,obs_tau_col_strato,  &
-                tau_nh3_cloud, pres_nh3_cloud 
+                tau_nh3_cloud, pres_nh3_cloud,rho_volc,topdust,top_h2so4
                   
        implicit none
 
@@ -76,11 +76,13 @@
       INTEGER,SAVE :: i_co2ice=0      ! co2 ice
       INTEGER,SAVE :: i_h2oice=0      ! water ice
       INTEGER,SAVE :: i_volc=0	      !volcanic ash
+      INTEGER,SAVE :: i_h2so4=0	      !sulfuric acid
 !$OMP THREADPRIVATE(i_co2ice,i_h2oice,i_volc)
       CHARACTER(LEN=20) :: tracername ! to temporarily store text
 
       ! for fixed dust profiles
-      real topdust, expfactor, zp
+      real expfactor, zp
+!      real topdust, expfactor, zp
       REAL taudusttmp(ngrid) ! Temporary dust opacity used before scaling
       REAL tauh2so4tmp(ngrid) ! Temporary h2so4 opacity used before scaling
 
@@ -270,7 +272,7 @@
 !         1. Initialization 
           aerosol(1:ngrid,1:nlayer,iaer)=0.0
           
-          topdust=30.0 ! km  (used to be 10.0 km) LK
+!          topdust=30.0 ! km  (used to be 10.0 km) LK
 
 !       2. Opacity calculation
 
@@ -316,7 +318,7 @@
 !==================================================================
 !           H2SO4 
 !==================================================================
-! added by LK
+! added by LK. 
       if (iaero_h2so4.ne.0) then
          iaer=iaero_h2so4
 
@@ -331,7 +333,7 @@
             DO ig=1,ngrid
 !              Typical mixing ratio profile
 
-               zp=(pplev(ig,1)/pplay(ig,l))**(70./30) !emulating topdust
+               zp=(pplev(ig,1)/pplay(ig,l))**(70./top_h2so4) !emulating topdust
                expfactor=max(exp(0.007*(1.-max(zp,1.))),1.e-3)
 
 !             Vertical scaling function
@@ -347,28 +349,37 @@
          ENDDO
          DO l=1,nlayer-1
             DO ig=1,ngrid
-               aerosol(ig,l,iaer) = max(1E-20, &
-                          1 &
-                       *  pplev(ig,1) / pplev(ig,1) &
-                       *  aerosol(ig,l,iaer) &
-                       /  tauh2so4tmp(ig))
-
-            ENDDO
-         ENDDO
+! Below we are getting a certain opacity at particular wavelength. 
+! Everywhere on the planet is specified by random tau value. 
+! Tracer not linked to aerosols. See Kerber et al. 2015
+! Saira made the variable h2so4tau to replace the default 
+! value of 1.
+!               aerosol(ig,l,iaer) = max(1E-20, &
+!                          h2so4tau &
+!                       *  pplev(ig,1) / pplev(ig,1) &
+!                       *  aerosol(ig,l,iaer) &
+!                       /  tauh2so4tmp(ig))
+!
+!            ENDDO
+!         ENDDO
 
 ! 1/700. is assuming a "sulfurtau" of 1
 ! Sulfur aerosol routine to be improved.
-!                     aerosol0 =                         &
-!                          (  0.75 * QREFvis3d(ig,l,iaer) /        &
-!                          ( rho_h2so4 * reffrad(ig,l,iaer) )  ) *   &
-!                          ( pq(ig,l,i_h2so4) + 1.E-9 ) *         &
-!                          ( pplev(ig,l) - pplev(ig,l+1) ) / g
-!                     aerosol0           = max(aerosol0,1.e-9)
-!                     aerosol0           = min(aerosol0,L_TAUMAX)
-!                     aerosol(ig,l,iaer) = aerosol0
 
-!                  ENDDO
-!               ENDDO
+! Below the aerosol is linked to the tracer "pq(ig,l,i_h2so4)"
+! Stuff in the tracer account goes into the aerosol account, this happens
+! across the whole grid and then start over with each timestep.
+                     aerosol0 =                         &
+                          (  0.75 * QREFvis3d(ig,l,iaer) /        &
+                          ( rho_h2so4 * reffrad(ig,l,iaer) )  ) *   &
+                          ( pq(ig,l,i_h2so4) + 1.E-9 ) *         &
+                          ( pplev(ig,l) - pplev(ig,l+1) ) / g
+                     aerosol0           = max(aerosol0,1.e-9)
+                     aerosol0           = min(aerosol0,L_TAUMAX)
+                     aerosol(ig,l,iaer) = aerosol0
+
+                  ENDDO
+               ENDDO
       end if
  
 !     ---------------------------------------------------------
@@ -389,7 +400,7 @@
             else
                DO ig=1, ngrid
                   DO l=1,nlayer-1 ! to stop the rad tran bug
-
+!pq is where we put amount of tracer into aerosol
                      aerosol0 =                         &
                           (  0.75 * QREFvis3d(ig,l,iaer) /        &
                           ( rho_volc * reffrad(ig,l,iaer) )  ) *   &
