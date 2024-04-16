@@ -10,6 +10,6 @@ This directory contains a set of necessary input data needed to run the model.
 
 `diagfi.def` contains a list of variables to be written to the diagfi.nc output file
 
-`ns` is a handy file to rename restart files to start files
+`ns` is a handy file that renames restart files to start files
 
 See this link for more information on model compilation and creating and modifying initial states: https://lmdz-forge.lmd.jussieu.fr/mediawiki/Planets/index.php/Quick_Install_and_Run#Running_the_GCM 
