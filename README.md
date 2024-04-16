@@ -1,13 +1,13 @@
-LMD Generic PCM Modified Code to Erupt Volcanoes on Mars
+#LMD Generic PCM Modified Code to Erupt Volcanoes on Mars
 
 Modified version of the Generic LMD PCM used in Hamid et al. 2024. Based on the Generic LMD SVN revision: 2289.
 
 Intructions on how to download other versions of the LMD PCM can be found here https://lmdz-forge.lmd.jussieu.fr/mediawiki/Planets/index.php/Quick_Install_and_Run
 
-Added Codes
+#Added Codes
 trunk/LMDZ.COMMON/libf/phystd/volcano.F - Dispersal of volcanic products by the LMD/PCM
 
-Modified Codes
+#Modified Codes
 trunk/LMDZ.COMMON/libf/phystd/aeropacity.F90 -  Added option to compute aerosol optical depth in each gridbox for volcanic ash and sulfuric acid (h2so4).
 
 trunk/LMDZ.COMMON/libf/phystd/aerosol_mod.F90 - Added volcanic ash and h2so4 aerosols to common file, which creates aerosol tags and initializes them to zero
