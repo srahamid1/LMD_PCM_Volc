@@ -19,37 +19,26 @@ c=======================================================================
 c   Explosive volcanic eruptions (updated to run in parallel)
 c
 c   Description :
-c       Dispersal of volcanic products by the LMD/GCM.
+c       Dispersal of volcanic products by the LMD/PCM.
 c
 c     Author : Lionel Wilson
-c     Adapted for the LMD/GCM by Laura Kerber, J.-B. Madeleine, and 
+c     Adapted for the LMD/PCM by Laura Kerber, J.-B. Madeleine, and 
 c     Saira Hamid
 c
-c   Reference :
-c       @ARTICLE{2007JVGR..163...83W,
-c       author = {{Wilson}, L. and {Head}, J.~W.},
-c       title = "{Explosive volcanic eruptions on Mars: Tephra and
-c       accretionary lapilli formation, dispersal and recognition in the
-c       geologic record}",
-c       journal = {Journal of Volcanology and Geothermal Research},
-c       year = 2007,
-c       month = jun,
-c       volume = 163}
+c   Reference documenting most recent changes:
+c       Hamid et al. 2024 Icarus
 c=======================================================================
 
 c     Variable statement
 c     __________________________________________________________________
 
-!#include "dimensions.h"
-!#include "dimphys.h"
-!#include "comcstfi.h"
 
 c Parameters
 c ----------
 
 c PLEASE DEFINE THE LOCATION OF THE ERUPTION BELOW :
 c =============================================
-c     Coordinate of the volcano (degrees) :
+c     Coordinate of the volcano (degrees) commented out because lat/lon is now modified in callphys.def:
 c      REAL, parameter :: lon_volc = 178 
 c      REAL, parameter :: lat_volc = -8.5
 c       ex : Alba Patera lon=-111.11 and lat= 39.19
@@ -71,10 +60,10 @@ c       ex : Peneus Patera lon=60.76 and lat= -58.05
 c       ex : Pityusa Patera lon= 36.87 and lat= -66.77
 c       ex : Syrtis Major lon=66.4 and lat= 9.85
 c       ex : Tyrrhenia Mons lon=106.55 and lat= -21.32
-c     Source flux (kg/s)
-c       REAL, parameter :: mmsource = 1E8  !Mastin et al. 2009, Glaze and Baloga 2002
-c      REAL, parameter :: wsource = 1.E6 ! 1 wt% water (Greeley, 1987)
-c       REAL, parameter :: h2so4source = 1.E5 !Self et al. 1993
+c     Source flux (kg/s) is commented out because these are now changed in callphys.def
+c       REAL, parameter :: mmsource = 1E8
+c      REAL, parameter :: wsource = 1.E6 
+c       REAL, parameter :: h2so4source = 1.E5
 c =============================================
 c Local variables
 c ---------------
@@ -142,15 +131,14 @@ c       ENDIF
 c This part of the code distributes mass flux in the grid square
 c (mass flux/mass of air in grid square), resulting in kg/kg/s tendency.
 c -----------------------
-c Specify the levels at which each class of clasts falls,
-c rounded to the nearest GCM level, either from the Wilson model or from
-c a fixed height. 
+c Specify the levels at which each volcanic product falls,
+c rounded to the nearest GCM level at a fixed height. 
 
       IF (ivolc==0) THEN !Tendencies will=0 & leave the routine
        RETURN
       endif
 
-c      l= 14                            ! for a fixed height. 
+c      l= 14                            ! for a fixed height. Commented out because this is now changed in callphys.def
       write(*,*) 'tracer names',noms
       DO iq=1, nq
         tracername=noms(iq)
