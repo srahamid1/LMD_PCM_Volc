@@ -1,6 +1,6 @@
 After running the PCM, an output file called diagfi.nc will be created containing your results. 
 
-Use these files to read the diagfi.nc file and to create figures using the GrADS visualization software.
+Use the files in this directory to read the diagfi.nc file and to create figures using the GrADS visualization software.
 
 `0ani.gs` can be used to create a single image.
 
