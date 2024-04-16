@@ -5,7 +5,7 @@ Modified version of the Generic LMD PCM used in Hamid et al. 2024. Based on the 
 Intructions on how to download other versions of the LMD PCM can be found here https://lmdz-forge.lmd.jussieu.fr/mediawiki/Planets/index.php/Quick_Install_and_Run
 
 ## Added Codes
-`trunk/LMDZ.COMMON/libf/phystd/volcano.F - Dispersal of volcanic products by the LMD/PCM
+`trunk/LMDZ.COMMON/libf/phystd/volcano.F - Dispersal of volcanic products by the LMD/PCM`
 
 ## Modified Codes
 trunk/LMDZ.COMMON/libf/phystd/aeropacity.F90 -  Added option to compute aerosol optical depth in each gridbox for volcanic ash and sulfuric acid (h2so4).
