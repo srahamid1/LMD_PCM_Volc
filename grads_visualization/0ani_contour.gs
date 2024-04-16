@@ -60,7 +60,7 @@
 'clear'
 'set grads off' 
 
-*---DATA---*
+*---LOAD PCM DATA---*
 'sdfopen diagfi.nc'
 
 'set xlopts 1 5 0.15'
