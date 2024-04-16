@@ -29,11 +29,10 @@ callvolcano=.false.
 # Alba Patera lon=-111.11 and lat= 39.19
 # Albor Tholus lon=150.4 and lat= 19.0
 # Amphritites lon=52.66 and lat= -58.00
-# Apollinaris Patera lon=174.4 and lat=-9.3/-8.5
-# Apollinaris Patera high res lon=178 and lat=-8.5
+# Apollinaris Patera lon=174.4 and lat= -8.5
 # Arsia Mons lon=-120.46 and lat= -9.14
 # Ascraeus Mons lon=-104.37 and lat= 11.1
-# Cerberus Fossae lon= 160.0 and lat= 10.0, (old lon=176.6, lat=9)
+# Cerberus Fossae lon=176.6 and lat=9
 # Electris volcano lon=-173.21 and lat = -37.35
 # Hadriacus Mons lon=92.18 and lat= -30.44
 # Hecates Tholus lon=150.08 and lat= 31.68
@@ -57,11 +56,11 @@ lat_volc=-8.5
 # Elysium summit height = 14.1 km (Plescia 2004) 
 # Apollinaris summit height = 3.2 km (Plescia 2004) 
 ## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-dropheight=14
+dropheight=1
 # Ash Mass Eruption Rate (kg/s)?
-mmsource= 1E8
+mmsource= 1E5
 # Water Mass Eruption Rate (kg/s)?
-wsource= 1E8
+wsource= 1E5
 # H2SO4 Mass Eruption Rate (kg/s)?
 h2so4source= 1E5
 # Density of Volcanic Ash (in kg/m3)? (choose 2980 for basaltic ash; Vogel et al. 2017)
@@ -115,6 +114,7 @@ startype = 1
 # 1024.5 W m-2		Sol today x 0.75 = weak Sun 3.8 GYa
 # 18.462 W m-2		The feeble GJ581
 # 19.960 W m-2		GJ581 with e=0.38 orbital average
+# See Hamid et al. 2024 Icarus Table 1 for stellar fluxes used for Apollinaris, Hadriacus, Pityusa, Cerberus, & Elysium
 Fat1AU = 1024.5
 
 ## Tracer and aerosol options 
@@ -134,15 +134,21 @@ calladj  = .true.
 callsoil = .true.
 
 #########################################################################
-## extra non-standard definitions for Early Mars
+## extra non-standard definitions for Mars
 #########################################################################
 
 ## Tracer and aerosol options 
 ## ~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Radiatively active ash aerosol?
 aeroash       = .false.
-# Radiatively active H2SO4 aerosol?
+# Fixed radiatively active ash aerosol distribution (set to false if you want ash aerosol tied to tracer)?
+aerofixash  = .false.
+# Radiatively active H2SO4 aerosol tied to tracer?
 aeroh2so4       = .false.
+# basic h2so4 opacity for fixed h2so4 aerosol? (0.15=realistic global-mean optical depth following a volcanic eruption. LeGrande et al. 2016) 
+h2so4tau      = 0
+# height of h2so4 layer (km) for fixed h2so4 opacity (if h2so4tau > 0)?
+top_h2so4 = 30 
 # Radiatively active CO2 aerosol?
 aeroco2       = .true.
 # Fixed CO2 aerosol distribution?
@@ -153,13 +159,8 @@ aeroh2o       = .true.
 aerofixh2o  = .false.
 # basic dust opacity
 dusttau       = 0.2
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# H2SO4 Opacity
-# Choose 0.15 for realistic global-mean aerosol optical depth
-# following a volcanic eruption. Fig.2 blue line LeGrande et al. 2016
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# basic h2so4 opacity 
-h2so4tau      = 0
+# height of dust layer (km) for fixed dust opacity (if dusttau > 0) ?
+topdust = 30 
 # Varying H2O cloud fraction?
 CLFvarying    = .false.
 # H2O cloud fraction?
@@ -169,9 +170,9 @@ radfixed=.false.
 # number mixing ratio of CO2 ice particles
 Nmix_co2      = 100000.
 # number mixing ratio of water particles (for rafixed=.false.)
-Nmix_h2o      = 1.e5
+Nmix_h2o      = 1.e7
 # number mixing ratio of water ice particles (for rafixed=.false.)
-Nmix_h2o_ice      = 1.e5
+Nmix_h2o_ice      = 5.e5
 # radius of H2O water particles (for rafixed=.true.):
 rad_h2o=10.e-6
 # radius of H2O ice particles (for rafixed=.true.):
@@ -203,7 +204,7 @@ albedo_spectral_mode=.false.
 #            = 0.645 (0.50 Sun-integrated) for 'realistic' snow.
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # H2O snow (and ice) albedo ?
-albedosnow    = 0.645
+albedosnow    = 0.5
 # Maximum sea ice thickness ?
 maxicethick   = 0.05
 # Freezing point of seawater (degrees C) ?
@@ -225,4 +226,4 @@ co2cond       = .true.
 nearco2cond   = .false.
 
 # address for spectroscopic file
-datadir = /path/to/datadir/
+datadir = /path/to/data/directory/
