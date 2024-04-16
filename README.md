@@ -32,4 +32,4 @@ Intructions on how to download and use the LMD PCM can be found here https://lmd
 
 `trunk/LMDZ.COMMON/libf/phystd/tracer_h.F90` - Added volcanic ash and h2so4 tracer variables
 
-`trunk/LMDZ.COMMON/libf/phystd/turbdiff.F90` - Added options to turn off sublimation of water (1) when volcano is degassing, (2) in volcano grid point, or (3) depending on ash thickness
+`trunk/LMDZ.COMMON/libf/phystd/turbdiff.F90` - Added options to turn off sublimation of water (1) on the whole planet, (2) only when volcano is degassing, (3) only in the volcano grid point, or (4) depending on the surface ash thickness
