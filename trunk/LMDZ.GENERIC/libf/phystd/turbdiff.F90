@@ -1,3 +1,4 @@
+
       subroutine turbdiff(ngrid,nlay,nq,rnat,          &
           ptimestep,pcapcal,lecrit,                    &   
           pplay,pplev,pzlay,pzlev,pz0,                 &
@@ -508,22 +509,22 @@
                ! compute evaporation efficiency
                do ig=1,ngrid
                   if(nint(rnat(ig)).eq.1)then
-!                     dryness(ig)=0
+!                     dryness(ig)=0 ! [1] uncomment this line & comment lines 512-514 to turn off sublimation completely
                      dryness(ig)=pqsurf(ig,iliq_surf)+pqsurf(ig,iice_surf) 
                      dryness(ig)=MIN(1.,2*dryness(ig)/mx_eau_sol)
                      dryness(ig)=MAX(0.,dryness(ig))
-!                     [1] Turn off all H2O sublimation when volcano is passively degassing
+!                     [2] Turn off all H2O sublimation when volcano is passively degassing
 !                     --------------------------------------------------------------------
 !                     if (callvolcano) then
 !                       dryness(ig)=0  
 !                     endif
-!                     [2] Turn off H2O sublimation in volcano grid point
+!                     [3] Turn off H2O sublimation in volcano grid point
 !                     --------------------------------------------------
 !                     if (ig==ivolc) then
 !                       WRITE(*,*) 'volcano dryness=0',ig
 !                       dryness(ig)=0 !no sublimation of surface H2O @ volcano grid point 
 !                     endif
-!                     [3] Turn off H2O sublimation depending on ash thickness(for explosive eruptions)
+!                     [4] Turn off H2O sublimation depending on ash thickness(for explosive eruptions)
 !                     --------------------------------------------------------------------------------
 !                     if (igcm_volc_1.ne.0) then !if you have volcanic ash size 1 as a tracer
 !                       if (pqsurf(ig,igcm_volc_1)>=2100) then !9000 kg/m2 for basaltic ash (3000kg/m3), 2100 kg/m2 for pumice (700kg/m3)
@@ -790,3 +791,4 @@
 !      endif
 
       end
+
