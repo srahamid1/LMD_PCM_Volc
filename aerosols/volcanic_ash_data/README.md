@@ -1,6 +1,6 @@
 This directory contains IR and visible volcanic ash data from various volcanoes. 
 
-Files contain wavenumber, n, and k data. Wavenumber needs to be converted to wavelegnth for use with Mie code. See spreadsheet titled `Radiatively Active Ash` for conversions to wavelength as well as extra plots to visualize IR and visible data. 
+Files contain wavenumber, n, and k data. Wavenumber needs to be converted to wavelegnth for use with Mie code. See `Radiatively Active Ash.xlsx` for conversions to wavelength as well as extra plots to visualize IR and visible data. 
 
 See also input files that begin with `optind` for examples on how to format text file to be used by Mie code. 
 
