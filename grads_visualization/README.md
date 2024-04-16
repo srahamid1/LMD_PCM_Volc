@@ -8,7 +8,9 @@ Use these files to read the diagfi.nc file and to create figures using the GrADS
 
 `surface.ctl` and `surface.dat` contain surface data of Mars.
 
+Download GrADS here: http://cola.gmu.edu/grads/downloads.php
+
 GrADS user guide can be found here http://cola.gmu.edu/grads/gadoc/gadoc.php
 
-Download GrADS here: http://cola.gmu.edu/grads/downloads.php
+A list of useful GrADS commands can be found here http://cola.gmu.edu/grads/gadoc/commandsatt.html
 
