@@ -8,7 +8,7 @@ This directory contains a set of necessary input data needed to run the model.
 
 `newstartify` is a script used to compile the newstart program and allows the user to change the intial state. Once compiled, copy or move `newstart_32x32x15_phystd_seq.e`, from `trunk/LMDZ.COMMON/bin/` to the directory containing the initial conditions and parameter files. User can modify initial state from `start.nc` and `startfi.nc` or `start_archive.nc` file. 
 
-`diagfi.def` contains a list of variables to be written to the diagfi.nc output file
+`diagfi.def` contains a list of variables specified by the user to be written to the diagfi.nc output file. Remove file to write all variables in output file. 
 
 `ns` is a handy file that renames restart files to start files
 
