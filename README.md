@@ -16,7 +16,7 @@ Intructions on how to download and use the LMD PCM can be found here https://lmd
 
 `trunk/LMDZ.COMMON/libf/phystd/aerosol_mod.F90` - Added volcanic ash and h2so4 aerosols to common file, which creates aerosol tags and initializes them to zero
 
-`trunk/LMDZ.COMMON/libf/phystd/callkeys_mod.F90` - Added variables to be read in from callphys.def including volcano tracer density (rho_volc), h2so4 aerosol optical depth (h2so4tau), latitude and longitude of volcano (lat_volc, lon_volc), mass flux of ash, water, and h2so4 (mmsource, wsource, h2so4source), height of dust and h2so4 layer in cases of a fixed aerosol optical depth (topdust, top_h2so4), radiatively active h2so4 and ash aerosol tied to tracer (aeroh2so4, aeroash), fixed ash aerosol distribution (aerofixash), and release height of volcanic products (dropheight).
+`trunk/LMDZ.COMMON/libf/phystd/callkeys_mod.F90` - Added variables to be read in from callphys.def including volcano tracer density (rho_volc), fixed h2so4 aerosol optical depth (h2so4tau), latitude and longitude of volcano (lat_volc, lon_volc), mass flux of ash, water, and h2so4 (mmsource, wsource, h2so4source), height of dust and h2so4 layer in cases of a fixed aerosol optical depth (topdust, top_h2so4), radiatively active h2so4 and ash aerosol tied to tracer (aeroh2so4, aeroash), fixed ash aerosol distribution (aerofixash), and release height of volcanic products (dropheight).
 
 `trunk/LMDZ.COMMON/libf/phystd/iniaerosol.F` - Added initialization of volcanic ash and h2so4 aerosols 
 
