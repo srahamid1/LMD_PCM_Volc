@@ -586,6 +586,11 @@ CONTAINS
      call getin_p("aeroash",aeroash)
      write(*,*)" aeroash = ",aeroash
 
+     write(*,*)"Fixed Ash aerosol distribution?"
+     aerofixash=.false.     ! default value
+     call getin_p("aerofixash",aerofixash)
+     write(*,*)" aerofixash = ",aerofixash
+
      write(*,*)"Fixed CO2 aerosol distribution?"
      aerofixco2=.false.     ! default value
      call getin_p("aerofixco2",aerofixco2)
