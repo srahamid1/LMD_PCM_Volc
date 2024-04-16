@@ -226,7 +226,6 @@ cbar
 *set ccols 0 4 11 5 13 3 10 7 12 8 2 6
 *set ccols 0 47 48 49 50 21 52 53 54
 
-
 *Temperature/Ice
 *set clevs 130 135 140 145 150 155 160 165 170 175 180 185 190 195 200 205 210 215'
 *'set ccols 9 14 4 11 5 13 3 10 7 12 8 2 6'
@@ -279,4 +278,6 @@ cbar
 
 *---EXTRA---*
 *superscript example 10`a5 `nkg/s Eruption
+*subscript examples H`b2 `0 
+*degree symbol [value]`3.
 
