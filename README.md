@@ -6,7 +6,9 @@ Intructions on how to download and use the LMD PCM can be found here https://lmd
 
 ## Added Codes
 `trunk/LMDZ.COMMON/libf/phystd/volcano.F` - Dispersal of volcanic products by the LMD/PCM
+
 `trunk/LMDZ.COMMON/arch/arch-local.fcm` - Added architecture file
+
 `trunk/LMDZ.COMMON/arch/arch-local.path` - Added architecture file
 
 ## Modified Codes
