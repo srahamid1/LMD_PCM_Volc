@@ -24,7 +24,7 @@ Intructions on how to download and use the LMD PCM can be found here https://lmd
 
 `trunk/LMDZ.COMMON/libf/phystd/initracer.F` - Added volcanic ash and h2so4 tracer qualities (density, radius, etc.)
 
-`trunk/LMDZ.COMMON/libf/phystd/physiq_mod.F90` - Call volcano.F. 
+`trunk/LMDZ.COMMON/libf/phystd/physiq_mod.F90` - Added call to volcano.F
 
 `trunk/LMDZ.COMMON/libf/phystd/radii_mod.F90` - Added volcanic ash and h2so4 radii to compute effective radii of particles
 
