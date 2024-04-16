@@ -1,0 +1,558 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html>
+<head>
+  <title>FCM System User Guide: System Administration</title>
+  <meta name="author" content="FCM development team">
+  <meta name="descriptions" content="User Guide - System Administration">
+  <meta name="keywords" content="FCM, user guide">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body>
+  <address>
+    <a href="index.html">FCM System User Guide</a> &gt; System Administration
+  </address>
+
+  <h1>System Administration</h1>
+
+  <p>This chapter provides an administration guide for managers of projects or
+  systems which are using FCM.</p>
+
+  <p>Note that, where this section refers to the "FCM team" this applies only to
+  Met Office users. External users will either need to refer to the equivalent
+  team within their organisation or will need to perfom these tasks themselves.
+  </p>
+
+  <h2><a name="svn">Subversion</a></h2>
+
+  <h3><a name="svn_design">Repository design</a></h3>
+
+  <p>The FCM system assumes that each project directory has sub-directories called
+  <em>trunk</em>, <em>branches</em> and <em>tags</em> (Subversion recommends it but
+  doesn't insist on it). We recommend that each project within a Subversion
+  repository is in a sub-directory of the repository root.</p>
+      <pre>
+&lt;root&gt;
+    |
+    |-- &lt;project 1&gt;
+    |       |
+    |       |-- trunk
+    |       |-- branches
+    |       |-- tags
+    |
+    |-- &lt;project 2&gt;
+    |       |
+    |       |-- trunk
+    |       |-- branches
+    |       |-- tags
+    |
+    |-- ...
+</pre>
+  <p>In theory you could also have the project as the root directory or several levels
+  below the root directory. However, this is not tested and could cause problems with
+  some <tt>fcm</tt> commands so is best avoided.</p>
+
+  <p>You will need to decide whether to use a single project tree for your system or
+  whether to use multiple projects.</p>
+
+  <p>Advantages of a single project tree:</p>
+
+  <ul>
+    <li>Changes to any part of the system can always be committed as a single logical
+    changeset. If you split your system into multiple projects then you may have
+    occasions when a logical change involves more than one project and hence requires
+    multiple commits (and branches).</li>
+  </ul>
+
+  <p>Disadvantages of a single project tree:</p>
+
+  <ul>
+    <li>If you have a large system then your working copies may become very large
+    and unwieldy. Basic commands such as <tt>checkout</tt> and <tt>status</tt>
+    can become frustratingly slow if your working copy is too large.</li>
+        
+    <li>Depending on how you work, you may end up doing lots more merges of files
+    that are unrelated to your work.</li>
+  </ul>
+
+  <p>One common approach is to split the admin type files (things that only the
+  system manager should need to touch) into a separate project from the core
+  system files (which all the developers need access to). If you include any
+  large data files under version control you may also want to use a separate
+  project for them to avoid making your working copies very large when editing
+  code.</p>
+  
+  <p>Note that there is often no obvious right or wrong answer so you just have
+  to make a decision and see how it works out. You can always re-arrange your
+  repository in the future (although be aware that this will break any changes
+  being prepared on branches at the time).</p>
+
+  <p>You also need to decide whether your system requires its own repository (or
+  multiple repositories) or whether it can share with another system.</p>
+  
+  <ul>
+    <li>The main disadvantage of having separate repositories for each system is
+    the maintenance overhead (although this is almost all automated by the FCM
+    team so is not a big deal).</li>
+        
+    <li>We normally configure a single Trac system per repository. If the
+    repository contains multiple systems then it makes it difficult to use the
+    Trac milestones to handle system releases. However, Trac now supports
+    restricting itself to a sub-directory within a repository so, again, this is
+    not a big deal.</li>
+        
+    <li>If you share a repository with other systems then your revision numbers
+    can increase even when there are no changes to your system. This doesn't
+    matter but some people don't like it.</li>
+  </ul>
+  
+  <p>For simplicity, in most cases you will probably want your own repository for
+  your system.</p>
+
+  <p>You will not normally want to have multiple repositories for a system. One
+  exception may be if you are storing large data files where you might not want
+  to keep all the old versions for ever. Removing old versions can't be done
+  without changing all the revision numbers which would mess up all your code
+  history and Trac tickets. Storing the large data files in a separate
+  repository reduces the impact if you do decide to remove old versions in the
+  future. One disadvantage of this approach is that, for the moment at least,
+  Trac only handles one repository so you will need a separate Trac system for
+  the data files.</p>
+
+  <p>For further details please see the section
+  <a href="http://svnbook.red-bean.com/en/1.2/svn.reposadmin.projects.html#svn.reposadmin.projects.chooselayout">
+  Choosing a Repository Layout</a> from the Subversion book.</p>
+
+  <h3><a name="svn_create">Creating a repository</a></h3>
+
+  <p>Normally the FCM team will help you to set up your initial repository.
+  However, it is quite simple if you need to do it yourself. First you need to
+  issue the command <tt>svnadmin create /path/to/repos</tt>. This creates an
+  empty repository which is now ready to accept an initial import. To do so,
+  you should create a directory tree in a suitable location, and issue the
+  <tt>svn import</tt> command. At the top level of your directory tree should be
+  the project directories. Each project should then contain three directories
+  "trunk", "branches" and "tags". The directories "branches" and "tags" should be
+  empty.  The directory "trunk" should contain your source files in a directory
+  structure you have chosen.  For example, if your directory tree is located
+  at "$HOME/foo", you will do the following to import it to a new repository:</p>
+
+  <table class="pad" summary="creating a repository and importing a project tree" border="1" width="100%">
+    <tr>
+      <th>Creating a repository and importing a project tree</th>
+    </tr>
+
+    <tr>
+      <td>
+        <pre>
+(SHELL PROMPT)$ svnadmin create FOO_svn
+(SHELL PROMPT)$ svn import $HOME/foo file://$PWD/FOO_svn -m 'Initial import'
+Adding         FOO
+Adding         FOO/trunk
+Adding         FOO/trunk/doc
+Adding         FOO/trunk/doc/hello.html
+Adding         FOO/trunk/doc/world.html
+Adding         FOO/trunk/src
+Adding         FOO/trunk/src/bar
+Adding         FOO/trunk/src/bar/egg.f90
+Adding         FOO/trunk/src/bar/ham.f90
+Adding         FOO/branches
+Adding         FOO/tags
+
+Committed revision 1.
+</pre>
+      </td>
+    </tr>
+  </table>
+
+  <p>Note that the <tt>svnadmin</tt> command takes a PATH as an argument, as
+  opposed to a URL for the <tt>svn</tt> command.</p>
+
+  <p>For further details please see the section
+  <a href="http://svnbook.red-bean.com/en/1.2/svn.reposadmin.projects.html#svn.reposadmin.projects.import">
+  Creating the Layout, and Importing Initial Data</a> from the Subversion book.</p>  
+
+  <h3><a name="svn_access">Access control</a></h3>
+
+  <p>You will not normally want to allow anonymous write access to your repository
+  since this means that changes do not get identified with a userid. Therefore
+  system managers need to provide the FCM team with a list of users who should
+  have write access to their repositories. You may also want to arrange passwords
+  for these users although this is only necessary if you need to prevent
+  malicious access. Further restrictions such as preventing anonymous read access
+  or restricting write access to the trunk to a limited set of users can be
+  arranged if necessary.</p>
+
+  <h3><a name="svn_hosting">Repository hosting</a></h3>
+
+  <p>The FCM team will organise the hosting of your repository. A number of
+  facilities will be set up for you as standard.</p>
+  
+  <ul>
+    <li>Your repository will be set up on a central FCM server and access will be
+    provided via <em>svnserve</em> (which we use in preference to <em>Apache</em>
+    for performance reasons). The FCM team will advise you of the URL.</li>
+        
+    <li>Each night a full backup of your repository will be taken. An integrity
+    check will also be performed using the <tt>svnadmin verify</tt> command.</li>
+        
+    <li>Standard hook scripts will be set up to handle the following post-commit
+    tasks:
+
+      <ul>
+        <li>Each time a changeset is successfully committed an incremental dump
+        of the new revision is taken. This would allow the repository to be
+        recovered should the live repository become corrupted for whatever
+        reason.</li>
+            
+        <li>A file is updated which records the latest revision of your
+        repository. This can be used by system managers to regularly check for
+        new commits in a cron job and perform any required actions (updating
+        files on a remote platform for instance). The FCM team can advise you
+        of the location of this file and show you some example scripts which
+        make use of it.</li>
+      </ul>
+    </li>
+
+    <li>Standard hook scripts will be set up to handle the following tasks for
+    changes in revision properties (pre-revprop-change/post-revprop-change):
+
+      <ul>
+        <li>If a user attempts to modify the log message of a changeset and
+        he/she is not the original author of the changeset, the
+        pre-revprop-change hook script will e-mail the original author. You can
+        also set up a watch facility to monitor changes of log messages that
+        affect particular paths in the repository. (See the <a href=
+        "#svn_watch">next sub-section</a> for details.)</li>
+
+        <li>The post-revprop-change hook script updates the Trac SQLite database
+        following a successful change in the log message.</li>
+      </ul>
+    </li>
+  </ul>
+
+  <p>Additional hook scripts can be put in place if you have a requirement. The
+  use of hook scripts is discussed in the section <a href=
+  "http://svnbook.red-bean.com/en/1.2/svn.reposadmin.create.html#svn.reposadmin.create.hooks">
+  Repository Creation and Configuration</a> from the Subversion book.</p>
+
+  <p>Note that if you want to use a Subversion repository for your own individual
+  use there is no need to get the FCM team to host it. You can simply create your
+  repository and then use a <tt>file://</tt> URL to access it.</p>
+
+  <h3><a name="svn_watch">Watching changes in log messages</a></h3>
+
+  <p>You can set up a watch facility to monitor changes in revision log messages
+  in your repository. An obvious use of this facility is for system managers to
+  monitor changes of log messages affecting the trunks of their projects. To set
+  up the facility, you will need to add a <tt>watch.cfg</tt> file to the root of
+  your repository. (To avoid checking out the whole repository, including every
+  branch, make sure that you checkout the root of your repository
+  non-recursively, i.e. <tt>fcm checkout -N URL</tt>.) The <tt>watch.cfg</tt>
+  file is an INI-type file, with the basic format:</p>
+
+  <pre>
+[repos_base]
+
+path/in/repos = list,of,watchers
+</pre>
+
+  <p>For example, if your repository is <tt>svn://fcm1/FCM_svn/</tt>, and you
+  want set up particular users to monitor changes of the log messages affecting
+  several areas within the repository, you may have something like this:</p>
+
+  <pre>
+[FCM_svn]
+
+FCM/trunk/src            = fred,bob
+FCM/trunk/doc            = fred,bob,alice
+FCM/branches/dev/*/*/src = fred
+</pre>
+
+  <p>Later on, if "dave" attempts to modify the log message of a changeset that
+  affects the path <tt>FCM/trunk/src</tt>, "fred" and "bob" will both be
+  notified by e-mail.</p>
+    
+  <h2><a name="trac">Trac</a></h2>
+
+  <h3><a name="trac_config">Trac configuration</a></h3>
+
+  <p>Normally the FCM team will set up your Trac system for you (using a script
+  which helps automate the configuration). This section describes some things you
+  may wish to be configured. This can be done when the Trac system is set up or
+  later if you are unsure what you will require at first.</p>
+
+  <h4><a name="trac_access">Access control</a></h4>
+
+  <p>You will not normally want to allow anonymous users to make changes to your
+  Trac system since this means that changes may not get identified with a userid.
+  The FCM team will set up your Trac system with accounts for all users who have
+  write access to your Subversion repository. You may also want to arrange
+  passwords for these users although this is only necessary if you need to prevent
+  malicious access. Further restrictions such as preventing anonymous read access
+  can be arranged if necessary.</p>
+
+  <p>An additional admin account will be set up for the system manager which will
+  be given TRAC_ADMIN privileges. This allows this account to do additional
+  things which normal users cannot do such as:</p>
+
+  <ul>
+    <li>Delete wiki pages (particular versions or the entire page).</li>
+        
+    <li>Add or modify milestones.</li>
+        
+    <li>Modify ticket descriptions and delete ticket attachments.</li>
+        
+    <li>Make wiki pages read-only.</li>
+  </ul>
+  
+  <p>We recommend that the system manager uses a normal account most of the time
+  and only uses their admin account when they require the additional privileges.
+  </p>
+
+  <p>For further details please see the section
+  <a href="http://projects.edgewall.com/trac/wiki/TracPermissions">
+  Trac Permissions</a> from the Trac documentation.</p>  
+
+  <h4><a name="trac_email">Email notification</a></h4>
+
+  <p>By default, each Trac system is configured such that the owner and reporter
+  and anyone on the "CC" list are notified whenever a change is made to a
+  ticket. If system mangers wish to be notified of all ticket changes then this
+  can also be configured. Alternatively, email notifications can be disabled if
+  they are not wanted.</p>
+
+  <h4><a name="trac_milestones">Milestones</a></h4>
+
+  <p>Milestones are useful for identifying when tickets need to be resolved.
+  Typically, milestones may be particular system releases or time periods. The
+  FCM team can configure milestones for you when they set up your Trac system.
+  However, this is not strictly necessary since milestones can be set up via the
+  web interface using the admin account (go to the <em>Roadmap</em> page).</p>
+
+  <h4><a name="trac_misc">Other configurable items</a></h4>
+
+  <p>There are lots of other things that can be configured in your Trac system
+  such as:</p>
+  
+  <ul>
+    <li>Components</li>
+        
+    <li>Versions</li>
+        
+    <li>Custom fields</li>
+        
+    <li>System icon</li>
+        
+    <li>Stylesheets</li>
+  </ul>
+
+  <p>For further details please see the sections
+  <a href="http://projects.edgewall.com/trac/wiki/TracIni">
+  The Trac Configuration File</a> and
+  <a href="http://projects.edgewall.com/trac/wiki/TracTickets">
+  The Trac Ticket System</a> from the Trac documentation.</p>  
+  
+  <h3><a name="trac_hosting">Trac hosting</a></h3>
+
+  <p>The FCM team will organise the hosting of your Trac system. It will be set
+  up on the same server that hosts your Subversion repository and access will be
+  provided via a web server. The FCM team will advise you of the URL. Each night
+  a backup of your Trac system will be taken in case the live system should
+  become corrupted for whatever reason.</p>
+  
+  <h2><a name="fcm-keywords">FCM keywords</a></h2>
+
+  <p>When you set up a repository for a new project, you will normally want the
+  FCM team to set up a set of URL keywords for it in the FCM central
+  configuration file. The name of the project should be a short string containing
+  only word characters. If your project is called "PROJ", the recommended set of
+  keywords are:</p>
+
+  <ul>
+    <li>fcm:proj - for the top level URL of the PROJ repository.</li>
+
+    <li>fcm:proj_tr - for the "trunk" sub-directory of PROJ repository.</li>
+
+    <li>fcm:proj_br - for the "branches" sub-directory of PROJ repository.</li>
+
+    <li>fcm:proj_tg - for the "tags" sub-directory of PROJ repository.</li>
+  </ul>
+
+  <p>If your project has an associated Trac browser, you should also declare the
+  Trac browser URL (that corresponds to the Subversion URL) in the central
+  configuration file. This allows FCM to associate the URL to the Trac browser
+  with a Subversion URL.</p>
+
+  <p>For more information on how to set up the keywords, please refer to <a
+  href="code_management.html#svn_basic_keywords">Repository &amp; Revision
+  Keywords</a> and the <a href="annex_fcm_cfg.html">Annex: Declarations in FCM
+  central/user configuration file</a>.</p>
+
+  <h2><a name="ext-bld-cfg">Extract and build configuration</a></h2>
+
+  <p>The extract and build systems are very flexibile and can be used in lots of
+  different ways. It is therefore difficult to give specific advice explaining
+  how to configure them. However, based on experience with a number of systems,
+  the following general advice can be offered.</p>
+
+  <ul>
+    <li>Standard extract configuration files should be defined and stored within
+    the repository. Users then include these files into their configurations,
+    before applying their local changes.</li>
+    <li>The files should be designed to include one another in a hierarchy. For
+    example, you may have one core file which defines all the repository and
+    source locations plus a series of platform/compiler specific files which
+    include the core file. More complex setups are also possible if you need to
+    cater for other options such as different optimisation levels, 32/64 bit,
+    etc.</li>
+    <li>When including other configuration files, always make use of the special
+    <tt>$HERE</tt> variable
+    (rather than, for instance, referring to a fixed repository location). When
+    your configuration file is parsed, this special variable is normally
+    expanded into the container directory of the current configuration file. This
+    means that the include statements should work correctly whether you are
+    referring to configuration files in the repository trunk, in a branch or in
+    a local working copy.</li>
+    <li>Make good use of user variables (e.g. <tt>%fred</tt>) to simplify
+    repetitive declarations and make your configuration files easier to
+    maintain.</li>
+    <li>Use continuation lines to split long lines and make them easier to read
+    (see the <a href="command_ref.html#fcm_config">FCM Command Reference</a>
+    section for further details about configuration files).</li>
+  </ul>
+
+  <p>Probably the best advice is to look at what has already been set up for
+  other systems. The FCM team can advise on the best systems to examine.</p>
+
+  <p>When you create a stable build you should keep an extract configuration file
+  that can reproduce the build. One easy way to do this is to create your build
+  using the standard configuration files and the latest versions of the code. You
+  can then save the expanded extract configuration file which is created when you
+  run the extraction. To help document your stable build you can use the command
+  <tt>fcm cmp-ext-cfg</tt> to show what has changed.</p>
+
+  <h2><a name="alternate_versions">Maintaining alternate versions of namelists
+  and data files</a></h2>
+
+  <p>Sometimes it is useful to be able to access particular revisions of some
+  directories from a FCM repository without having to go via Subversion. Typical
+  examples are namelist or data files used as inputs to a program. The script
+  <tt>fcm_update_version_dir.pl</tt> is designed to help with this. It can be
+  used to maintain a set of extracted version directories from a FCM repository.
+  The script has the following options and arguments:</p>
+
+  <ul>
+    <li>-f [--full]: specify the full mode, in which the versioned directories
+    of each specified item will be removed before being re-extracted.</li>
+
+    <li>-d [--dest] &lt;arg&gt;: specify a destination &lt;arg&gt; for the
+    extraction. If not specified, the current working directory will be used as
+    the base path.</li>
+
+    <li>-u [--url] &lt;arg&gt;: specify the source repository URL. This option
+    is compulsory.</li>
+  </ul>
+
+  <p>If an argument is specified, it must be the location of a configuration
+  file. Otherwise, the command reads its configuration from the standard input.
+  The configuration file is a line-based text file. Blank lines and lines
+  beginning with a "#" are ignored.</p>
+
+  <p>Each configuration line must contain the relative path of a sub-directory
+  under the specified source repository URL. If the path ends in "<tt>*</tt>"
+  then the path is expanded recursively and any sub-directories containing
+  regular files are added to the list of relative paths to extract.</p>
+
+  <p>Optionally, each relative path may be followed by a list of space separated
+  "conditions". Each condition is a conditional operator (&gt;, &gt;=, &lt;,
+  &lt;=, == or !=) followed by a revision number or the keyword HEAD.</p>
+
+  <p>The command uses the revision log to determine the revisions at which the
+  relative path has been updated in the source repository URL. If these
+  revisions also satisfy the "conditions" set by the user, they will be
+  considered in the extraction. In full mode, everything is re-extracted. In
+  incremental mode, the version directories are only updated if they do not
+  already exist.</p>
+
+  <p>Example:</p>
+
+  <table class="pad" summary="fcm_update_version_dir.pl example" border="1"
+  width="100%">
+    <tr>
+      <th>fcm_update_version_dir.pl example</th>
+    </tr>
+
+    <tr>
+      <td>
+        <pre>
+(SHELL PROMPT)$ fcm_update_version_dir.pl -u fcm:ver_tr &lt;&lt;EOF
+namelists/VerNL_AreaDefinition   &gt;1000 !=1234
+namelists/VerNL_GRIBToPPCode     &gt;=600 &lt;3000
+namelists/VerNL_StationList      
+elements/*                       &gt;1000
+EOF
+</pre>
+      </td>
+    </tr>
+  </table>
+
+  <p>N.B.</p>
+
+  <ol>
+    <li>Each time a sub-directory is revised, the script assigns a sequential
+    "v" number for the item. Each "v" number for a sub-directory, therefore, is
+    associated with a revision number. For each extracted revision directory,
+    there is a corresponding "v" number symbolic link pointing to it.</li>
+
+    <li>The system also creates a symbolic link "latest" to point to the latest
+    extracted revision directory.</li>
+  </ol>
+
+  <h2><a name="work-practise">Defining working practises and policies</a></h2>
+
+  <p>Some options on working practises and policies are defined in the chapter
+  on <a href="working_practices.html">Code Management Working Practices</a>.
+  Individual projects should document the approach they have adopted. In
+  addition, each project may also need to define its own working practices and
+  policies to suit its local need. For example each project may need to
+  specify:</p>
+
+  <ul>
+    <li>Whether changes are allowed directly on the trunk or whether branches
+    have to be used in all cases.</li>
+
+    <li>Whether all users are allowed to make changes to the trunk.</li>
+
+    <li>Whether Trac tickets have to be raised for all changes to the trunk.</li>
+        
+    <li>Whether Trac tickets should be raised for all support queries or whether
+    a Trac ticket should only be raised once there is an agreed "issue".</li>
+
+    <li>Whether branches should normally be made from the latest code or from a
+    stable release.</li>
+
+    <li>Whether a user is allowed to resolve conflicts directly when merging a
+    branch into the trunk or whether he/she should merge the trunk into the
+    branch and resolve the conflicts in the branch first.</li>
+
+    <li>Whether all code changes to the trunk need to be reviewed.</li>
+
+    <li>What testing is required before changes can be merged to the trunk.</li>
+
+    <li>Whether history entries are maintained in source files or whether
+    individual source files changes need to be described in the Subversion log
+    message.</li>
+
+    <li>Branch deletion policy.</li>
+
+    <li>Whether any files in the project require locking before being changed.
+    </li>
+  </ul>
+
+  <script type="text/javascript" src="maintain.js">
+  </script>
+</body>
+</html>

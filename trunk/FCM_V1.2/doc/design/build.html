@@ -1,0 +1,812 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html>
+<head>
+  <title>FCM Detailed Design: Build System</title>
+  <meta name="author" content="FCM development team">
+  <meta name="descriptions" content="FCM Detailed Design: Build System">
+  <meta name="keywords" content="FCM, design">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body>
+  <address>
+    <a href="index.html">FCM Detailed Design</a> &gt; Build System
+  </address>
+
+  <h1>Build System</h1>
+  
+  <p>In this chapter, we shall discuss in detail the design of the build
+  system. For information of how to use the build system, please see: <a
+  href="../user_guide/build.html">FCM System User Guide &gt; The Build
+  System</a>.</p>
+
+  <p>The build system analyses the directory tree containing a set of source
+  code, processes the configuration, and invokes <em>make</em> to compile/build
+  the source code into the project executables. The system is written in a set
+  of Perl modules. It is designed to work with GNU <em>make</em>. It creates
+  the <em>Makefile</em> and many other dependent files automcatically. The
+  build system uses a similar interface to the extract system. Its
+  configuration file can be produced through the extract system. It also
+  shares the same command line interface and many other utilities with the
+  code management system and the extract system.</p>
+
+  <h2><a name="io">Input and Output</a></h2>
+
+  <p>The build system has the following input:</p>
+
+  <ul class="pad">
+    <li>a directory tree populated with a set of Fortran and C source files,
+    and scripts written in Perl, Python, TCL, PVWave or a Unix shell.</li>
+
+    <li>the location of the root directory of the build.</li>
+
+    <li>the tools/commands (and their options) to be used for the build.</li>
+
+    <li>the locations of previous builds, if the current build is to base on
+    them.</li>
+
+    <li>other build options.</li>
+  </ul>
+
+  <p>Output from the build system includes:</p>
+
+  <ul class="pad">
+    <li>the targets of the build and their dependencies.</li>
+
+    <li>other files used by the system to build the targets.</li>
+  </ul>
+
+  <h2><a name="component">Components</a></h2>
+
+  <p>The build system uses the following commands, modules and tools:</p>
+
+  <table class="pad" summary="build system components" border="1">
+    <tr>
+      <th>Name</th>
+
+      <th>Category</th>
+
+      <th>Description</th>
+    </tr>
+
+    <tr>
+      <th>fcm</th>
+
+      <td>Perl executable</td>
+
+      <td>Top level command line interface of the FCM system.</td>
+    </tr>
+
+    <tr>
+      <th>fcm_internal</th>
+
+      <td>Perl executable</td>
+
+      <td>Command wrapper for the compiler and linker.</td>
+    </tr>
+
+    <tr>
+      <th>Fcm::Build</th>
+
+      <td>Perl module</td>
+
+      <td>Main class that controls the running of the build system.</td>
+    </tr>
+
+    <tr>
+      <th>Fcm::BuildTask</th>
+
+      <td>Perl module</td>
+
+      <td>A class that performs various "tasks" (such as pre-process and
+      generate interface) for the build system.</td>
+    </tr>
+
+    <tr>
+      <th>Fcm::CfgFile</th>
+
+      <td>Perl module</td>
+
+      <td>A class for reading from and writing to configuration files.</td>
+    </tr>
+
+    <tr>
+      <th>Fcm::Compiler</th>
+
+      <td>Perl module</td>
+
+      <td>A class for wrapping the compiler and linker commands.</td>
+    </tr>
+
+    <tr>
+      <th>Fcm::Config</th>
+
+      <td>Perl module</td>
+
+      <td>A class that contains the configuration settings shared by all
+      FCM components.</td>
+    </tr>
+
+    <tr>
+      <th>Fcm::SrcFile</th>
+
+      <td>Perl module</td>
+
+      <td>A class that controls the actions on a source file.</td>
+    </tr>
+
+    <tr>
+      <th>Fcm::SrcPackage</th>
+
+      <td>Perl module</td>
+
+      <td>A class that deals with the actions on a source directory
+      sub-package.</td>
+    </tr>
+
+    <tr>
+      <th>Fcm::Util</th>
+
+      <td>Perl module</td>
+
+      <td>A collection of utilities shared by all FCM components.</td>
+    </tr>
+
+    <tr>
+      <th>Ecmwf::Fortran90_stuff</th>
+
+      <td>Perl module</td>
+
+      <td>A utility originally developed by the ECMWF for generating interface
+      blocks for Fortran 9X source files. Modified for adoptation by the FCM
+      system.</td>
+    </tr>
+
+    <tr>
+      <th>make</th>
+
+      <td>Unix utility</td>
+
+      <td>The <em>make</em> build utility. FCM is designed to work with the
+      GNU version of <em>make</em>.</td>
+    </tr>
+
+    <tr>
+      <th>ksh</th>
+
+      <td>Unix shell</td>
+
+      <td>The following shell commands are used: "cp", "rm", "mv", "cd" and
+      "touch".</td>
+    </tr>
+
+    <tr>
+      <th>f90aib</th>
+
+      <td>Fortran utility</td>
+
+      <td>Formerly used by the GEN system as the generator for Fortran 9X
+      interface blocks. It is a freeware developed by Michel Olagnon at the
+      French Research Institute for Exploitation of the Sea. Its use is still
+      supported by FCM, but the ECMWF interface generator is now
+      preferred.</td>
+    </tr>
+  </table>
+
+  <h2><a name="command">The Build Command</a></h2>
+
+  <p>There are several options that can be supplied to the build command.
+  These options are implemented as follows:</p>
+
+  <ul>
+    <li><strong>Archive mode</strong>: the build system generates many files,
+    which are placed in various sub-directories according to their categories.
+    Most of these files are not used in the runtime environment. To prevent a
+    clutter up of disk space, it may be desirable to archive these
+    sub-directories. The system implements this by using the "tar" command to
+    archive each sub-directory. For an incremental build in the same
+    directory, the archived "tar" files are extracted back into the
+    sub-directories so that they can be re-used. It is worth noting that the
+    archive mode should not be used if a build is going to be re-used as a
+    pre-compiled build, as it will not be possible to extract the "tar" archives
+    back to their original forms. The default is not to archive
+    sub-directories.</li>
+
+    <li><strong>Full mode</strong>: on an incremental build, the system removes
+    all sub-directories created by the previous build, so that a new build can
+    be performed. The default is to perform an incremental build.</li>
+
+    <li><strong>Parallel jobs</strong>: this is implemented via the option in
+    GNU <em>make</em>. The generated <em>Makefile</em> is written with
+    parallel <em>make</em> in mind. The default is to perform a serial
+    build.</li>
+
+    <li><strong>Stage</strong>: this is implemented by running the build
+    system up to and including a named or a numbered stage. The default is to
+    go through all the stages.</li>
+
+    <li><strong>Targets</strong>: if targets are specified in the build
+    command, overrides the default targets supplied to the <em>make</em>
+    command. The default is to build the "all" target.</li>
+
+    <li><strong>Verbose</strong>: the verbose setting is a variable in the
+    Fcm::Config module. If the option is specified in the build command, it
+    sets this variable to the value supplied to the option. At various places
+    in the build process, it may be useful to print out diagnostic
+    information. This variable contols whether the information will get
+    printed.</li>
+  </ul>
+
+  <h2><a name="fcm-cfg">The Central/User Configuration File</a></h2>
+
+  <p>When we invoke the FCM command, it creates a new instance of Fcm::Config,
+  which reads, processes and stores information from the central and user
+  configuration file. The default settings in Fcm::Config is overwritten by
+  the information provided by the central configuration file. If a user
+  configuration file is found, its settings will take overall precedence.
+  These settings are stored in the Fcm::Config instance, which are parsed to
+  all other modules used by the build system. By convention, the reference to
+  the Fcm::Config instance can normally be fetched by the "config" method for
+  all OO "Fcm::" modules.</p>
+
+  <h2><a name="bld-cfg">The Build Configuration File</a></h2>
+
+  <p>When we invoke the build command, it creates a new instance of Fcm::Build,
+  which automatically creates a new instance of Fcm::CfgFile. If an argument
+  is specified in the build command, it is used as the build configuration
+  file if it is a regular file. Otherwise, it is used to search for the build
+  configuration file. If no argument is specified, the current working directory
+  is searched. Fcm::CfgFile will attempt to locate a file called "bld.cfg"
+  under this directory. If such a file is not found, it will attempt to locate
+  it under "cfg/bld.cfg".</p>
+  
+  <p>Once a file is located, Fcm::CfgFile will attempt to parse it. This is
+  done by reading and processing each line of the configuration file into
+  separate label, value and comment fields. Each line is then pushed into an
+  array that can be fetched using the "lines" method of the Fcm::CfgFile
+  instance. Internally, each line is recorded as a reference to a hash table
+  with the following keys:</p>
+
+  <ul class="pad">
+    <li>LABEL: the label of a declaration.</li>
+
+    <li>VALUE: the value of a declaration.</li>
+
+    <li>COMMENT: the comment following a declaration or the comment in a
+    comment line.</li>
+
+    <li>NUMBER: the line number of the current line in the source file.</li>
+
+    <li>SRC: the name of the source file.</li>
+  </ul>
+  
+  <p>The information given by each line is "deciphered" by Fcm::Build. The
+  information is processed in the following ways:</p>
+
+  <ul class="pad">
+    <li>The configuration file type "CFG::TYPE" and version "CFG::VERSION"
+    declarations are stored as properties of the Fcm::CfgFile instance.
+    Fcm::Build uses the information to ensure that it is reading a build
+    configuration file.</li>
+
+    <li>Build target(s) declarations "TARGET" are delimited by space
+    characters. Each target is pushed into the array reference "TARGET".</li>
+
+    <li>The location of the build root directory "DIR::ROOT" and its
+    sub-directories are stored in the "DIR" hash reference in the Fcm::Build
+    instance.  The keys of the hash table are the internal names of the
+    sub-directories, and the values are the locations of the
+    sub-directories.</li>
+
+    <li>The source directories "SRC::&lt;pcks&gt;" are stored in the "SRCDIR"
+    hash reference under the Fcm::Build instance. The keys of the hash table
+    are the names of the sub-packages. (If package names are delimited by the
+    double colons "::", they are turned into the double underscores "__" at
+    this stage.) The values of the "SRCDIR" hash reference are new instances
+    of Fcm::SrcPackage. When initialised, Each Fcm::SrcPackage creates a list
+    of source files in its source directory. For each source file in the list,
+    a new instance of Fcm::SrcFile is created, and pushed into the the
+    "SRCFILE" array reference under the Fcm::SrcPackage instance. When
+    initialised, each Fcm::SrcFile instance will attempt to determine the type
+    associated with the source file. This information can be fetched using the
+    "type" method of the Fcm::SrcFile instance.</li>
+
+    <li>Pre-processor switches "PP[::&lt;pcks&gt;]" declarations are stored in
+    the "PP" hash reference under the Fcm::Build instance. The keys of this hash
+    table are the names of the sub-packages, prefix with PP and a pair of
+    underscores, i.e. "PP__&lt;pcks&gt;". The declaration to switch on/off
+    pre-processing globally is stored using the key "PP". The values in the
+    hash table is either true (1) or false (0).</li>
+
+    <li>A tool declaration "TOOL::&lt;name&gt;[::&lt;pcks&gt;]" is stored as
+    a setting in Fcm::Config as ("TOOL", &lt;name&gt;[__&lt;pcks&gt;]. The
+    value of the declaration can then be fetched using the "setting" method of
+    the Fcm::Config instance.</li>
+
+    <li>An exclude dependency declaration "EXCL_DEP[::&lt;pcks&gt;]" is stored
+    as a setting in Fcm::Config as ("EXCL_DEP", &lt;value&gt;, &lt;pcks&gt;,
+    where &lt;value&gt; is the value of the declaration. For an exclude
+    dependency declaration that applies globally, &lt;pcks&gt; is set to a
+    null string "".) The value of an exclude dependency setting is always set
+    to 1.</li>
+
+    <li>Input file extension declaration "INFILE_EXT::&lt;ext&gt;" is stored
+    as a setting in Fcm::Config as ("INFILE_EXT", &lt;ext&gt;). The value of
+    the setting can then be fetched using the "setting" method of the
+    Fcm::Config instance.</li>
+
+    <li>Output file extension declaration "OUTFILE_EXT::&lt;type&gt;" is
+    stored as a in Fcm::Config as ("OUTFILE_EXT", &lt;type&gt;). The value of
+    the setting can then be fetched using the "setting" method of the
+    Fcm::Config instance.</li>
+
+    <li>For each "USE" declaration to use a pre-compiled build, a new instance of
+    Fcm::Build is created. The instance Fcm::Build for the previous build
+    creates a new instance of Fcm::CfgFile for its configuration file. The
+    configuration of the previous build is read and processed as described
+    above. The current instance of Fcm::Build will then attempt to inherit the
+    settings of the previous build where appropriate. The Fcm::Build instance
+    for the pre-compiled build is pushed into the "USE" array reference under
+    the current Fcm::Build.</li>
+
+    <li>The inherit flags for targets "INHERIT::TARGET", source directories
+    "INHERIT::SRC[::&lt;pcks&gt;]" and pre-processor switches
+    "INHERIT::PP[::&lt;pcks&gt;]" are stored in the "INHERIT" hash reference
+    under the Fcm::Build instance. For declarations that apply globally, the
+    keys to the hash table are "TARGET", "SRCDIR" or "PP". If the declarations
+    apply to &lt;pcks&gt;, the keys are "SRCDIR__&lt;pcks&gt;" or
+    "PP__&lt;pcks&gt;". (The inherit target flag always applies globally.)</li>
+  </ul>
+
+  <p>Unless the search source flag "SEARCH_SRC" is switched off (0) in the build
+  configuration, Fcm::Build will attempt to search the source sub-directory
+  "src/" of the build root recursively for source directory sub-packages. The
+  source directories obtained in the search are treated as if they are
+  declared using "SRC::&lt;pcks&gt;" in the build configuration file.</p>
+
+  <h2><a name="flags">Compiler Flags</a></h2>
+
+  <p>As discussed in the user guide, if you declare the Fortran compiler flags
+  without specifying a sub-package, the declaration applies globally.
+  Otherwise, it only applies to the Fortran source files within the
+  sub-package. This is implemented via a simple "tool selection" mechanism. You
+  may have noticed that all TOOL declarations (and TOOL settings in
+  Fcm::Config) are turned into an environemnt variable declaration in the
+  generated <em>Makefile</em>. For example, if we have a
+  "FFLAGS__bar__egg__ham__foo" declaration, it will be declared as an
+  environment variable in the generated <em>Makefile</em>. Suppose we have a
+  source file "foo.f90" under the sub-package "bar::egg::ham". When we invoke
+  the compiler wrapper (i.e. "fcm_internal" and "Fcm::Compile") to compile the
+  source file, the system will first attempt to select from the FFLAGS
+  environment variable that matches the sub-package of the source file, which
+  is "FFLAGS__bar__egg__ham__foo" in this case. If the environment variable
+  does not exist, it will attempt to go one sub-package up, i.e.
+  "FFLAGS__bar__egg__ham", and so on until it reaches the global "FFLAGS"
+  declaration, (which should always exists).</p>
+
+  <p>For changes in compiler flags declaration, the build system should
+  trigger re-compilation of required targets only. This is implemented using a
+  "flags" file system. These "flags" files are dummy files created in the
+  "flags/" sub-directory of the build root. They are updated by the "touch"
+  command.  The following dependencies are followed:</p>
+
+  <ul>
+    <li>Source files are dependent on its own "flags" file. E.g. the file
+    Ops_Switch in sub-package ":ops::code::OpsMod_Control" is dependent
+    on "FFLAGS__ops__code__OpsMod_Control__Ops_Switch.flags".</li>
+
+    <li>The "flags" file of a source file is dependent on the "flags" file
+    of its container sub-package. E.g. the above flags file is dependent
+    on "FFLAGS__ops__code__OpsMod_Control.flags".</li>
+
+    <li>The "flags" file of a sub-package is dependent on the "flags"
+    file of its container sub-package. E.g. the above is dependent on
+    "FFLAGS__ops__code.flags", which is dependent on
+    "FFLAGS__ops.flags".</li>
+
+    <li>The "flags" file of a top-level package is dependent on the
+    "flags" file of the global flags. E.g. "FFLAGS__ops.flags" is
+    dependent on "FFLAGS.flags".</li>
+
+    <li>The "flags" file of the global "flags" file is dependent on the
+    "flags" file of the compiler command. E.g. "FFLAGS.flags" is
+    dependent on "FC.flags".</li>
+  </ul>
+  
+  <p>The system records changes in declared tools using a cache file, (called
+  ".bld_tool", located at the ".cache/" sub-directory of the built root). It
+  is basically a list of "TOOL::" declarations for the latest build.  When an
+  incremental build is invoked, the list is compared against the current set.
+  If there are changes (modification, addition and deletion) in any
+  declarations, the timestamp of the corresponding "flags" files will be
+  updated. Files depending on the updated "flags" file will then be considered
+  out of date by <em>make</em>, triggering a re-build of those files.</p>
+
+  <h2><a name="interface">Fortran 9X Interface Block Generator</a></h2>
+
+  <p>The build system generates an interface block file for each Fortran 9X
+  source file. If the original source file has been pre-processed, the system
+  uses the pre-processed source file. Otherwise, the system uses the original
+  source file. For each source file containing standalone subroutines and
+  functions, the system will generate an interface file containing the
+  interfaces for the subroutines and functions. The interface files for other
+  Fortran 9X source files are empty.</p>
+
+  <p>Fcm::Build controls the creation of interface files by searching for a
+  list of Fcm::SrcFile instances containing Fortran 9X source files, by
+  calling the "is_type ('FORTRAN9X')" method of each Fcm::SrcFile instance.
+  For each of Fortran 9X source file, a Fcm::BuildTask is created to "build"
+  the interface file. The build task is dependent on the interface
+  generator. The interface files will be re-generated if we change the
+  interface generator. The generated interface is held in an array initially.
+  If an old file exists, it is read into an array so that it can be compared
+  with the current one. The current interface is written to the interface file
+  if it is not the same as the old one, or if an old one does not already
+  exist.</p>
+
+  <p>FCM supports the use of <em>f90aib</em> and the ECMWF interface
+  generator. The latter is the default.</p>
+
+  <h2><a name="dependency">Depdendency Scanner</a></h2>
+
+  <p>For each source directory sub-package, the build system scans its source
+  files for dependency information. The dependency scanner uses a pre-defined
+  set of patterns and rules in Fcm::Config to determine whether a line in a
+  source file contains a dependency. Only source files of supported types are
+  scanned. The dependency information of a sub-package is stored in the memory
+  as well as a cache file. The latter can be re-used by subsequent incremental
+  builds. In an incremntal build, only those source files newer than the cache
+  file is re-scanned for dependency. The cache file is read/written using
+  temporary instances of Fcm::CfgFile.</p>
+
+  <p>The control of the source file selection process is handled by the
+  Fcm::SrcPackage instances, while the actual dependency scans are performed
+  via the scan_dependency method of the Fcm::SrcFile instances.</p>
+
+  <p>A dependency has a type. For example, it can be a Fortran module or an
+  include file. The type of a dependency determines how it will be used by the
+  source file during the <em>make</em> stage, and so it affects how the
+  <em>make</em> rule will be written for the source file. In memory, the
+  dependency information is stored in a hash table, which can be retrieved as
+  a property of the Fcm::SrcFile instance. The keys of the hash table are the
+  dependency items, and the values are their types.</p>
+
+  <p>A dependency is not added to the hash table if it matches with an exclude
+  dependency declaration for the current sub-package.</p>
+
+  <p>While the dependency scanner is scanning through each line of a Fortran
+  source file, the system also attempt to determine its internal name. This is
+  normally the name of the first compilable program unit defined in the
+  Fortran source file. The internal name is converted into lowercase (bearing
+  in mind that Fortran is case insensitive), and will be used to name the
+  compiled object file of the source file.</p>
+
+  <p>The package configuration file is a system to bypass the automatic
+  dependency scanner. It can also be used to add extra dependencies to a
+  source file in the package. The configuration file is a special file in a
+  source package. The lines in the file is read using a temporary instance of
+  Fcm::CfgFile created by Fcm::SrcPackage. All declarations in a package
+  configuration file apply to named source files. The declarations set the
+  properties of the Fcm::SrcFile instance associated with the source file. It
+  can be used to add dependencies to a source file, and to tell the system to
+  bypass automatic dependency scanning of the source file. Other modifications
+  such as the internal name (object file name) of a source file, or the target
+  name of the executable can also be set using the package configuration file
+  in the package containing the source file.</p>
+
+  <h2><a name="rule">Make Rule Generator</a></h2>
+
+  <p>The dependency information is used to create the <em>Makefile</em>
+  fragments for the source directory sub-packages. A <em>Makefile</em> fragment
+  is updated if it is older than its corresponding dependency cache file.</p>
+
+  <p>The following is a list of file types and their <em>make</em> rule
+  targets:</p>
+
+  <table class="pad" summary="list of file types and thier make rules"
+  border="1">
+    <tr>
+      <th colspan="2">File type</th>
+
+      <th>Targets</th>
+    </tr>
+
+    <tr>
+      <th rowspan="5">SOURCE</th>
+
+      <th>all</th>
+
+      <td>
+        <ul>
+          <li>compile: object file</li>
+
+          <li>touch: flags file for compiler flags</li>
+        </ul>
+      </td>
+    </tr>
+
+    <tr>
+      <th>FPP and C</th>
+
+      <td>
+        <p>If the original source has not been pre-processed:</p>
+
+        <ul>
+          <li>touch: flags file for pre-processor definition macros</li>
+        </ul>
+      </td>
+    </tr>
+
+    <tr>
+      <th>PROGRAM</th>
+
+      <td>
+        <ul>
+          <li>load: executable binary file</li>
+
+          <li>touch: flags file for loader (linker) flags</li>
+        </ul>
+      </td>
+    </tr>
+
+    <tr>
+      <th>all except PROGRAM</th>
+
+      <td>
+        <ul>
+          <li>touch: "done" file to denote the resolution of all external
+          objects.</li>
+        </ul>
+      </td>
+    </tr>
+
+    <tr>
+      <th>all FORTRAN except PROGRAM and MODULE</th>
+
+      <td>
+        <ul>
+          <li>interface: "interface" file to denote that all dependent module
+          information files are up to date.</li>
+        </ul>
+      </td>
+    </tr>
+
+    <tr>
+      <th colspan="2">INCLUDE</th>
+
+      <td>
+        <ul>
+          <li>cp: "include" file to "inc/" sub-directory</li>
+
+          <li>touch: "idone" file to denote the resolution of all external
+          objects.</li>
+        </ul>
+      </td>
+    </tr>
+
+    <tr>
+      <th colspan="2">EXE and SCRIPT</th>
+
+      <td>
+        <ul>
+          <li>cp: executable file to "bin/" sub-directory</li>
+        </ul>
+      </td>
+    </tr>
+
+    <tr>
+      <th colspan="2">LIB</th>
+
+      <td>
+        <ul>
+          <li>ar: archive object library file</li>
+        </ul>
+      </td>
+    </tr>
+  </table>
+
+  <p>The resulting <em>Makefile</em> is made up of a top level
+  <em>Makefile</em> and a list of include ".mk" files, (one for each
+  sub-package). The toplevel <em>Makefile</em> consists of useful environment
+  variables, including the search path of each sub-directory, the build tools,
+  the verbose mode and the VPATH directives for different file types. It has
+  two top level build targets, "all" and "clean". The "all" target is the
+  default target, and the "clean" target is for removing the previous build
+  from the current build root. It also has a list of targets for building the
+  top level and the container sub-package "flags" files. At the end of the
+  file is a list of "include" statements to include the ".mk" files.</p>
+
+  <p>A the top of each of ".mk" files are local variables for locating the
+  source directories of the sub-package. Below that are the rules for building
+  source files in the sub-package.</p>
+
+  <h2><a name="pp">Pre-processing</a></h2>
+
+  <p>As discussed in the user guide, the PP switch can be used to switch on
+  pre-processing. The PP switch can be specified globally or for individual
+  sub-packages. (However, it does not go down to the level of individual
+  source files.) The "inheritance" relationship is similar to that of the
+  compiler flags.</p>
+
+  <p>Currently, only Fortran source files with uppercase file extensions and C
+  source files are considered to be source files requiring pre-processing. If
+  a sub-package source directory contains such files and has its PP switch set
+  to ON, the system will attempt to pre-process these files.</p>
+
+  <p>The system allows header files to be located anywhere in the source tree.
+  Therefore, a dependency scan is performed on all files requiring
+  pre-processing as well as all header files to obtain a list of "#include"
+  header file dependencies. For each header file or source file requiring
+  pre-processing, a new instance of Fcm::BuildTask is created to represent a
+  "target". Similar to the logic in <em>make</em>, a "target" is only up to
+  date if all its dependencies are up to date. The Fcm::BuildTask instance
+  uses this logic to pre-process its files. Dependent header files are updated
+  by copying them to the "inc/" sub-directory of the build root. The "inc/"
+  sub-directory is automatically placed in the search path of the
+  pre-processor command, usually by the "-I" option. Pre-processing is
+  performed by a method of the Fcm::SrcFile instance. The method builds the
+  command by selecting the correct set of pre-processor definition macros and
+  pre-processor flags, using an inheritance relationship similar to that used
+  by the compiler flags. Unlike <em>make</em>, however, Fcm::BuildTask only
+  updates the target if both the timestamp and the content are out of date.
+  Therefore, if the target already exists, the pre-processing command is only
+  invoked if the timestamp of the target is out of date. The output from the
+  pre-processor will then be compared with the content in the target. The
+  target is only updated if the content has changed.</p>
+
+  <p>Once a source file is pre-processed, subsequent build system operations
+  such as Fortran 9X interface block generation and dependency scan (for
+  creating the <em>Makefile</em>) will be based on the pre-processed source,
+  and not the original source file. If a source file requires pre-processing
+  and is not pre-processed at the pre-processing stage, it will be left to the
+  compiler to perform the task.</p>
+
+  <h2><a name="file-type">File Type Register</a></h2>
+
+  <p>The build system file type register is a simple interface for modifying
+  the default settings in the Fcm::Config module. There are two registers, one
+  for output file type and one for input file type.</p>
+
+  <p>The output file register is the simpler of the two. It is implemented as
+  a hash table, with the keys being the names of the file types as known by the
+  system internally, and the values being the suffices that will be added to
+  those output files. Therefore, the output file register allows us to modify
+  the suffix added to an output file of a particular type.</p>
+
+  <p>The input file register allows us to modify the type flags of a file
+  named with a particular extension. The type flags are keywords used by the
+  build system to determine what type of input files it is dealing with. It is
+  implemented as a list of uppercase keywords delimited by a pair of colons.
+  The order of the keywords in the string is insignificant. Internally, the
+  build system determines the action on a file by looking at whether it
+  belongs to a type that is tied with that particular action. For example, a
+  file that has the keyword "SOURCE" in its type flag will be treated as a
+  compilable source file, and so it will be written to the <em>Makefile</em>
+  with a rule to compile it.</p>
+
+  <h2><a name="makefile">The <em>Makefile</em></a></h2>
+
+  <p>The following items are automatically written to the <em>Makefile</em>:</p>
+
+  <ul>
+    <li>The root directory and sub-directories of the current build, as
+    environment variables FCM_ROOTDIR, etc.</li>
+
+    <li>The search path of the different types of output file, using a set of
+    "vpath" directives.</li>
+
+    <li>TOOL declarations in the build configuration file are exported as
+    environment variables.</li>
+
+    <li>The diagnostic verbose mode information.</li>
+
+    <li>The default build targets.</li>
+
+    <li>The rules for building the targets for all the source files.</li>
+  </ul>
+
+  <h2><a name="wrapper">The Compiler/Linker Wrapper</a></h2>
+
+  <p>Compile and link are handled by the <em>fcm_internal</em> wrapper script.
+  The wrapper script uses the environment variables exported by the
+  <em>Makefile</em> to generate the correct compiler (or linker) command for the
+  current source (or object) file. Depending on the diagnistic verbose level,
+  it also prints out various amount of diagnostic output.</p>
+
+  <p>For compilation, the wrapper does the following:</p>
+
+  <ol>
+    <li>Select the correct compiler for the current source file.</li>
+
+    <li>Specify the output file name for the current source file.</li>
+
+    <li>If pre-processing is left to the compiler, specify the definition
+    macros, if any, for the pre-processor.</li>
+
+    <li>Specify the "include" path, in case the source file has dependencies
+    on include files.</li>
+
+    <li>Specify the "compile only" option, if it is not already set.</li>
+
+    <li>Add any other user defined flags to the compiler command.</li>
+
+    <li>Run the command, sending the output to a temporary directory.</li>
+
+    <li>If the compile succeeded, move the output from the temporary directory
+    to the output object directory.</li>
+
+    <li>Otherwise, delete the output from the temporary directory.</li>
+
+    <li>If there are Fortran module definition files (*.mod, *.MOD, etc), move
+    them to the "inc/" sub-directory.</li>
+  </ol>
+
+  <p>For linking, the wrapper does the following:</p>
+
+  <ol>
+    <li>Create a temporary object archive library with all the object files
+    currently residing in the output object sub-directory.</li>
+
+    <li>Select the correct linker for the current main program object
+    file.</li>
+
+    <li>Specify the output file name for the main program.</li>
+
+    <li>Specify the main program object file.</li>
+
+    <li>Specify the link library search path and the temporary link
+    library.</li>
+
+    <li>Add any other user defined flags to the linker command.</li>
+
+    <li>Run the command, sending the output to a temporary directory.</li>
+
+    <li>If the link succeeded, move the output from the temporary directory to
+    the "bin/" sub-directory of the build root.</li>
+
+    <li>Otherwise, delete the output from the temporary directory.</li>
+
+    <li>Remove the temporary object archive library.</li>
+  </ol>
+
+  <h2><a name="inheritance">Inheriting from a Pre-compiled Build</a></h2>
+
+  <p>A build can inherit configurations, source files and other items from a
+  previous build. At the Perl source code level, this is implemented via hash
+  tables and search paths. At the <em>Makefile</em> level, this is implemented
+  using the "vpath" directives. The following is a summary:</p>
+
+  <ul>
+    <li>Build targets are stored in a list. Targets that are specified in the
+    configuration file in the previous build are pushed into the list first.
+    A target that is specified in the current configuration file is pushed
+    into the list if it has not already been specified.</li>
+
+    <li>Each source directory has a unique sub-package identifier and a path
+    location. If a source directory in the previous build has the same
+    sub-package identifier, its location as specified in the previous build
+    will be placed in the search path of the source directory. The directory
+    specified in the current build is searched for files before the directory
+    specified in the previous build.</li>
+
+    <li>Tool settings such as compiler flags are set via the configuration
+    hash table. Settings declared in the previous build overrides those of the
+    default, and settings declared in the current build overrides those
+    declared in the previous build.</li>
+
+    <li>Ditto for exclude dependency, input file extension and output file
+    extension declarations.</li>
+
+    <li>Build items such as object files, executable files and other dummy
+    files are inherited via search path (and/or "vpath"). For example, the
+    system searches the "obj/" sub-directory of the current build for object
+    files before looking at that of the previous build. The system does not
+    re-build an item that exists in the previous build and is up to date.</li>
+  </ul>
+  
+  <script type="text/javascript" src="maintain.js">
+  </script>
+</body>
+</html>

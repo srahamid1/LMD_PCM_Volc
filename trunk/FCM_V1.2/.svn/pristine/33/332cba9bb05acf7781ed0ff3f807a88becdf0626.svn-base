@@ -1,0 +1,93 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html>
+<head>
+  <title>FCM System User Guide: Further Information</title>
+  <meta name="author" content="FCM development team">
+  <meta name="descriptions" content="User Guide - Further Information">
+  <meta name="keywords" content="FCM, user guide">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body>
+  <address>
+    <a href="index.html">FCM System User Guide</a> &gt; Further Information
+  </address>
+
+  <h1>Further Information</h1>
+
+  <ul>
+    <li>Project documents
+
+      <ul>
+        <li>
+          <a href="../../../FCM_Admin/doc/project/HighLevelDesign.html">High Level Design</a>
+
+          <ul>
+            <li>Gives the original reasons behind the choice of tools used in
+            the FCM system (e.g. Subversion &amp; Trac).</li>
+
+            <li>Some of the issues discussed are no longer relevant.</li>
+          </ul>
+        </li>
+
+        <li>
+          <a href="../design">FCM Detailed Design</a>
+
+          <ul>
+            <li>Information about the internal workings of the FCM system.</li>
+
+            <li>Intended mainly for people maintaining or developing the FCM
+            system.</li>
+          </ul>
+        </li>
+
+        <li>
+          <a href="../../../FCM_Admin/doc/project/scmUsecaseSolutions.html">Use-Case
+          Solution</a>
+
+          <ul>
+            <li>Discusses how FCM meets its requirements.</li>
+
+            <li>Some of the working practices discussed may not match current
+            advice. This User Guide takes precedence where there are any
+            differences.</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+
+    <li>Subversion
+
+      <ul>
+        <li><a href="http://subversion.tigris.org/">Subversion Home
+        Page</a></li>
+
+        <li><a href="http://svnbook.red-bean.com/en/1.2/">Subversion
+        Book</a></li>
+
+        <li><a href="http://subversion.tigris.org/faq.html">Subversion
+        FAQ</a></li>
+      </ul>
+    </li>
+
+    <li>Other links
+
+      <ul>
+        <li><a href="http://projects.edgewall.com/trac/">Trac Home
+        Page</a></li>
+
+        <li><a href="http://furius.ca/xxdiff/">xxdiff Home Page</a></li>
+
+        <li><a href="http://subversion.tigris.org/hacking.html">Hacker's
+        Guide to Subversion</a>: Contains some useful guidelines on log
+        message, filing issues, etc.</li>
+      </ul>
+    </li>
+  </ul>
+
+  <script type="text/javascript" src="maintain.js">
+  </script>
+</body>
+</html>

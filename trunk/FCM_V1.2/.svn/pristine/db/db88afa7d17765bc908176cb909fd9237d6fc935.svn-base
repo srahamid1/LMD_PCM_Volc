@@ -1,0 +1,83 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html>
+<head>
+  <title>FCM System User Guide: Introduction</title>
+  <meta name="author" content="FCM development team">
+  <meta name="descriptions" content="User Guide - Introduction">
+  <meta name="keywords" content="FCM, user guide">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body>
+  <address>
+    <a href="index.html">FCM System User Guide</a> &gt; Introduction
+  </address>
+
+  <h1>Introduction</h1>
+
+  <p>This is the User Guide for the <em>Flexible Configuration Management</em>
+  system which is known as <em>FCM</em>. It is designed to tell you everything
+  you need to know if you want to develop code which has been configured within
+  FCM. In addition it also provides the extra information you will need if you
+  are system manager of a project within FCM.</p>
+
+  <p>Note: some hyperlinks in this document lead to pages that are internal to
+  the Met Office, and so will generally not work when this document is viewed
+  externally. Please accept our apologies if this causes you any
+  inconvenience.</p>
+
+  <p>This guide consists of the following sections:</p>
+
+  <ul>
+    <li><a href="overview.html">System Overview</a>: A brief description of the
+    main features of FCM.</li>
+
+    <li><a href="getting_started.html">Getting Started</a>: How to start using
+    FCM. It includes a tutorial for you to work through and
+    familiarise yourself with some FCM activities.</li>
+
+    <li><a href="code_management.html">Code Management System</a>: How to use
+    the code management system to manage code changes.</li>
+
+    <li><a href="working_practices.html">Code Management Working Practices</a>:
+    Recommended ways of working with the code management system.</li>
+
+    <li><a href="extract.html">The Extract System</a>: How to extract code from
+    the repository ready for building.</li>
+
+    <li><a href="build.html">The Build System</a>: How to compile code using
+    the build system.</li>
+
+    <li><a href="system_admin.html">System Administration</a>: How to configure
+    and maintain a new system within FCM.</li>
+
+    <li><a href="command_ref.html">FCM Command Reference</a>: Detailed
+    information about each of the <em>fcm</em> commands.</li>
+
+    <li><a href="further_info.html">Further Information</a>: Where to find
+    further information about FCM and about configuration management in
+    general.</li>
+
+    <li>Annex: <a href="annex_quick_ref.html">Quick reference</a>: A quick
+    reference to many useful FCM code management system commands.</li>
+
+    <li>Annex: Detailed definitions of what declarations are allowed in the
+    following configuration files:
+
+      <ul>
+        <li><a href="annex_fcm_cfg.html">central/user</a></li>
+
+        <li><a href="annex_ext_cfg.html">extract</a></li>
+
+        <li><a href="annex_bld_cfg.html">build</a></li>
+
+        <li><a href="annex_pck_cfg.html">build package</a></li>
+      </ul>
+    </li>
+  </ul>
+
+  <script type="text/javascript" src="maintain.js"></script>
+</body>
+</html>

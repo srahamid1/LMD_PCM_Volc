@@ -1,0 +1,1 @@
+/Users/Saira/Documents/GCM/trunk/LMDZ.COMMON/libo/local_112x115x17_phystd_seq.e/.config/fcm_env.ksh

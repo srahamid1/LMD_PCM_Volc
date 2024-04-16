@@ -1,0 +1,40 @@
+CC_DEFINE     -D
+CPP           cpp
+CPPKEYS       CPP_PHYS %CPP_DEF
+CPP_INCLUDE   -I
+CFLAGS        %C_OPTIM %INCDIR
+GENINTERFACE  none
+LD_LIBSEARCH  -L
+MAKE_SILENT   -s
+CC            %C_COMPILER
+FPP_DEFINE    -D
+CPPFLAGS      %CPP_FLAGS %INCDIR
+CC_OUTPUT     -o
+CC_COMPILE    -c
+MAKE_JOB      -j
+MAKE          make
+CC_INCLUDE    -I
+FFLAGS__muphy -c -I/Users/Saira/Documents/GCM/trunk/LMDZ.COMMON/libf/aeronostd -I/usr/local/Cellar/netcdf-fortran/4.6.1/include -I/usr/local/Cellar/netcdf-fortran/4.6.1/include -O3 
+INTERFACE     file
+LD_OUTPUT     -o
+FPP_INCLUDE   -I
+AR            ar
+FC_DEFINE     -D
+LDFLAGS       -Wl,-rpath,/usr/local/lib:/usr/local/Cellar/netcdf-fortran/4.6.1/lib  -L/usr/local/Cellar/netcdf-fortran/4.6.1/lib -lnetcdff -lnetcdf -lnetcdf
+FPPKEYS       CPP_PHYS NC_DOUBLE
+FPP           cpp
+LD_LIBLINK    -l
+GRAPHIC_DIFF  xxdiff
+ARFLAGS       rs
+FFLAGS        -cpp -ffree-line-length-0 -fdefault-real-8 -DNC_DOUBLE -fdefault-double-8 -fallow-argument-mismatch -O3  -I/Users/Saira/Documents/GCM/trunk/LMDZ.COMMON/libf/aeronostd -I/usr/local/Cellar/netcdf-fortran/4.6.1/include -I/usr/local/Cellar/netcdf-fortran/4.6.1/include
+REMOTE_SHELL  remsh
+LD            /usr/local/bin/mpif90
+MIRROR        rsync
+CPP_DEFINE    -D
+FC            /usr/local/bin/mpif90
+FC_COMPILE    -c
+FC_INCLUDE    -I
+MAKEFLAGS     
+FPPFLAGS      -P -traditional -I/Users/Saira/Documents/GCM/trunk/LMDZ.COMMON/libf/aeronostd -I/usr/local/Cellar/netcdf-fortran/4.6.1/include -I/usr/local/Cellar/netcdf-fortran/4.6.1/include
+SHELL         /bin/bash
+FC_OUTPUT     -o

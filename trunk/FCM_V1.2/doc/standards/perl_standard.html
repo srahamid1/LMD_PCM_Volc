@@ -1,0 +1,396 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html>
+<head>
+  <title>Perl coding standard for FCM</title>
+  <meta name="author" content="FCM development team">
+  <meta name="descriptions" content="Perl coding standard for FCM">
+  <meta name="keywords" content="Perl, coding standard, FCM">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <link rel="StyleSheet" type="text/css" href="style.css">
+  <style type="text/css">
+  <!--
+  li, th, td {
+    padding: 3px;
+  }
+  td {
+    vertical-align: top;
+  }
+  th.r {
+    text-align: right;
+    background-color: transparent;
+    padding-right: 5px;
+  }
+  th.l {
+    text-align: left;
+    background-color: transparent;
+  }
+  -->
+  </style>
+</head>
+
+<body>
+  <p align="right"><img src="logo.png" alt="Met Office logo" width="85"
+  height="85"></p>
+
+  <h1>Perl coding standard for FCM</h1>
+
+  <p align="center">Last updated: 28 November 2006</a>
+
+  <p align="center">Met Office<br>
+  FitzRoy Road, Exeter<br>
+  Devon, EX1 3PB<br>
+  United Kingdom</p>
+
+  <p align="center">&copy; Crown copyright 2005-6. All rights reserved.</p>
+
+  <p align="center">Questions regarding this document or permissions to quote
+  from it should be directed to the <a href=
+  "mailto:iprmanager@metoffice.gov.uk">IPR Manager</a>.</p>
+  
+  <script type="text/javascript">
+  <!--
+  var out = 'For printing, please use the '
+  out    += '<a href="fcm-perl-standard.pdf">PDF<\/a> version of the document.'
+  document.write ('<p align="center">')
+  document.write (out)
+  document.write ('<\/p>')
+  //-->
+  </script>
+
+  <h2>Contents</h2>
+
+  <ul>
+    <li>Main contents:
+
+      <ol>
+        <li><a href="#1">Introduction</a></li>
+
+        <li><a href="#2">Online Perl style guides</a></li>
+
+        <li><a href="#3">Coding standard</a></li>
+      </ol>
+    </li>
+  </ul><a name="1"></a>
+
+  <h2>1. Introduction</h2>
+
+  <p>Perl (Practical Extraction and Report Language) is gaining a lot of
+  popularity at the Met Office for developing applications that are
+  traditionally programmed using shell script. For example, it is currently our
+  choice of language for developing the in-house components of the FCM
+  system.</p>
+ 
+  <p>Perl is a very powerful general purpose scripting tool that is free and
+  portable across a huge variety of platforms including many non-Unix systems.
+  Replacing a shell script with an equivalent Perl program often results in a
+  massive reduction in runtime - using cleaner syntax and algorithm.</p>
+
+  <p>Perl is a language with a rich set of "grammar". To most people, the first
+  impression of a piece of code written in Perl is that it is very ugly. Its
+  lines are full of punctuation junks that nobody can hope to understand. This
+  is often caused by poorly written programs coupled with little and often
+  inadequte documentations. To improve readability and to reduce the overheads
+  of maintenance, it is important for Perl programmers to write their code in a
+  nice and consistent way.</p>
+
+  <p>The aim of this document is to propose ideas on how the Perl programming
+  language should be used with FCM.</p>
+
+  <a name="2"></a><h2>2. Online Perl style guides</h2>
+
+  <p>There are many Perl style guides available online. Some are listed
+  below:</p>
+
+  <ul>
+    <li>the manpages <code>perlstyle</code> and <code>perlmodstyle</code></li>
+
+    <li><a href=
+    "http://www.kulnet.kuleuven.ac.be/perlcourse/perlingo.html">Perlingo</a></li>
+
+    <li><a href="http://ali.as/devel/code.html">Perl Style Guide for Large Scale
+    Object Oriented Development</a></li>
+
+    <li><a href="http://perltidy.sourceforge.net/">Perltidy</a></li>
+
+    <li><a href=
+    "http://perl.apache.org/docs/2.0/devel/core/coding_style.pdf">mod_perl
+    Coding Style Guide</a> (PDF)</li>
+  </ul>
+
+  <p>It is worth noting that the ideas in some of the Perl style guides may
+  conflict with each other - as they are targeted to different people. However,
+  there is a common theme to most of the best practices. The following is a
+  summary:</p>
+
+  <ul>
+    <li>A source file, whether it is a top-level script or a module, should
+    contain a header block with information of the source file,
+    some general description of the code as well as standard pragmas or
+    options for running the Perl interpreter.</li>
+
+    <li>Each function should be preceded by a comment block or a block of
+    POD to specify a synopsis for the defined function.</li>
+
+    <li>Avoid using names of built-in functions to name your new functions.</li>
+
+    <li>If the parameter list of a function is becoming too long, e.g. more
+    than 3 arguments, you may want to implement the argument list with a hash,
+    so that all the arguments are named.</li>
+
+    <li>Indent to an appropriate number of spaces/tabs for code blocks.</li>
+
+    <li>Open curly brackets should be on the same line as the keyword.</li>
+
+    <li>Close curly brackets should line up with the keywords that started
+    the block.</li>
+
+    <li>Insert a blank line between chunks of code that do different
+    things.</li>
+
+    <li>Use space between tokens and operators to improve readability.
+    Use space after commas. No space before commas and semi-colons.</li>
+
+    <li>Line up corresponding items vertically.</li>
+
+    <li>Use parentheses only if necessary.</li>
+
+    <li>Restrict line length to e.g. 80 characters.</li>
+
+    <li>Be consistent with style.</li>
+
+    <li>Use the "strict" and "warnings" pragmas.</li>
+
+    <li>options and arguments should be processed as "soon" as possible,
+    preferably at the beginning of a source file or a function.</li>
+
+    <li>Use the "__END__" directive at the end of a Perl script.</li>
+
+    <li>-more later-</li>
+  </ul>
+
+  <a name="3"></a><h2>3. Coding standard</h2>
+
+  <p>The main question is: what should we include in our coding standard?
+  Although we would like to recommend using the best practices described in
+  the last section, we would not want to impose any restriction, as Perl is a
+  language designed to do things in many different ways. The only thing we
+  would like to impose is a header block in each source file, and a header
+  comment block for each function in a source file.</p>
+
+  <p>For a Perl executable, the header block of the source file should contain
+  the following:</p>
+  
+  <ul>
+    <li>the first line should be <tt>"#!/usr/bin/perl"</tt></li>
+
+    <li>the name of the executable</li>
+    
+    <li>a synopsis and/or a description or what the executable does</li>
+
+    <li>an explanation of the options and arguments (either in separate
+    sections or described within the "description" section)</li>
+
+    <li>copyright and owner information</li>
+
+    <li>no history or revision information, (as we would prefer using the
+    Subversion log message to record such information)</li>
+
+    <li>use "strict" and use "warnings" statements</li>
+
+    <li>use the "__END__" directive at the end of a Perl script.</li>
+  </ul>
+
+  <table summary="executable header block example" border="1" width="100%">
+    <tr>
+      <th>Executable header block example</th>
+    </tr>
+
+    <tr>
+      <td>
+        <pre>
+#!/usr/bin/perl
+# ------------------------------------------------------------------------------
+# NAME
+#   example.pl
+#
+# SYNOPSIS
+#   example.pl [options] args
+#
+# DESCRIPTION
+#   This is a header example, and so on and so forth.
+#
+# OPTIONS
+#   -b [--bar] - this option does what "bar" does.
+#   -f [--foo] - this option does what "foo" does.
+#
+# ARGUMENTS
+#   args       - description of each argument.
+#
+# SEE ALSO
+#   list of relevant commands, modules and documents
+#
+# COPYRIGHT
+#   (C) Crown copyright Met Office. All rights reserved.
+#   For further details please refer to the file COPYRIGHT.txt
+#   which you should have received as part of this distribution.
+# ------------------------------------------------------------------------------
+
+# Standard pragmas
+use strict;
+use warnings;
+
+# Standard modules
+use Getopt::Long;
+
+# ------------------------------------------------------------------------------
+
+# Process options
+my ($foo, $bar);
+GetOptions (
+  'foo|f' =&gt; \$foo,
+  'bar|b' =&gt; \$bar,
+);
+
+# Process arguments
+my $arg = shift @ARGV;
+
+# Do something...
+print 'This is an example: ', $arg, "\n";
+print 'FOO', "\n" if $foo;
+print 'BAR', "\n" if $bar;
+
+__END__
+</pre>
+      </td>
+    </tr>
+  </table>
+
+  <p>For a Perl module, the header block of the source file should contain
+  the following:</p>
+  
+  <ul>
+    <li>the first line should be <tt>"#!/usr/bin/perl"</tt></li>
+
+    <li>the name of the module</li>
+    
+    <li>a synopsis and/or a description or what the module does</li>
+
+    <li>copyright and owner information</li>
+
+    <li>no history or revision information</li>
+
+    <li>use "strict" and use "warnings" statements</li>
+
+    <li>a list of exports (do not export if you are writing an OO module)</li>
+
+    <li>use the "__END__" directive at the end of a Perl script, and remember
+    to put 1 before the end of the module, so that it will return true.</li>
+  </ul>
+
+  <table summary="module header block example" border="1" width="100%">
+    <tr>
+      <th>Module header block example</th>
+    </tr>
+
+    <tr>
+      <td>
+        <pre>
+#!/usr/bin/perl
+# ------------------------------------------------------------------------------
+# NAME
+#   Metoffice::Example
+#
+# DESCRIPTION
+#   This is a header example, and so on and so forth.
+#
+# SEE ALSO
+#   list of relevant commands, modules and documents
+#
+# COPYRIGHT
+#   (C) Crown copyright Met Office. All rights reserved.
+#   For further details please refer to the file COPYRIGHT.txt
+#   which you should have received as part of this distribution.
+# ------------------------------------------------------------------------------
+
+package Metoffice::Example;
+
+# Standard pragmas
+use strict;
+use warnings;
+
+# Exports
+our (@ISA, @EXPORT, @EXPORT_OK);
+require Exporter;
+@ISA    = qw(Exporter);
+@EXPORT = qw(
+  foo
+  bar
+);
+
+# ------------------------------------------------------------------------------
+# ... some more Perl ...
+# ------------------------------------------------------------------------------
+
+1;
+
+__END__
+</pre>
+      </td>
+    </tr>
+  </table>
+
+  <p>The header of a function (or "method" for OO code) should have the
+  following:</p>
+
+  <ul>
+    <li>a synopsis of the function's calling interfaces.</li>
+
+    <li>a description of what the function does and what it returns, and if
+    appropriate, what each argument represents</li>
+  </ul>
+
+  <table summary="function header block example" border="1" width="100%">
+    <tr>
+      <th>Function header block example</th>
+    </tr>
+
+    <tr>
+      <td>
+        <pre>
+# ... Something before the function ...
+#
+# ------------------------------------------------------------------------------
+# SYNOPSIS
+#   $result = &amp;print_hello;
+#   $result = &amp;print_hello ($arg);
+#
+# DESCRIPTION
+#   Print the word "hello" to standard output. If no argument is specified,
+#   the word "world" will be printed after the word "hello". Otherwise, the
+#   word specified by the argument $arg will follow "hello". The function
+#   returns true on success.
+#
+# ARGUMENTS
+#   $arg - optional, describe $arg if it has not been done in the above section
+# ------------------------------------------------------------------------------
+
+sub print_hello {
+  my ($arg) = @_;
+  $arg = defined ($arg) ? $arg : 'world';
+  my $result = print 'hello ', $arg, "\n";
+  return $result;
+}
+
+# ------------------------------------------------------------------------------
+#
+# ... Something after the function ...
+</pre>
+      </td>
+    </tr>
+  </table>
+
+  <script type="text/javascript" src="maintain.js">
+  </script>
+</body>
+</html>

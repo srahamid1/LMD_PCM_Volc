@@ -1,0 +1,16 @@
+%COMPILER            /usr/bin/mpif90
+%LINK                /usr/bin/mpif90
+%AR                  ar
+%ARFLAGS          rU
+%MAKE                make
+%FPP_FLAGS           -P -traditional
+%FPP_DEF             NC_DOUBLE
+%BASE_FFLAGS          -cpp -ffree-line-length-0 -fdefault-real-8 -DNC_DOUBLE -fdefault-double-8
+%PROD_FFLAGS         -O3
+%DEV_FFLAGS          -Wall -fbounds-check
+%DEBUG_FFLAGS        -g3 -Wall -fbounds-check -ffpe-trap=invalid,zero,overflow -O0 -fstack-protector-all -fbacktrace -finit-real=nan
+%MPI_FFLAGS          -fcray-pointer
+%OMP_FFLAGS          -fopenmp -fcray-pointer
+%BASE_LD             -Wl,-rpath,/usr/lib:/home/jsmekens/Documents/LMDZtrunk/netcdf-4.0.1/lib
+%MPI_LD
+%OMP_LD              -fopenmp

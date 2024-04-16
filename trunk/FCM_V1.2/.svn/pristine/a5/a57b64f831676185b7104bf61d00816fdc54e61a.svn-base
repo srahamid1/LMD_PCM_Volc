@@ -1,0 +1,643 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html>
+<head>
+  <title>FCM System User Guide Annex: Declarations in FCM extract configuration
+  file</title>
+  <meta name="author" content="FCM development team">
+  <meta name="descriptions" content="User Guide Annex">
+  <meta name="keywords" content="FCM, user guide, annex">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body>
+  <address>
+    <a href="index.html">FCM System User Guide</a> &gt; Annex: Declarations in
+    FCM extract configuration file
+  </address>
+
+  <h1>Annex:<br>
+  Declarations in FCM extract configuration file</h1>
+
+  <p>The following is a list of supported declarations for the configuration
+  file used by the FCM extract system. Unless otherwise stated, the fields in
+  all declaration labels are not case sensitive.</p>
+
+  <table class="pad" summary="Declarations in extract configuration file"
+  width="100%" border="1">
+    <tr>
+      <th>Label</th>
+
+      <th colspan="2">Content</th>
+    </tr>
+
+    <tr>
+      <th rowspan="2">CFG::TYPE</th>
+
+      <th>Description</th>
+
+      <td>The configuration file type, the value should always be "ext" for an
+      extract configuration file. This declaration is compulsory for all
+      extract configuration files.</td>
+    </tr>
+
+    <tr>
+      <th>Example</th>
+
+      <td>
+        <pre>
+cfg::type  ext
+</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <th rowspan="2">CFG::VERSION</th>
+
+      <th>Description</th>
+
+      <td>The file format version, currently "1.0" - a version is included so
+      that we shall be able to read the configuration file correctly should we
+      decide to change its format in the future.</td>
+    </tr>
+
+    <tr>
+      <th>Example</th>
+
+      <td>
+        <pre>
+cfg::version  1.0
+</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <th>Label</th>
+
+      <th colspan="2">Content</th>
+    </tr>
+
+    <tr>
+      <th rowspan="2">DEST::ROOTDIR</th>
+
+      <th>Description</th>
+
+      <td>The "root" path of the destination of this extraction. This
+      declaration is compulsory for all extract configuration files.</td>
+    </tr>
+
+    <tr>
+      <th>Example</th>
+
+      <td>
+        <pre>
+dest::rootdir  $HOME/project/my_project
+</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <th rowspan="2">RDEST::MACHINE</th>
+
+      <th>Description</th>
+
+      <td>The destination machine for this extraction. If set, the extraction
+      will be mirrored to a location on this machine.</td>
+    </tr>
+
+    <tr>
+      <th>Example</th>
+
+      <td>
+        <pre>
+rdest::machine  tx01
+</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <th rowspan="2">RDEST::LOGNAME</th>
+
+      <th>Description</th>
+
+      <td>The login name of the user on the remote destination machine. If not
+      specified, the current login name of the user on the local platform is
+      assumed.</td>
+    </tr>
+
+    <tr>
+      <th>Example</th>
+
+      <td>
+        <pre>
+rdest::logname  frva
+</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <th rowspan="2">RDEST::ROOTDIR</th>
+
+      <th>Description</th>
+
+      <td>The "root" path of the remote destination of this extraction. This
+      declaration is compulsory if this extraction requires mirroring to a
+      remote machine.</td>
+    </tr>
+
+    <tr>
+      <th>Example</th>
+
+      <td>
+        <pre>
+rdest::rootdir  /home/nwp/da/frva/project/my_project
+</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <th>Label</th>
+
+      <th colspan="2">Content</th>
+    </tr>
+
+    <tr>
+      <th rowspan="2">REPOS::&lt;pck&gt;::&lt;branch&gt;</th>
+
+      <th>Description</th>
+
+      <td>This declares a URL or a local file system path for the container
+      "repository" of a branch named &lt;branch&gt; in a package named
+      &lt;pck&gt;. The package name &lt;pck&gt; must be the name of a
+      top-level package (i.e. it must not contain the double colon "::"
+      delimiter). The name &lt;branch&gt; is used internally within the
+      extract system, and so is independent of the branch name of the code
+      management system. However, it is usually desirable to use the same name
+      of the actual branch in the code management system. For declaration of a
+      local file system path, the convention is to name the branch "user".
+      Please note that both &lt;pck&gt; and &lt;branch&gt; fields are case
+      sensitive. The declared URL must be a valid Subversion URL or a valid
+      FCM URL keyword.</td>
+    </tr>
+
+    <tr>
+      <th>Example</th>
+
+      <td>
+        <pre>
+repos::var::trunk        fcm:var_tr
+repos::var::r4790_foobar fcm:var_br/frsn/r4790_foobar
+repos::var::user         $HOME/var
+</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <th rowspan="2">VERSION::&lt;pck&gt;::&lt;branch&gt;</th>
+
+      <th>Description</th>
+
+      <td>The revision to be used for the URL of &lt;branch&gt; in the package
+      &lt;pck&gt;. If not specified, the revision defaults to "HEAD". Please
+      note that if the delcared "repository" is in the local file system, this
+      declaration must not be used. The value of the declaration can be a FCM
+      revision keyword or any revision argument acceptable by Subversion. You
+      can use a valid revision number, a date between a pair of curly brackets
+      (e.g. {"2005-05-01 12:00"}) or the keyword "HEAD". However, please do
+      not use the keywords "BASE", "COMMITTED" or "PREV" as these are reserved
+      for working copy only. Again, please note that both &lt;pck&gt; and
+      &lt;branch&gt; fields are case sensitive. </td>
+    </tr>
+
+    <tr>
+      <th>Example</th>
+
+      <td>
+        <pre>
+# Declare the revision with the FCM revision keyword "vn22.0"
+version::var::trunk        vn22.0
+# Declare the revision with a {date}
+version::var::r4790_foobar {2006-01-01}
+</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <th rowspan="2">SRC::&lt;pcks&gt;::&lt;branch&gt;</th>
+
+      <th>Description</th>
+
+      <td>This declares a source directory for the sub-package &lt;pcks&gt;
+      of &lt;branch&gt;. If the repository is declared as a URL, the source
+      directory must be quoted as a relative path to the URL. If the
+      repository is declared as a path in the local file system, the source
+      directory can be declared as either a relative path to the "repository"
+      or a full path. If the source directory is a relative path and
+      &lt;pcks&gt; is a top-level package, the full name of the sub-package
+      will be determined automatically using the directory names of the
+      relative path as the name of the sub-packages. If the source directory
+      is a full path, the full sub-package name must be specified. The name of
+      the sub-package determines the destination path of the source directory
+      in the extraction.</td>
+    </tr>
+
+    <tr>
+      <th>Example</th>
+
+      <td>
+        <pre>
+src::var::trunk                   code/VarMod_PF
+src::var::code::VarMod_PF::user   $HOME/var/code/VarMod_PF 
+</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <th rowspan="2">EXPSRC::&lt;pcks&gt;::&lt;branch&gt;</th>
+
+      <th>Description</th>
+
+      <td>This declares an expandable source directory for the sub-package
+      &lt;pcks&gt; of &lt;branch&gt;. This declaration is essentially the
+      same as the SRC declaration, except that the system will attempt to
+      search recursively for sub-directories within the declared source
+      directory.</td>
+    </tr>
+
+    <tr>
+      <th>Example</th>
+
+      <td>
+        <pre>
+expsrc::var::trunk code
+expsrc::var::user  code
+</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <th>Label</th>
+
+      <th colspan="2">Content</th>
+    </tr>
+
+    <tr>
+      <th rowspan="2">BLD::&lt;fields&gt;</th>
+
+      <th>Description</th>
+
+      <td>Declare a build configuration file declaration. The label
+      &lt;fields&gt; is the label of the declaration. On a successful
+      extraction, &lt;fields&gt; will be added to the build configuration
+      file. Please note that some of the &lt;fields&gt; may be case
+      sensitive.</td>
+    </tr>
+
+    <tr>
+      <th>Example</th>
+
+      <td>
+        <pre>
+bld::name     var_stable_22.0
+bld::target   VarScr_AnalysePF
+bld::tool::fc sxmpif90
+bld::tool::cc sxmpic++
+# ... and so on ...
+</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <th rowspan="2">USE</th>
+
+      <th>Description</th>
+
+      <td>The declares the location of a previous successful extraction, which
+      the current extraction will base on. If the previous extraction is also
+      a build, the subsequent invocation of the build system on the current
+      extraction will automatically trigger an inherited incremental build
+      based on that build.</td>
+    </tr>
+
+    <tr>
+      <th>Example</th>
+
+      <td>
+        <pre>
+use  ~frva/var_stable_22.0
+# ... and then the settings for your current extraction ...
+</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <th rowspan="2">INC</th>
+
+      <th>Description</th>
+
+      <td>This declares the name of a file containing extract configuration.
+      The lines in the declared file will be included inline to the current
+      extract configuration file.</td>
+    </tr>
+
+    <tr>
+      <th>Example</th>
+
+      <td>
+        <pre>
+inc  ~frva/var_stable_22.0/cfg/ext.cfg
+# ... and then your changes ...
+</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <th rowspan="2">OVERRIDE</th>
+
+      <th>Description</th>
+
+      <td>If a file is modified by two different branches, this flag can be
+      used to specify either to allow the later branch to override (1) the
+      earlier one or to fail (0) the extraction. If not specified, the default
+      is to fail (0).</td>
+    </tr>
+
+    <tr>
+      <th>Example</th>
+
+      <td>
+        <pre>
+override  1
+</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <th rowspan="2">MIRROR</th>
+
+      <th>Description</th>
+
+      <td>The extract system can mirror the extracted source to a remote
+      machine. Currently, it does this using either the <em>rdist</em> or the
+      <em>rsync</em> command. The default is <em>rsync</em>. This declaration
+      can be used to switch to using <em>rdist</em>.</td>
+    </tr>
+
+    <tr>
+      <th>Example</th>
+
+      <td>
+        <pre>
+mirror  rdist
+</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <th rowspan="2">%&lt;name&gt;</th>
+
+      <th>Description</th>
+
+      <td>%&lt;name&gt; declares an internal variable &lt;name&gt; that
+      can later be re-used.</td>
+    </tr>
+
+    <tr>
+      <th>Example</th>
+
+      <td>
+        <pre>
+%my_variable      foo
+src::bar::trunk   %my_variable
+src::egg::trunk   %my_variable
+src::ham::trunk   %my_variable
+</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <th>Label</th>
+
+      <th colspan="2">Content</th>
+    </tr>
+  </table>
+
+  <p class="gray">The following declarations are for reference only. They
+  should not be used in normal operations of the FCM extract system:</p>
+
+  <table class="pad" summary="Unused declarations in extract configuration file"
+  width="100%" border="1">
+    <tr class="gray">
+      <th>Label</th>
+
+      <th colspan="2">Content</th>
+    </tr>
+
+    <tr class="gray">
+      <th rowspan="2">DEST::SRCDIR</th>
+
+      <th>Description</th>
+
+      <td>This declaration is optional and is not normally required. It is the
+      "source" path of the desintation of this extraction. Source directories
+      will be extracted to this directory. The default is to extract source
+      directories to the "src/" sub-directory under the root path of the
+      destination.</td>
+    </tr>
+
+    <tr class="gray">
+      <th>Example</th>
+
+      <td>
+        <pre>
+dest::srcdir  $HOME/project/my_project/src
+</pre>
+      </td>
+    </tr>
+
+    <tr class="gray">
+      <th rowspan="2">DEST::CFGDIR</th>
+
+      <th>Description</th>
+
+      <td>This declaration is optional and is not normally required. It is the
+      "configuration" path of the destination of this extraction.
+      Configuration files such as the expanded extraction configuration file
+      and the build configuration file will be written in this location. The
+      default is to send the configuration files to the "cfg/" sub-directory
+      under the root path of the destination.</td>
+    </tr>
+
+    <tr class="gray">
+      <th>Example</th>
+
+      <td>
+        <pre>
+dest::cfgdir  $HOME/project/my_project/cfg
+</pre>
+      </td>
+    </tr>
+
+    <tr class="gray">
+      <th rowspan="2">DEST::CACHEDIR</th>
+
+      <th>Description</th>
+
+      <td>This declaration is optional and is not normally required. It is the
+      cache directory used by this extraction. Source directories and other
+      configuration files will normally be extracted and written to the cache
+      directory before being copied to the destination. This ensures fast
+      subsequent incremental extractions. It also reduces the load on the
+      repository server. The default is use the ".cache/" sub-directory under
+      the root path of the destination.</td>
+    </tr>
+
+    <tr class="gray">
+      <th>Example</th>
+
+      <td>
+        <pre>
+dest::cachedir  $HOME/project/my_project/.cache
+</pre>
+      </td>
+    </tr>
+
+    <tr class="gray">
+      <th rowspan="2">DEST::BLD_CFG</th>
+
+      <th>Description</th>
+
+      <td>This declaration is optional and is not normally required. It is the
+      destination path of the build configuration file. By default, this file
+      will be named "bld.cfg" and will be placed under the configuration
+      directory, i.e. "cfg/bld.cfg" under the root path of the
+      destination.</td>
+    </tr>
+
+    <tr class="gray">
+      <th>Example</th>
+
+      <td>
+        <pre>
+dest::bld_cfg  $HOME/project/my_project/cfg/bld.cfg
+</pre>
+      </td>
+    </tr>
+
+    <tr class="gray">
+      <th rowspan="2">DEST::EXT_CFG</th>
+
+      <th>Description</th>
+
+      <td>This declaration is optional and is not normally required. It is the
+      destination path of the output expanded extract configuration file. By
+      default, this file will be named "ext.cfg" and will be placed under the
+      configuration directory, i.e. "cfg/ext.cfg" under the root path of the
+      destination.</td>
+    </tr>
+
+    <tr class="gray">
+      <th>Example</th>
+
+      <td>
+        <pre>
+dest::ext_cfg  $HOME/project/my_project/cfg/ext.cfg
+</pre>
+      </td>
+    </tr>
+
+    <tr class="gray">
+      <th rowspan="2">RDEST::SRCDIR</th>
+
+      <th>Description</th>
+
+      <td>This declaration is optional and is not normally required. It is the
+      "source" path of the remote desintation of this extraction. Source
+      directories will be mirrored to this directory. The default is to mirror
+      source directories to the "src/" sub-directory under the root path of the
+      remote destination.</td>
+    </tr>
+
+    <tr class="gray">
+      <th>Example</th>
+
+      <td>
+        <pre>
+rdest::srcdir  /home/nwp/da/frva/project/my_project/src
+</pre>
+      </td>
+    </tr>
+
+    <tr class="gray">
+      <th rowspan="2">RDEST::CFGDIR</th>
+
+      <th>Description</th>
+
+      <td>This declaration is optional and is not normally required. It is the
+      "configuration" path of the remote destination of this extraction.
+      Configuration files such as the expanded extraction configuration file
+      and the build configuration file are mirrored in this location. The
+      default is to send the configuration files to the "cfg/" sub-directory
+      under the root path of the remote destination.</td>
+    </tr>
+
+    <tr class="gray">
+      <th>Example</th>
+
+      <td>
+        <pre>
+rdest::cfgdir  /home/nwp/da/frva/project/my_project/cfg
+</pre>
+      </td>
+    </tr>
+
+    <tr class="gray">
+      <th rowspan="2">RDEST::BLD_CFG</th>
+
+      <th>Description</th>
+
+      <td>This declaration is optional and is not normally required. It is the
+      remote destination path of the build configuration file. By default, this
+      file will be named "bld.cfg" and will be placed under the configuration
+      directory, i.e. "cfg/bld.cfg" under the root path of the remote
+      destination.</td>
+    </tr>
+
+    <tr class="gray">
+      <th>Example</th>
+
+      <td>
+        <pre>
+rdest::bld_cfg  /home/nwp/da/frva/project/my_project/cfg/bld.cfg
+</pre>
+      </td>
+    </tr>
+
+    <tr class="gray">
+      <th rowspan="2">RDEST::EXT_CFG</th>
+
+      <th>Description</th>
+
+      <td>This declaration is optional and is not normally required. It is the
+      remote destination path of the output expanded extract configuration file.
+      By default, this file will be named "ext.cfg" and will be placed under the
+      configuration directory, i.e. "cfg/ext.cfg" under the root path of the
+      remote destination.</td>
+    </tr>
+
+    <tr class="gray">
+      <th>Example</th>
+
+      <td>
+        <pre>
+rdest::ext_cfg  /home/nwp/da/frva/project/my_project/cfg/ext.cfg
+</pre>
+      </td>
+    </tr>
+  </table>
+
+  <script type="text/javascript" src="maintain.js">
+  </script>
+</body>
+</html>

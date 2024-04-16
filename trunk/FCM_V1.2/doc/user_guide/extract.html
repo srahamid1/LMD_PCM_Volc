@@ -1,0 +1,1118 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html>
+<head>
+  <title>FCM System User Guide: The Extract System</title>
+  <meta name="author" content="FCM development team">
+  <meta name="descriptions" content="User Guide - The Extract System">
+  <meta name="keywords" content="FCM, user guide, extract, build">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body>
+  <address>
+    <a href="index.html">FCM System User Guide</a> &gt; The Extract System
+  </address>
+
+  <h1>The Extract System</h1>
+
+  <p>The extract system provides an interface between the revision control
+  system (currently Subversion) and the build system. Where appropriate, it
+  extracts code from the repository and other user-defined locations to a
+  directory tree suitable for feeding into the build system. In this chapter,
+  we shall use many examples to explain how to use the extract system. At the
+  end of this chapter, you will be able to extract code from the local file system
+  as well as from different branches of different repository URLs. You will
+  also learn how to mirror code to a remote machine. Finally, you will be given
+  an introduction on how to specify configurations for the build system via the
+  extract configuration file. (For further information on the build system,
+  please see the next chapter <a href="build.html">The Build System</a>.) The
+  last section of the chapter tells you what you can do in the case when
+  Subversion is not available.</p>
+
+  <h2><a name="command">The Extract Command</a></h2>
+
+  <p>To invoke the extract system, simply issue the command:</p>
+  <pre>
+fcm extract
+</pre>
+
+  <p>By default, the extract system searches for an extract configuration file
+  "ext.cfg" in "$PWD" and then "$PWD/cfg". If an extract configuration file is
+  not found in these directories, the command fails with an error. If an
+  extract configuration file is found, the system will use the configuration
+  specified in the file to perform the current extraction.</p>
+
+  <p>If the destination of the extraction does not exist, the system performs a
+  new full extraction to the destination. If a previous extraction already
+  exists at the destination, the system performs an incremental extraction,
+  updating any modifications if necessary. If a full (fresh) extraction is
+  required for whatever reason, you can invoke the extract system using the
+  "-f" option, (i.e. the command becomes "fcm extract -f"). For further
+  information on the extract command, please see <a href=
+  "command_ref.html#fcm_ext">FCM Command Reference &gt; fcm extract</a>.</p>
+
+  <h2><a name="simple">Simple Usage</a></h2>
+
+  <p>The extract configuration file is the main user interface of the extract
+  system. It is a line based text file. For a complete set of extract
+  configuration file declarations, please refer to the <a href=
+  "annex_ext_cfg.html">Annex: Declarations in FCM extract configuration
+  file</a>.</p>
+
+  <h3><a name="simple_local">Extract from a local path</a></h3>
+
+  <p>A simple example of a basic extract configuration file is given below:</p>
+
+  <table class="pad" summary="extract_example1" border="1" width="100%">
+    <tr>
+      <th>Extract configuration example 1 - extract from a local path</th>
+    </tr>
+
+    <tr>
+      <td>
+        <pre>
+cfg::type         ext       # line 1
+cfg::version      1.0       # line 2
+                            # line 3
+dest::rootdir     $PWD      # line 4
+                            # line 5
+repos::var::user  $HOME/var # line 6
+                            # line 7
+expsrc::var::user code      # line 8
+</pre>
+      </td>
+    </tr>
+  </table>
+
+  <p>The above demonstrates how to use the extract system to extract code from
+  a local user directory. Here is an explanation of what each line does:</p>
+
+  <ul>
+    <li>line 1: the label "CFG::TYPE" declares the type of the configuration
+    file. The value "ext" tells the system that it is an extract configuration
+    file.</li>
+
+    <li>line 2: the label "CFG::VERSION" declares the version of the extract
+    configuration file. The current default is "1.0". Although it is not
+    currently used, if we have to change the format of the configuration file
+    at a later stage, we shall be able to use this number to determine whether
+    we are reading a file with an older format or one with a newer format.</li>
+
+    <li>line 3: a blank line or a line beginning with a "#" is a comment, and
+    is ignored by the interpreter.</li>
+
+    <li>line 4: the label "DEST::ROOTDIR" declares the destination root
+    directory of this extraction. The value "$PWD" expands to the current
+    working directory.</li>
+
+    <li>line 5: comment line, ignored.</li>
+
+    <li>line 6: the label "REPOS::&lt;pck&gt;::&lt;branch&gt;" declares the top
+    level URL or path of a repository. The package name of the repository is
+    given by &lt;pck&gt;. In our example, we choose "var" as the name of the
+    package. (You can choose any name you like, however, it is usually sensible
+    to use a package name that matches the name of the project or system you are
+    working with.) The branch name in the repository is given by &lt;branch&gt;.
+    (Again, you can choose any name you like, however, it is usually sensible to
+    use a name such as "trunk", "user" or something that matches your branch
+    name.) In our example, the word "user" is normally used to denote a local
+    user directory. Hence the statement declares that the repository path for
+    the "var" package in the "user" branch can be found at "$HOME/var".</li>
+
+    <li>line 7: comment line, ignored.</li>
+
+    <li>line 8: the label "EXPSRC::&lt;pck&gt;::&lt;branch&gt;" declares an
+    "expandable" source directory for the package &lt;pck&gt; in the branch
+    &lt;branch&gt;. In our example, the package name is "var", and the branch
+    name is "user". These match the package and the branch names of the
+    repository declaration in line 6. It means that the source directory
+    declaration is associated with the path "$HOME/var". The value of the
+    declaration "code" is therefore a sub-directory under "$HOME/var". By
+    declaring a source directory using an "expsrc" label, the system
+    automatically searches for all sub-directories (recursively) under the
+    declared source directory.</li>
+  </ul>
+
+  <p>Invoking the extract system using the above configuration file will
+  "extract" all sub-directories under "$HOME/var/code" to "$PWD/src/var/code".
+  Note: the extract system ignores all hidden files, (i.e. directories and
+  files beginning with a "."). It will write a build configuration file to
+  "$PWD/cfg/bld.cfg". The configuration used for this extraction will be
+  written to the configuration file at "$PWD/cfg/ext.cfg".</p>
+
+  <table class="pad" summary="note - incremental extraction" border="1" width=
+  "100%">
+    <tr>
+      <th>Note - incremental extraction</th>
+    </tr>
+
+    <tr>
+      <td>Suppose you have already performed an extraction using the above
+      configuration file. At a later time, you have made some changes to some
+      of the files in the source directory. Re-running the extract system on
+      the same configuration will trigger an incremental extraction. In an
+      incremental extraction, the system will update only those files that are
+      modified. In exact words, the system checks the modification time of each
+      file in the source and destination. If a source file is newer than its
+      corresponding destination file, it checks whether the content differs.
+      The destination is only updated if its content differs from the
+      source.</td>
+    </tr>
+  </table>
+
+  <h3><a name="simple_url">Extract from a Subversion URL</a></h3>
+
+  <p>The next example demonstrates how to extract from a Subversion repository
+  URL:</p>
+
+  <table class="pad" summary="extract_example2" border="1" width="100%">
+    <tr>
+      <th>Extract configuration example 2 - extract from a Subversion URL</th>
+    </tr>
+
+    <tr>
+      <td>
+        <pre>
+cfg::type           ext                    # line 1
+cfg::version        1.0                    # line 2
+                                           # line 3
+dest::rootdir       $PWD                   # line 4
+                                           # line 5
+repos::var::trunk   svn://server/var/trunk # line 6
+version::var::trunk 1234                   # line 7
+                                           # line 8
+expsrc::var::trunk  code                   # line 9
+</pre>
+      </td>
+    </tr>
+  </table>
+
+  <ul>
+    <li>line 1 to 5: same as example 1.</li>
+
+    <li>line 6: the line declares the repository location of the "trunk" branch
+    of the "var" package to be the Subversion URL
+    "svn://server/var/trunk".</li>
+
+    <li>line 7: the label "VERSION::&lt;pck&gt;::&lt;branch&gt;" declares the
+    revision of the repository associated with the package &lt;pck&gt; in the
+    branch &lt;branch&gt;. The current line tells the extract system to use
+    revision 1234 of "svn://server/var/trunk". If the revision is not declared,
+    the default revision "HEAD" will be assumed.</li>
+
+    <li>line 8: comment line, ignored.</li>
+
+    <li>line 9: the line declares an expandable source directory in the
+    repository "svn://server/var/trunk".</li>
+  </ul>
+
+  <p>Invoking the extract system using the above configuration file will
+  extract all sub-directories under "svn://server/var/trunk/code" to
+  "$PWD/src/var/code". It will write a build configuration file to
+  "$PWD/cfg/bld.cfg". The configuration used for this extraction will be
+  written to the configuration file at "$PWD/cfg/ext.cfg".</p>
+
+  <table class="pad" summary=
+  "note - declaration of source directories for extraction" border="1" width=
+  "100%">
+    <tr>
+      <th>Note - declaration of source directories for extraction</th>
+    </tr>
+
+    <tr>
+      <td>
+        <strong>EXPSRC or SRC?</strong>
+
+        <p>So far, we have only declared source directories using the "EXPSRC"
+        statement, which stands for "expandable source directory". A source
+        directory declared using this statement will trigger the system to
+        search recursively for any sub-directories under the declared one. Any
+        sub-directories containing regular source files will be included in the
+        extraction. Empty directories, hidden directories and directories
+        containing only hidden files are ignored.</p>
+
+        <p>If you do not want the system to search for sub-directories
+        underneath your declared source directory, you can declare your source
+        directory using the "SRC" statement. The "SRC" statement is essentially
+        the same as "EXPSRC" except that it does not trigger the automatic
+        recursive search for source directories. In fact, the system implements
+        the "EXPSRC" statement by expanding it into a list of "SRC"
+        statements.</p>
+
+        <p><strong>Package and sub-package</strong></p>
+
+        <p>The second field of a repository, revision or source directory
+        declaration label is the name of the container package. It is a name
+        selected by the user to identify the system or project he/she is
+        working on. (Therefore, it is often sensible to choose an identifier
+        that matches the name of the project or system.) The package name
+        provides a unique namespace for a file container. Source directories
+        are automatically arranged into sub-packages, using the names of the
+        sub-directories as the names of the sub-packages. For example, the
+        declaration at line 9 in example 2 will put the source directory in the
+        "var::code" sub-package automatically.</p>
+
+        <p>The double colon "::" and the double underscore "__" (internal only)
+        are delimiters for package names in the extract system. Please avoid
+        using "::" and "__" for naming your files and directories.</p>
+
+        <p>You can declare a sub-package name explicitly in your source
+        directory statement. For example, the following two lines are
+        equivalent:</p>
+        <pre>
+src::var::trunk                        code/VarMod_Surface
+src::var::code::VarMod_Surface::trunk  code/VarMod_Surface
+</pre>
+
+        <p>Explicit sub-package declaration should not be used normally, as it
+        requires a lot more typing (although there are some situations where it
+        can be useful).</p>
+      </td>
+    </tr>
+  </table>
+
+  <table class="pad" summary="note - the expanded extract configuration file"
+  border="1" width="100%">
+    <tr>
+      <th>Note - the expanded extract configuration file</th>
+    </tr>
+
+    <tr>
+      <td>
+        At the end of a successful extraction, the configuration used by the
+        current extraction is written in "cfg/ext.cfg" under the extract
+        destination root. This file is an "expanded" version of the original,
+        with changes in the following declarations:
+
+        <ul>
+          <li>All revision keywords are converted into revision numbers.</li>
+
+          <li>If a revision is not defined for a repository, it is set to the
+          corresponding revision number of the HEAD revision.</li>
+
+          <li>All URL keywords are converted into the full URLs.</li>
+
+          <li>All EXPSRC declarations are expanded into SRC declarations.</li>
+
+          <li>All other variables are expanded.</li>
+        </ul>
+
+        <p>With this file, it should be possible for later extraction to
+        re-create the current configuration even if the contents of the
+        repository have changed. (This applies only to code stored in the
+        repository.)</p>
+      </td>
+    </tr>
+  </table>
+
+  <h3><a name="simple_mirror">Mirror code to a remote machine</a></h3>
+
+  <p>The next example demonstrates how to extract from a repository and mirror
+  the code to a remote machine. It is essentially the same as example 2,
+  except that it has three new lines to describe how the system can mirror the
+  extracted code to a remote machine.</p>
+
+  <table class="pad" summary="extract_example3" border="1" width="100%">
+    <tr>
+      <th>Extract configuration example 3 - mirror code to remote machine</th>
+    </tr>
+
+    <tr>
+      <td>
+        <pre>
+cfg::type           ext
+cfg::version        1.0
+
+dest::rootdir       $PWD
+
+rdest::machine      tx01                           # line 6
+rdest::logname      frva                           # line 7
+rdest::rootdir      /scratch/frva/extract/example3 # line 8
+
+repos::var::trunk   svn://server/var/trunk
+version::var::trunk 1234
+
+expsrc::var::trunk  code
+</pre>
+      </td>
+    </tr>
+  </table>
+
+  <p>Here is an explanation of what each line does:</p>
+
+  <ul>
+    <li>line 6: "RDEST::MACHINE" declares the target machine to which the code
+    will be mirrored. The example mirrors the code to the machine named
+    "tx01".</li>
+
+    <li>line 7: "RDEST::LOGNAME" declares the remote user name of the target
+    machine, to which the user has remote login access. If this is not
+    declared, the system uses the login name of the current user on the local
+    machine.</li>
+
+    <li>line 8: "RDEST::ROOTDIR" declares the root directory of the extraction
+    on the remote target machine. This is where the mirror version of the
+    extraction will be sent.</li>
+  </ul>
+
+  <p>Invoking the extract system on the above configuration will trigger an
+  extraction similar to that given in example 2, but it will also attempt to
+  mirror the contents at "$PWD/src/var/code" to
+  "/scratch/frva/extract/example3/src" on the remote machine. It will also
+  mirror the expanded extract configuration file "$PWD/cfg/ext.cfg" to
+  "/scratch/frva/extract/example3/cfg/ext.cfg" and "$PWD/cfg/bld.cfg" to
+  "/scratch/frva/extract/example3/cfg/bld.cfg". It is also worth noting that
+  the content of the build configuration file will be slightly different, since
+  it will include directory names appropriate for the remote system.</p>
+
+  <table class="pad" summary="note - mirroring command" border="1" width=
+  "100%">
+    <tr>
+      <th>Note - mirroring command</th>
+    </tr>
+
+    <tr>
+      <td>
+        The extract system currently supports "rdist" and "rsync" as its
+        mirroring tool. The default is "rsync". To use "rdist" instead of
+        "rsync", add the following line to your "$HOME/.fcm" file:
+        <pre>
+set::tool::mirror  rdist
+</pre>
+
+        <p>N.B. If you are going to mirror code to another machine, you need to
+        ensure that your account on the remote machine is set up correctly to
+        accept commands from the local machine. In our current settings of both
+        "rdist" and "rsync", all you need to do is set up your "$HOME/.rhosts"
+        file on the remote machine. For example, if you are "fred" working on
+        the local machine "eld001", you will need to have the following entry
+        in your "$HOME/.rhosts" on the remote machine:</p>
+        <pre>
+eld001  fred
+</pre>
+      </td>
+    </tr>
+  </table>
+
+  <h2><a name="advanced">Advanced Usage</a></h2>
+
+  <h3><a name="advanced_multi">Extract from multiple repositories</a></h3>
+
+  <p>So far, we have only extracted from a single location. The extract system
+  is not much use if that is the only thing it can do. In fact, the extract
+  system supports extraction of multiple source directories from multiple
+  branches in multiple repositories. The following configuration file is an
+  example of how to extract from multiple repositories:</p>
+
+  <table class="pad" summary="extract_example4" border="1" width="100%">
+    <tr>
+      <th>Extract configuration example 4 - extract from multiple
+      repositories</th>
+    </tr>
+
+    <tr>
+      <td>
+        <pre>
+cfg::type           ext
+cfg::version        1.0
+
+dest::rootdir       $PWD
+
+repos::var::trunk   fcm:var_tr              # line 6
+repos::ops::trunk   fcm:ops_tr              # line 7
+repos::gen::trunk   fcm:gen_tr              # line 8
+
+version::gen::trunk 2468                    # line 10
+
+expsrc::var::trunk  code                    # line 12
+expsrc::var::trunk  scripts                 # line 13
+expsrc::ops::trunk  code                    # line 14
+src::gen::trunk     code/GenMod_Constants   # line 15
+src::gen::trunk     code/GenMod_Control     # line 16
+src::gen::trunk     code/GenMod_FortranIO   # line 17
+src::gen::trunk     code/GenMod_GetEnv      # line 18
+src::gen::trunk     code/GenMod_ModelIO     # line 19
+src::gen::trunk     code/GenMod_ObsInfo     # line 20
+src::gen::trunk     code/GenMod_Platform    # line 21
+src::gen::trunk     code/GenMod_Reporting   # line 22
+src::gen::trunk     code/GenMod_Trace       # line 23
+src::gen::trunk     code/GenMod_UMConstants # line 24
+src::gen::trunk     code/GenMod_Utilities   # line 25
+</pre>
+      </td>
+    </tr>
+  </table>
+
+  <p>Here is an explanation of what each line does:</p>
+
+  <ul>
+    <li>line 6 to 8: these lines declare the repositories for the "trunk"
+    branches of the "var", "ops" and "gen" packages respectively. It is worth
+    noting that the values of the declarations are no longer Subversion URLs
+    but are FCM URL keywords. These keywords are normally declared in the
+    central configuration file of the FCM system, and will be expanded into the
+    corresponding Subversion URLs by the FCM system. For further information on
+    URL keywords, please see <a href=
+    "code_management.html#svn_basic_keywords">Code Management System &gt; Using
+    Subversion &gt; Basic Command Line Usage &gt; Repository &amp; Revision
+    Keywords</a>.</li>
+
+    <li>line 10: this line declares the revision number for the "trunk" branch
+    of the "gen" package, i.e. for the "fcm:gen_tr" repository. It is worth
+    noting that the revision numbers for the "var" and "ops" packages have not
+    been declared. By default, their revision numbers will be set to
+    "HEAD".</li>
+
+    <li>line 12 to 14: these line declares the source directories for the
+    "trunk" branches of the "var" and "ops" packages. For the "var" package, we
+    are extracting everything from the "code" and the "scripts" sub-directory.
+    For the "ops" package, we are extracting everything from the "code"
+    directory.</li>
+
+    <li>line 15 to 25: these line declares the source directories for the
+    "trunk" branch of the "gen" package. The source directories declared will
+    not be searched for sub-directories underneath the declared
+    directories.</li>
+  </ul>
+
+  <p>We shall end up with a directory tree such as:</p>
+  <pre>
+$PWD
+   |
+   |--- cfg
+   |      |
+   |      |--- bld.cfg
+   |      |--- ext.cfg
+   |
+   |--- src
+          |
+          |--- gen
+          |      |
+          |      |--- code
+          |              |
+          |              |--- GenMod_Constants
+          |              |--- GenMod_Control
+          |              |--- GenMod_FortranIO
+          |              |--- GenMod_GetEnv
+          |              |--- GenMod_ModelIO
+          |              |--- GenMod_ObsInfo
+          |              |--- GenMod_Platform
+          |              |--- GenMod_Reporting
+          |              |--- GenMod_Trace
+          |              |--- GenMod_UMConstants
+          |              |--- GenMod_Utilities
+          |
+          |--- ops
+          |      |
+          |      |--- code
+          |              |
+          |              |--- ...
+          |
+          |--- var
+                 |
+                 |--- code
+                 |       |
+                 |       |--- ...
+                 |
+                 |--- scripts
+                         |
+                         |--- ...
+</pre>
+
+  <table class="pad" summary="note - revision number" border="1" width="100%">
+    <tr>
+      <th>Note - revision number</th>
+    </tr>
+
+    <tr>
+      <td>
+        As seen in the above example, if a revision number is not specified for
+        a repository URL, it defaults to the "HEAD" revision. The revision
+        number can also be declared in other ways:
+
+        <ul>
+          <li>Any revision arguments acceptable by Subversion are allowed. You
+          can use a valid revision number, a date between a pair of curly
+          brackets (e.g. {"2005-05-01 12:00"}) or the keyword "HEAD". However,
+          please do not use the keywords "BASE", "COMMITTED" or "PREV" as these
+          are reserved for working copy only.</li>
+
+          <li>FCM revision keywords are allowed. These must be defined for the
+          corresponding repository URLs in either the central or the user FCM
+          configuration file. For further information on revision keywords,
+          please see <a href="code_management.html#svn_basic_keywords">Code
+          Management &gt; Using Subversion &gt; Basic Command Line Usage &gt;
+          Repository &amp; Revision Keywords</a>.</li>
+
+          <li>Do not use the keyword "USER", as it is used internally by the
+          extract system.</li>
+        </ul>
+      </td>
+    </tr>
+  </table>
+
+  <h3><a name="advanced_branches">Extract from multiple branches</a></h3>
+
+  <p>We have so far dealt with extraction from a single branch in any package.
+  The extract system can be used to "combine" changes from different branches
+  of a package. An example is given below:</p>
+
+  <table class="pad" summary="extract_example5" border="1" width="100%">
+    <tr>
+      <th>Extract configuration example 5 - extract from multiple branches</th>
+    </tr>
+
+    <tr>
+      <td>
+        <pre>
+cfg::type               ext
+cfg::version            1.0
+ 
+dest::rootdir           $PWD
+ 
+repos::var::trunk       fcm:var_tr
+repos::ops::trunk       fcm:ops_tr
+repos::gen::trunk       fcm:gen_tr
+ 
+version::gen::trunk     2468
+ 
+expsrc::var::trunk      code
+expsrc::var::trunk      scripts
+expsrc::ops::trunk      code
+src::gen::trunk         code/GenMod_Constants
+src::gen::trunk         code/GenMod_Control
+src::gen::trunk         code/GenMod_FortranIO
+src::gen::trunk         code/GenMod_GetEnv
+src::gen::trunk         code/GenMod_ModelIO
+src::gen::trunk         code/GenMod_ObsInfo
+src::gen::trunk         code/GenMod_Platform
+src::gen::trunk         code/GenMod_Reporting
+src::gen::trunk         code/GenMod_Trace
+src::gen::trunk         code/GenMod_UMConstants
+src::gen::trunk         code/GenMod_Utilities
+
+repos::var::new_stuff   fcm:var_br/frva/r1234_new_stuff   # line 27
+repos::var::bug_fix     fcm:var_br/frva/r1516_bug_fix     # line 28
+repos::ops::good_stuff  fcm:ops_br/opsrc/r3188_good_stuff # line 29
+</pre>
+      </td>
+    </tr>
+  </table>
+
+  <p>The configuration file in example 5 is similar to that of example 4 except
+  for the last three lines. Here is an explanation of what they do:</p>
+
+  <ul>
+    <li>line 27: this line declares a repository URL for the "new_stuff" branch
+    of the "var" package. From the URL of the branch, we know that the branch
+    was created by the user "frva" based on the trunk at revision at 1234. The
+    description of the branch is "new_stuff". The following points are worth
+    noting:
+
+      <ul>
+        <li>By declaring a new branch with the same package name to a
+        previously declared branch, it is assumed that both branches reside in
+        the same Subversion repository.</li>
+
+        <li>It is only by convention that the branch name "new_stuff" declared
+        using the "REPOS::var::new_stuff" label should correspond to the branch
+        description of the URL. It is not a requirement by the extract system.
+        It is perfectly valid to use "REPOS::var::ham_egg" as the label of line
+        27. In such case, the extract system will use "ham_egg" instead of
+        "new_stuff" as the internal label of the URL.</li>
+
+        <li>No revision is declared for this URL, so the default "HEAD"
+        revision is used.</li>
+
+        <li>No source directory is declared for this URL. By default, if no
+        source directory is declared for a branch repository, it will attempt
+        to use the same set of source directories as the first declared branch
+        of the package. In this case, the source directories declared for the
+        "trunk" branch of the "var" package will be used.</li>
+      </ul>
+    </li>
+
+    <li>line 28: this line declares another branch called "bug_fix" for the
+    "var" package. No source directory is declared for this URL either, so it
+    will use the same set of source directories declared for the "trunk"
+    branch.</li>
+
+    <li>line 29: this line declares a branch called "good_stuff" for the "ops"
+    package. It will use the same set of source directories declared for the
+    "ops" package "trunk" branch.</li>
+  </ul>
+
+  <p>When we invoke the extract system, it will attempt to extract from the
+  first declared branch of a package, if the last commit revision of the source
+  directory is the same in all the branches. However, if the last commit
+  revision of the source directory differs for different branches, the system
+  will attempt to obtain an extract priority list for each source directory,
+  using the following logic:</p>
+
+  <ol>
+    <li>The system looks for source directory packages from the first declared
+    branch to the last declared branch.</li>
+
+    <li>The branch in which a source directory package is first declared is
+    the "base" branch of the source directory package.</li>
+
+    <li>The commit revision of a source directory package in a subsequently
+    declared repository branch is compared with that of the base branch. If
+    the commit revision is the same as that of the base branch, the source
+    directory of this branch is discarded. Otherwise, it is placed at the end
+    of the extract priority list.</li>
+  </ol>
+
+  <p>For the "var" package in the above example, let us assume that we have
+  three source directory packages X, Y and Z under "code", and their commit
+  revisions under "trunk" are 100. Let's say we have committed some changes to
+  X and Z in the "new_stuff" branch at revision 102, and other changes to Y
+  and Z in the "bug_fix" branch at revision 104, the extract priority lists
+  for X, Y and Z will look like:</p>
+
+  <ul>
+    <li>X: trunk (100, base), new_stuff (102), bug_fix (100, discarded)</li>
+
+    <li>Y: trunk (100, base), new_stuff (100, discarded), bug_fix (104)</li>
+
+    <li>Z: trunk (100, base), new_stuff (102), bug_fix (104)</li>
+  </ul>
+
+  <p>Once we have an extract priority list for a source directory, we can
+  begin the extraction of source files in the source directory. The source
+  directory of the base branch is extracted first, followed by that in the
+  subsequent branches. If a source file in a subsequent branch has the same
+  content as the that in the base branch, it is discarded. Otherwise, the
+  following logic determines the branch to use:</p>
+
+  <ol>
+    <li>If a source file is modified in only one subsequent branch, the source
+    file in that branch is extracted.</li>
+
+    <li>If a source file is modified in two or more subsequent branches, but
+    their modifications are the same, then the source file in the first
+    modification is used.</li>
+
+    <li>If a source file is modified in two or more subsequent branches and
+    their modifications differ, then the behaviour depends on the override
+    mode setting. If override mode is false, the extraction fails. Otherwise,
+    the file in the latest declared branch takes precedence. The default
+    override mode is false, which is the safe behaviour - conflicting changes
+    should be resolved manually. However, this behaviour may not be the most
+    efficient way for development. Therefore, an override mode is provided,
+    which should be used with care. To switch on the override mode, make the
+    following declaration in the extract configuration file:
+      <pre>
+override  1
+</pre>
+    </li>
+  </ol>
+  
+  <p>Once the system has established which source files to use, it determines
+  whether the destination is out of date or not. The destination is out of
+  date if the source file does not exist or if its content differs from the
+  version of the source file we are using. The system only updates the
+  destination if it is considered to be out of date.</p>
+
+  <p>The extract system can also combine changes from branches in the Subversion
+  repository and the local file system. The limitation is that there can only
+  be one branch from the local file system. (By convention, the branch is named
+  "user".)</p>
+
+  <p>It is also worth bearing in mind that the "user" branch always takes
+  precedence over branches residing in Subversion repositories. Hence, source
+  directories from a "user" branch are always placed at the end of the extract
+  priority list.</p>
+
+  <p>Extracting from a mixture of Subversion repository and local file system
+  is demonstrated in the next example.</p>
+
+  <table class="pad" summary="extract_example6" border="1" width="100%">
+    <tr>
+      <th>Extract configuration example 6 - extract from multiple branches +
+      user paths</th>
+    </tr>
+
+    <tr>
+      <td>
+        <pre>
+cfg::type               ext
+cfg::version            1.0
+ 
+dest::rootdir           $PWD
+  
+repos::var::trunk       fcm:var_tr
+repos::ops::trunk       fcm:ops_tr
+repos::gen::trunk       fcm:gen_tr
+ 
+version::gen::trunk     2468
+ 
+expsrc::var::trunk      code
+expsrc::var::trunk      scripts
+expsrc::ops::trunk      code
+src::gen::trunk         code/GenMod_Constants
+src::gen::trunk         code/GenMod_Control
+src::gen::trunk         code/GenMod_FortranIO
+src::gen::trunk         code/GenMod_GetEnv
+src::gen::trunk         code/GenMod_ModelIO
+src::gen::trunk         code/GenMod_ObsInfo
+src::gen::trunk         code/GenMod_Platform
+src::gen::trunk         code/GenMod_Reporting
+src::gen::trunk         code/GenMod_Trace
+src::gen::trunk         code/GenMod_UMConstants
+src::gen::trunk         code/GenMod_Utilities
+
+repos::var::new_stuff   fcm:var_br/frva/r1234_new_stuff
+repos::var::bug_fix     fcm:var_br/frva/r1516_bug_fix
+repos::ops::good_stuff  fcm:ops_br/opsrc/r3188_good_stuff
+
+repos::var::user        $HOME/var/src                     # line 31
+repos::gen::user        $HOME/gen/src                     # line 32
+</pre>
+      </td>
+    </tr>
+  </table>
+
+  <p>Example 6 is similar to example 5 except that it is also extracting from
+  local directories. Here is an explanation of the lines:</p>
+
+  <ul>
+    <li>line 31 to 32: these line declare the "repositories" for the "user"
+    branches of the "var" and "gen" packages respectively. Both are local paths
+    at the local file system. There are no declarations for source directories
+    for the "user" branches, so they use the same set of source directories of
+    the first declared branches, the "trunk" branches in both cases.</li>
+  </ul>
+
+  <table class="pad" summary="note - the inc statement" border="1" width=
+  "100%">
+    <tr>
+      <th>Note - the INC declaration</th>
+    </tr>
+
+    <tr>
+      <td>
+        You have probably realised that the above examples have many repeated
+        lines. To avoid having repeated lines in multiple extract configuration
+        files, you can use INC declarations to "include" other extract
+        configuration files. For example, if the configuration file of example 5
+        is stored in the file "$HOME/var/example5/ext.cfg", line 1 to 29 of
+        example 6 can be replaced with an INC declaration. Example 6 can then be
+        written as:
+        <pre>
+inc                     $HOME/var/example5/ext.cfg
+
+repos::var::user        $HOME/var/src
+repos::gen::user        $HOME/gen/src
+</pre>
+
+        <p>Note: the INC declaration supports the special "environment variable"
+        $HERE. If this variable is already set in the environment, it acts as a
+        normal environment variable. However, if it is not set, it will be
+        expanded into the container directory of the current extract
+        configuration file. This feature is particularly useful if you are
+        including a hierarchy of extract configurations from files in the same
+        container directory in a repository.</p>
+      </td>
+    </tr>
+  </table>
+
+  <h3><a name="advanced_incremental">Incremental extract based on a previous
+  extraction</a></h3>
+
+  <p>All the examples above dealt with standalone extraction, that is, the
+  current extraction is independent of any other extraction. If a previous
+  extraction exists in another location, the extract system can "USE" this
+  previous extraction in your current extraction. This works like a normal
+  incremental extraction, except that your extraction will only contain the
+  changes you have specified (compared with the USEd extraction) instead of the
+  full source directory tree. This type of incremental extraction is useful in
+  several ways. For instance:</p>
+
+  <ul>
+    <li>The extraction is fast, because you only have to extract and mirror
+    files that you have changed.</li>
+
+    <li>The subsequent build will also be fast, since it will use incremental
+    build.</li>
+
+    <li>You do not need write access to the original extraction. A system
+    administrator can set up a stable version in a central account, which
+    developers can then reuse.</li>
+
+    <li>You want an incremental extraction, but you need to leave the original
+    extraction unmodified.</li>
+  </ul>
+
+  <p>The following example is based on example 4 and 6. The assumption is that
+  an extraction has already been performed at the directory "~frva/var/vn22.0"
+  based on the configuration file in example 4.</p>
+
+  <table class="pad" summary="extract_example7" border="1" width="100%">
+    <tr>
+      <th>Extract configuration example 7 - incremental extract based on a
+      previous extraction</th>
+    </tr>
+
+    <tr>
+      <td>
+        <pre>
+cfg::type               ext
+cfg::version            1.0
+ 
+dest::rootdir           $PWD
+
+use                     ~frva/var/vn22.0                  # line 6
+
+repos::var::new_stuff   fcm:var_br/frva/r1234_new_stuff   # line 8
+repos::var::bug_fix     fcm:var_br/frva/r1516_bug_fix     # line 9
+repos::ops::good_stuff  fcm:ops_br/opsrc/r3188_good_stuff # line 10
+
+repos::var::user        $HOME/var/src                     # line 12
+repos::gen::user        $HOME/gen/src                     # line 13
+</pre>
+      </td>
+    </tr>
+  </table>
+
+  <ul>
+    <li>line 6: this line replaces line 1 to 25 of example 6. It declares that
+    the current extraction should be based on the previous extraction located
+    at "~frva/var/vn22.0".</li>
+  </ul>
+
+  <p>Running the extract system using the above configuration will trigger an
+  incremental extraction, as if you are running an incremental extraction
+  having modified the configuration file in example 4 to that of example 6. The
+  only difference is that the original extraction using the example 4
+  configuration will be left untouched at "~frva/var/vn22.0", and the new
+  extraction will contain only the changes in the branches declared from line 8
+  to 13.</p>
+
+  <p>If you are setting up an extraction to be reused, you do not have to
+  perform a build. If you don't you will still gain the benefit of incremental
+  file extraction, but you will be performing a full build of the code.</p>
+
+  <h3><a name="advanced_build">Extract - Build Configuration</a></h3>
+
+  <p>Configuration settings for feeding into the build system can be declared
+  through the extract configuration file using the "BLD::" prefix. Any line in
+  an extract configuration containing a label with such a prefix will be
+  considered a build system variable. At the end of a successful extraction,
+  the system strips out the "BLD::" prefix before writing these variables to
+  the build configuration file. Some example entries are given between line 17
+  and 22 in the following configuration file:</p>
+
+  <table class="pad" summary="extract_example8" border="1" width="100%">
+    <tr>
+      <th>Extract configuration example 8 - setting build configuration</th>
+    </tr>
+
+    <tr>
+      <td>
+        <pre>
+cfg::type           ext
+cfg::version        1.0
+
+dest::rootdir       $PWD
+
+repos::var::trunk   fcm:var_tr
+repos::ops::trunk   fcm:ops_tr
+repos::gen::trunk   fcm:gen_tr
+
+version::gen::trunk 2468
+
+expsrc::var::trunk  code
+expsrc::var::trunk  scripts
+expsrc::ops::trunk  code
+src::gen::trunk     code/GenMod_Constants
+src::gen::trunk     code/GenMod_Control
+src::gen::trunk     code/GenMod_FortranIO
+src::gen::trunk     code/GenMod_GetEnv
+src::gen::trunk     code/GenMod_ModelIO
+src::gen::trunk     code/GenMod_ObsInfo
+src::gen::trunk     code/GenMod_Platform
+src::gen::trunk     code/GenMod_Reporting
+src::gen::trunk     code/GenMod_Trace
+src::gen::trunk     code/GenMod_UMConstants
+src::gen::trunk     code/GenMod_Utilities
+
+bld::target         VarProg_AnalysePF.exe   # line 27
+
+bld::tool::fc       sxmpif90                # line 29
+bld::tool::cc       sxmpic++                # line 30
+bld::tool::ld       sxmpif90                # line 31
+</pre>
+      </td>
+    </tr>
+  </table>
+
+  <p>The above example is essentially the same as example 4, apart from the
+  additional build configuration. The following is a simple explanation of what
+  the lines represent: (For detail of the build system, please see the next
+  chapter on <a href="build.html">The Build System</a>.)</p>
+
+  <ul>
+    <li>Line 27: the line declares a default target of the build.</li>
+
+    <li>Line 29-31: the lines declare the Fortran compiler, the C compiler and
+    the linker respectively.</li>
+  </ul>
+
+  <table class="pad" summary="note - user variable" border="1" width=
+  "100%">
+    <tr>
+      <th>Note - user variable</th>
+    </tr>
+
+    <tr>
+      <td>When you start using the extract system to define compiler flags for
+      the build system, you may end up having to make a lot of long and
+      repetitive declarations. In such case, you may want to define variables to
+      replace the repetitive parts of the declarations. In the extract system,
+      you can define a local variable by making a declaration with a label that
+      begins with a percent sign "%". For example:
+
+        <pre>
+# Declare a variable %fred
+%fred                     -Cdebug -eC -Wf,-init heap=nan stack=nan
+
+bld::tool::fflags         %fred
+# bld::tool::fflags       -Cdebug -eC -Wf,-init heap=nan stack=nan
+
+bld::tool::fflags::foo    %fred -f0
+# bld::tool::fflags::foo  -Cdebug -eC -Wf,-init heap=nan stack=nan -f0
+
+bld::tool::fflags::bar    -w %fred
+# bld::tool::fflags::bar  -w -Cdebug -eC -Wf,-init heap=nan stack=nan
+</pre>
+      </td>
+    </tr>
+  </table>
+
+  <h2><a name="verbose">Diagnostic verbose level</a></h2>
+
+  <p>The amount of diagnostic messages generated by the extract system is
+  normally set to a level suitable for normal everyday operation. This is the
+  default diagnostic verbose level 1. If you want a minimum amount of
+  diagnostic messages, you should set the verbose level to 0. If you want more
+  diagnostic messages, you can set the verbose level to 2 or 3. You can modify
+  the verbose level in two ways. The first way is to set the environment
+  variable FCM_VERBOSE to the desired verbose level. The second way is to
+  invoke the extract system with the "-v &lt;level&gt;" option. (If set, the
+  command line option overrides the environment variable.)</p>
+
+  <p>The following is a list of diagnostic output at each verbose level:</p>
+
+  <table class="pad" summary="List of diagnostic verbose output" border="1">
+    <tr>
+      <th>Verbose level</th>
+
+      <th>Possible output</th>
+    </tr>
+
+    <tr>
+      <th>0</th>
+
+      <td>
+        <ul>
+          <li>Report the time taken to extract the code.</li>
+
+          <li>Report the time taken to mirror the code.</li>
+
+          <li>If "rdist" is used to mirror the code, run the command with the
+          "-q" option.</li>
+        </ul>
+      </td>
+    </tr>
+
+    <tr>
+      <th>1</th>
+
+      <td>
+        <ul>
+          <li>Everything at verbose level 0.</li>
+
+          <li>Report the name of the extract configuration file.</li>
+
+          <li>Report date/time at the beginning of the extract step.</li>
+
+          <li>Report the number of directories created, number of ignored
+          sub-directories, number of files updated and number of removed
+          files.</li>
+
+          <li>In override mode, report any files that are modified in two or
+          more branches.</li>
+
+          <li>Report date/time at the beginning of the mirror step.</li>
+
+          <li>Report total time.</li>
+        </ul>
+      </td>
+    </tr>
+
+    <tr>
+      <th>2</th>
+
+      <td>
+        <ul>
+          <li>Everything at verbose level 1.</li>
+
+          <li>If the revision specified for a repository branch is not current
+          (i.e. the specified revision number is less than the revision number
+          of the last commit revision), print an information statement to
+          inform the user of the last commit revision of the branch.</li>
+
+          <li>Report details of created directories, ignored sub-directories,
+          removed files and updated files.</li>
+
+          <li>Report any files that have the same modifications in two or more
+          branches.</li>
+
+          <li>If "rdist" is used to mirror the code, run the command without the
+          "-q" option.</li>
+        </ul>
+      </td>
+    </tr>
+
+    <tr>
+      <th>3</th>
+
+      <td>
+        <ul>
+          <li>Everything at verbose level 2.</li>
+
+          <li>Report all shell commands invoked by the extract system with
+          timestamp.</li>
+
+          <li>If "rdist" is used to mirror the code, print the "distfile"
+          supplied to the command.</li>
+
+          <li>If "rsync" is used to mirror the code, invoke the command with
+          the "-v" option.</li>
+        </ul>
+      </td>
+    </tr>
+  </table>
+
+  <h2><a name="nosvn">When Subversion Is Not Available</a></h2>
+
+  <p>The extract system can still be used if Subversion is not available.
+  Clearly, you can only use local repositories. However, you can still do
+  incremental extraction, mirror an extraction to another machine, or combine
+  code from multiple local repositories.</p>
+
+  <p>If you are using Subversion but your server is down then clearly there is
+  little you can do. However, if you already have an extraction then you can
+  re-run <tt>fcm extract</tt> as long as the extract configuration file only
+  refers to fixed revisions. If this is not the case then you can always use the
+  expanded extract configuration file which can be found in "cfg/ext.cfg" under
+  the extract destination root. This means that you can continue to makes changes
+  to local code and do incremental extractions even whilst your Subversion server
+  is down.</p>
+
+  <script type="text/javascript" src="maintain.js"></script>
+</body>
+</html>

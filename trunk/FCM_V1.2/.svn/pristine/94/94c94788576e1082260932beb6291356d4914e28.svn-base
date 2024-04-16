@@ -1,0 +1,1533 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html>
+<head>
+  <title>FCM System User Guide Annex: Declarations in FCM build
+  configuration file</title>
+  <meta name="author" content="FCM development team">
+  <meta name="descriptions" content="User Guide Annex">
+  <meta name="keywords" content="FCM, user guide, annex">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body>
+  <address>
+    <a href="index.html">FCM System User Guide</a> &gt; Annex: Declarations in
+    FCM build configuration file
+  </address>
+
+  <h1>Annex:<br>
+  Declarations in FCM build configuration file</h1>
+
+  <p>The following is a list of supported declarations for the configuration
+  file used by the FCM build system. Unless otherwise stated, the fields in
+  all declaration labels are not case sensitive. Build declarations can be
+  made either in a build configuration file or in an extract configuration
+  file. In the latter case, the prefix "BLD::" must be added at the beginning
+  of each label to inform the extract system that the declaration is a build
+  system declaration. (In a build configuration file, the prefix "BLD::" is
+  optional.)</p>
+
+  <table class="pad" summary="Declarations in build configuration file"
+  width="100%" border="1">
+    <tr>
+      <th>Label</th>
+
+      <th colspan="2">Content</th>
+    </tr>
+
+    <tr>
+      <th rowspan="2">CFG::TYPE</th>
+
+      <th>Description</th>
+
+      <td>The configuration file type, the value should always be "bld" for a
+      build configuration file. This declaration is compulsory for all
+      build configuration files. (This declaration is automatic when the
+      extract system creates a build configuration file.)</td>
+    </tr>
+
+    <tr>
+      <th>Example</th>
+
+      <td>
+        <pre>
+cfg::type  bld
+</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <th rowspan="2">CFG::VERSION</th>
+
+      <th>Description</th>
+
+      <td>The file format version, currently "1.0" - a version is included so
+      that we shall be able to read the configuration file correctly should we
+      decide to change its format in the future. (This declaration is automatic
+      when the extract system creates a build configuration file.)</td>
+    </tr>
+
+    <tr>
+      <th>Example</th>
+
+      <td>
+        <pre>
+cfg::version  1.0
+</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <th rowspan="2">TARGET</th>
+
+      <th>Description</th>
+
+      <td>Specify the targets for the build. Multiple targets can be declared in
+      one or more declarations. These targets become the dependencies of the
+      default "all" target in the <em>Makefile</em>.</td>
+    </tr>
+
+    <tr>
+      <th>Example</th>
+
+      <td>
+        <pre>
+target  VarScr_AnalysePF VarScr_CovAccStats
+target  VarScr_CovPFstats
+</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <th rowspan="2">DIR::ROOT</th>
+
+      <th>Description</th>
+
+      <td>The root directory of the build. It must be declared for each build.
+      (This declaration is automatic when the extract system creates a build
+      configuration file. The value is normally the root path of the
+      extraction destination.)</td>
+    </tr>
+
+    <tr>
+      <th>Example</th>
+
+      <td>
+        <pre>
+dir::root  $HOME/my_build
+</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <th>Label</th>
+
+      <th colspan="2">Content</th>
+    </tr>
+
+    <tr>
+      <th rowspan="2">SRC::&lt;pcks&gt;</th>
+
+      <th>Description</th>
+
+      <td>This declares a source directory in the sub-package &lt;pcks&gt;.
+      The name of the sub-package &lt;pcks&gt; must be unique. Package names
+      are delimited by double colons "::" or double underscores "__". (This
+      declaration is automatic when the extract system creates the build
+      configuration file. The list of declared source directories will be the
+      list of extracted source directories.)</td>
+    </tr>
+
+    <tr>
+      <th>Example</th>
+
+      <td>
+        <pre>
+src::var::code::VarMod_PF  $HOME/my_build/src/var/code/VarMod_PF
+</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <th rowspan="2">SEARCH_SRC</th>
+
+      <th>Description</th>
+
+      <td>This declares a flag to determine whether the build system should
+      search the source sub-directory of the build root for a list of source
+      directories. The automatic search is useful if the build system is
+      invoked standalone and the source sub-directory contains the full source
+      tree of the build. The default is to search (1). Set the flag to 0 to
+      switch off the behaviour. (When the extract system creates a build
+      configuration file, it declares all source directories. Searching of the
+      source sub-directory should not be required, and so this flag is
+      automatically set to 0.)</td>
+    </tr>
+
+    <tr>
+      <th>Example</th>
+
+      <td>
+        <pre>
+search_src  0
+</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <th rowspan="2">EXE_DEP[::&lt;target&gt;]</th>
+
+      <th>Description</th>
+
+      <td>This declares an extra dependency for either all main program targets
+      or only &lt;target&gt; if it is specified. If &lt;target&gt; is specified,
+      it must be the name of a main program target. The value of the declaration
+      is a space delimited list. Each item in the list can either be a valid
+      name of a sub-package or the name of a valid object target. If a
+      sub-package name is used, the <em>make</em> rule for the main program will
+      be set to depend on all (non-program) object files within the
+      sub-package.</td>
+    </tr>
+
+    <tr>
+      <th>Example</th>
+
+      <td>
+        <pre>
+# Only foo.exe to depend on the package foo::bar and egg.o
+exe_dep::foo.exe  foo::bar egg.o
+
+# All executables to depend on the package foo::bar and egg.o
+exe_dep  foo::bar egg.o
+
+# Only foo.exe to depend on all objects
+exe_dep::foo.exe
+
+# All executables to depend on all objects
+exe_dep
+</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <th rowspan="2">BLOCKDATA[::&lt;target&gt;]</th>
+
+      <th>Description</th>
+
+      <td>This declares a BLOCKDATA dependency for either all main program targets
+      or only &lt;target&gt; if it is specified. If &lt;target&gt; is specified,
+      it must be the name of a main program target. The value of the declaration
+      is a space delimited list. Each item in the list must be the name of a
+      valid object target containing a Fortran BLOCKDATA program unit.</td>
+    </tr>
+
+    <tr>
+      <th>Example</th>
+
+      <td>
+        <pre>
+# Only foo.exe to depend on blkdata.o
+blockdata::foo.exe  blkdata.o
+
+# All executables to depend on fbd.o
+blockdata  fbd.o
+</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <th rowspan="2">EXE_NAME::&lt;name&gt;</th>
+
+      <th>Description</th>
+
+      <td>This renames the executable target of a main program source file
+      &lt;name&gt; to the specified value.</td>
+    </tr>
+
+    <tr>
+      <th>Example</th>
+
+      <td>
+        <pre>
+# Rename the executable target name of foo.f90 from "foo.exe" to "bar"
+exe_name::foo  bar
+</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <th rowspan="2">LIB[::&lt;pcks&gt;]</th>
+
+      <th>Description</th>
+
+      <td>This declares the name of a library archive target. If &lt;pcks&gt; is
+      specified in the label, the declaration applies to the library archive
+      target for that sub-package only. If set, the name of the library archive
+      target will be named "lib&lt;value&gt;.a", where &lt;value&gt; is the
+      value of the declaration. If not specified, the default is to name the
+      global library "libfcm_default.a". For a library archive of a sub-package,
+      the default is to name its library after the name of the sub-package.</td>
+    </tr>
+
+    <tr>
+      <th>Example</th>
+
+      <td>
+        <pre>
+# Rename the top level library "libfoo.a"
+lib  foo
+
+# Rename the library for the sub-package "egg::ham"
+# from "libegg__ham.a" to "libegg-ham.a"
+lib::egg::ham  egg-ham
+</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <th rowspan="2">PP[::&lt;pcks&gt;]</th>
+
+      <th>Description</th>
+
+      <td>This declares whether a pre-processing stage is required. To switch on
+      pre-processing, set the value to 1. If &lt;pcks&gt; is specified
+      in the label, the flag applies to the files within that sub-package
+      only. Otherwise, the flag affects source directories in all packages.
+      The pre-processing stage is useful if the pre-processor changes the
+      dependency and/or the argument list of the source files. The default
+      behaviour is skip the pre-processing stage for all source
+      directories.</td>
+    </tr>
+
+    <tr>
+      <th>Example</th>
+
+      <td>
+        <pre>
+pp::gen 1  # switch on pre-processing for sub-packages in "gen"
+pp      1  # switch on pre-processing globally
+</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <th rowspan="2">TOOL::&lt;label&gt;[::&lt;pcks&gt;]</th>
+
+      <th>Description</th>
+
+      <td>This declaration is used to specify a build "tool" such as the Fortran
+      compiler or its flags. The &lt;label&gt; determines the "tool" you are
+      declaring. A TOOL declaration normally applies globally. However, where it
+      is sensible to do so, a sub-package &lt;pcks&gt; can be specified. In
+      which case, the declaration applies only to the files and directories
+      under the sub-package. A list of &lt;label&gt; fields is available <a
+      href="#tools-list">later in this section</a>.</td>
+    </tr>
+
+    <tr>
+      <th>Example</th>
+
+      <td>
+        <pre>
+tool::fc      sxmpif90
+tool::fflags  -Chopt -Pstack
+
+tool::cc      sxmpic++
+tool::cflags  -O nomsg -pvctl nomsg
+
+tool::ar      sxar
+</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <th>Label</th>
+
+      <th colspan="2">Content</th>
+    </tr>
+
+    <tr>
+      <th rowspan="2">EXCL_DEP[::&lt;pcks&gt;]</th>
+
+      <th>Description</th>
+
+      <td>
+        This declaration is used to specify whether a particular dependency
+        should be ignored during the automatic dependency scan. If a sub-package
+        &lt;pcks&gt; is specified, the declaration applies only to the files and
+        directories under the sub-package. Otherwise, the declaration applies
+        globally. It is worth noting that the build system is not yet clever
+        enough to recognise changes in this declaration in incremental builds.
+        Therefore, users should manually trigger a full build if these
+        statements are modified. The value of this declaration must contain one
+        or two fields (separated by the double colon "::"). The first field
+        denotes the dependency type, and the second field is the dependency
+        target. If the second field is specified, it will only exclude the
+        dependency to the specified target. Otherwise, it will exclude all
+        dependency to the specified type. The following dependency types are
+        supported:
+
+        <a name="dependency-types"></a>
+
+        <table summary="dependency types" border="1">
+          <tr>
+            <th>Dependency type</th>
+
+            <th>Description</th>
+          </tr>
+
+          <tr>
+            <th>USE</th>
+
+            <td>The dependency target is a Fortran module.</td>
+          </tr>
+
+          <tr>
+            <th>INTERFACE</th>
+
+            <td>The dependency target is a Fortran 9X interface block file.</td>
+          </tr>
+
+          <tr>
+            <th>INC</th>
+
+            <td>The dependency target is a Fortran INCLUDE file.</td>
+          </tr>
+
+          <tr>
+            <th>H</th>
+
+            <td>The dependency target is a pre-processor #include header
+            file.</td>
+          </tr>
+
+          <tr>
+            <th>OBJ</th>
+
+            <td>The dependency target is a compiled binary object file.</td>
+          </tr>
+
+          <tr>
+            <th>EXE</th>
+
+            <td>The dependency target is an executable binary or script.</td>
+          </tr>
+        </table>
+
+        <p>N.B. The following dependency targets are in the default list of
+        excluded dependencies:</p>
+
+        <ul>
+          <li>
+            Intrinsic Fortran modules:
+
+            <ul>
+              <li>USE::ISO_C_BINDING</li>
+
+              <li>USE::IEEE_EXCEPTIONS</li>
+
+              <li>USE::IEEE_ARITHMETIC</li>
+
+              <li>USE::IEEE_FEATURES</li>
+            </ul>
+          </li>
+
+          <li>
+            Intrinsic Fortran subroutines:
+
+            <ul>
+              <li>OBJ::CPU_TIME</li>
+
+              <li>OBJ::GET_COMMAND</li>
+
+              <li>OBJ::GET_COMMAND_ARGUMENT</li>
+
+              <li>OBJ::GET_ENVIRONMENT_VARIABLE</li>
+
+              <li>OBJ::MOVE_ALLOC</li>
+
+              <li>OBJ::MVBITS</li>
+
+              <li>OBJ::RANDOM_NUMBER</li>
+
+              <li>OBJ::RANDOM_SEED</li>
+
+              <li>OBJ::SYSTEM_CLOCK</li>
+            </ul>
+          </li>
+
+          <li>
+            Dummy declarations:
+
+            <ul>
+              <li>OBJ::NONE</li>
+
+              <li>EXE::NONE</li>
+            </ul>
+          </li>
+        </ul>
+      </td>
+    </tr>
+
+    <tr>
+      <th>Example</th>
+
+      <td>
+        <pre>
+excl_dep  USE::YourFortranMod
+excl_dep  INTERFACE::HerFortran.interface
+excl_dep  INC::HisFortranInc.inc
+excl_dep  H::TheirHeader.h
+excl_dep  OBJ
+excl_dep  EXE
+</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <th>Label</th>
+
+      <th colspan="2">Content</th>
+    </tr>
+
+    <tr>
+      <th rowspan="2">INFILE_EXT::&lt;ext&gt;</th>
+
+      <th>Description</th>
+
+      <td>
+        This declaration is used to re-register particular file name
+        extensions &lt;ext&gt; to associate with different file types. The
+        value of the declaration is a list of type flags delimited by the
+        double colon "::". Each type flag is used internally to describe the
+        nature of the file. For example, a Fortran free source form containing
+        a main program is registered as
+        <tt>"FORTRAN::FORTRAN9X::SOURCE::PROGRAM"</tt>. The following is a
+        list of type flags that are currently in-use (or <span class="gray">*
+        reserved</span>) by the build system:
+
+        <a name="infile-ext-types"></a>
+
+        <table summary="input file extension type flags" border="1">
+          <tr>
+            <th>Flag</th>
+
+            <th>Description</th>
+          </tr>
+
+          <tr>
+            <td class="mono">SOURCE</td>
+
+            <td>a source file containing program code of a supported language
+            (currently Fortran, FPP, C and CPP).</td>
+          </tr>
+
+          <tr>
+            <td class="mono">INCLUDE</td>
+
+            <td>an include file containing program code of a supported language
+            (currently Fortran, FPP, C and CPP).</td>
+          </tr>
+
+          <tr>
+            <td class="mono">FORTRAN</td>
+
+            <td>a file containing Fortran code.</td>
+          </tr>
+
+          <tr>
+            <td class="mono">FORTRAN9X</td>
+
+            <td>a file containing the Fortran free source form. This word must be
+            used in conjunction with the word "FORTRAN".</td>
+          </tr>
+
+          <tr>
+            <td class="mono">FPP</td>
+
+            <td>a file containing Fortran code requiring pre-processing.</td>
+          </tr>
+
+          <tr>
+            <td class="mono">FPP9X</td>
+
+            <td>a file containing Fortran free source form requiring
+            pre-processing. This word must be used in conjunction with the word
+            "FPP".</td>
+          </tr>
+
+          <tr>
+            <td class="mono">C</td>
+
+            <td>a file containing C code.</td>
+          </tr>
+
+          <tr>
+            <td class="mono">CPP</td>
+
+            <td>a file containing CPP include header.</td>
+          </tr>
+
+          <tr>
+            <td class="mono">INTERFACE</td>
+
+            <td>a file containing a Fortran 9X interface block.</td>
+          </tr>
+
+          <tr>
+            <td class="mono">PROGRAM</td>
+
+            <td>a file containing a main program.</td>
+          </tr>
+
+          <tr>
+            <td class="mono">MODULE</td>
+
+            <td>a file containing a Fortran 9X module.</td>
+          </tr>
+
+          <tr>
+            <td class="mono">BINARY</td>
+
+            <td>a binary file.</td>
+          </tr>
+
+          <tr>
+            <td class="mono">EXE</td>
+
+            <td>an executable file. This word must be used in conjunction with
+            the word "BINARY".</td>
+          </tr>
+
+          <tr>
+            <td class="mono">LIB</td>
+
+            <td>an archive library. This word must be used in conjunction with
+            the word "BINARY".</td>
+          </tr>
+
+          <tr>
+            <td class="mono">SCRIPT</td>
+
+            <td>a file containing source code of a scripting language.</td>
+          </tr>
+
+          <tr>
+            <td class="mono">PVWAVE</td>
+
+            <td>a file containing executable PVWAVE scripts. This word must be
+            used in conjunction with the word "SCRIPT".</td>
+          </tr>
+
+          <tr>
+            <td class="mono">SQL</td>
+
+            <td>a file containing SQL scripts. This word must be used in
+            conjunction with the word "SCRIPT".</td>
+          </tr>
+
+          <tr>
+            <td class="mono">GENLIST</td>
+
+            <td>a GEN List file.</td>
+          </tr>
+
+          <tr class="gray">
+            <td class="mono">OBJ</td>
+
+            <td>(* reserved) an object file. This word must be used in
+            conjunction with the word "BINARY".</td>
+          </tr>
+
+          <tr class="gray">
+            <td class="mono">SHELL</td>
+
+            <td>(* reserved) a file containing executable shell scripts. This
+            word must be used in conjunction with the word "SCRIPT".</td>
+          </tr>
+
+          <tr class="gray">
+            <td class="mono">PERL</td>
+
+            <td>(* reserved) a file containing executable Perl scripts. This
+            word must be used in conjunction with the word "SCRIPT".</td>
+          </tr>
+
+          <tr class="gray">
+            <td class="mono">PYTHON</td>
+
+            <td>(* reserved) a file containing executable Python scripts. This
+            word must be used in conjunction with the word "SCRIPT".</td>
+          </tr>
+
+          <tr class="gray">
+            <td class="mono">TCL</td>
+
+            <td>(* reserved) a file containing executable TCL scripts. This
+            word must be used in conjunction with the word "SCRIPT".</td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr>
+      <th>Example</th>
+
+      <td>
+        <pre>
+infile_ext::h90  CPP::INCLUDE
+infile_ext::inc  FORTRAN::FORTRAN9X::INCLUDE
+</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <th rowspan="2">OUTFILE_EXT::&lt;type&gt;</th>
+
+      <th>Description</th>
+
+      <td>
+        This declaration is used to re-register the output file extension
+        for a particular &lt;type&gt; of output files. The value must be a
+        valid file extension. The following is a list of output file types
+        in-use by the build system:
+
+        <a name="outfile-ext-types"></a>
+
+        <table summary="output file extension types" border="1">
+          <tr>
+            <th>Type</th>
+
+            <th>Description</th>
+
+            <th>Default</th>
+          </tr>
+
+          <tr>
+            <td class="mono">MK</td>
+
+            <td>dependency files, <em>Makefile</em> fragments</td>
+
+            <td class="mono">.mk</td>
+          </tr>
+
+          <tr>
+            <td class="mono">OBJ</td>
+
+            <td>compiled object files</td>
+
+            <td class="mono">.o</td>
+          </tr>
+
+          <tr>
+            <td class="mono">MOD</td>
+
+            <td>compiled Fortran module information files</td>
+
+            <td class="mono">.mod</td>
+          </tr>
+
+          <tr>
+            <td class="mono">EXE</td>
+
+            <td>binary executables</td>
+
+            <td class="mono">.exe</td>
+          </tr>
+
+          <tr>
+            <td class="mono">DONE</td>
+
+            <td>"done" files for compiled source</td>
+
+            <td class="mono">.done</td>
+          </tr>
+
+          <tr>
+            <td class="mono">IDONE</td>
+
+            <td>"done" files for included source</td>
+
+            <td class="mono">.idone</td>
+          </tr>
+
+          <tr>
+            <td class="mono">FLAGS</td>
+
+            <td>"flags" files, compiler flags config</td>
+
+            <td class="mono">.flags</td>
+          </tr>
+
+          <tr>
+            <td class="mono">INTERFACE</td>
+
+            <td>interface files for F9X standalone subroutines/functions</td>
+
+            <td class="mono">.interface</td>
+          </tr>
+
+          <tr>
+            <td class="mono">LIB</td>
+
+            <td>archive object library</td>
+
+            <td class="mono">.a</td>
+          </tr>
+
+          <tr>
+            <td class="mono">TAR</td>
+
+            <td>TAR archive</td>
+
+            <td class="mono">.tar</td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr>
+      <th>Example</th>
+
+      <td>
+        <pre>
+# Output F9X interface files will now have ".foo" extension
+outfile_ext::interface  .foo
+</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <th>Label</th>
+
+      <th colspan="2">Content</th>
+    </tr>
+
+    <tr>
+      <th rowspan="2">INC</th>
+
+      <th>Description</th>
+
+      <td>This declares the name of a file containing build configuration. The
+      lines in the declared file will be included inline to the current build
+      configuration file.</td>
+    </tr>
+
+    <tr>
+      <th>Example</th>
+
+      <td>
+        <pre>
+inc  ~frva/var_stable_22.0/cfg/bld.cfg
+# ... and then your changes ...
+</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <th rowspan="2">USE</th>
+
+      <th>Description</th>
+
+      <td>This declares a pre-compiled build, which the current build is
+      dependent on. The value must be must be either the configuration file or
+      the root directory of a successful build. Output of the pre-compiled
+      build, the build tools, the exclude dependency declarations, the file
+      type registers declarations are automatically inherited from the
+      pre-compiled build. Source directories, build targets and pre-processing
+      stage declarations may be inherited depending on the INHERIT
+      declarations. (If you have a USE declaration in an extraction, the
+      resulting build configuration file will contain an automatic USE
+      declaration, which expects a pre-compiled build at the destination of
+      the extraction.)</td>
+    </tr>
+
+    <tr>
+      <th>Example</th>
+
+      <td>
+        <pre>
+# Use VAR build 22.0
+USE  ~frva/var_22.0
+</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <th rowspan="2">INHERIT::&lt;name&gt;[::&lt;pcks&gt;]</th>
+
+      <th>Description</th>
+
+      <td>This declares whether build targets (&lt;name&gt; = "target"),
+      source directories (&lt;name&gt; = "src") and pre-processing stage
+      declarations (&lt;name&gt; = "pp") are inherited from pre-compiled builds
+      declared by the USE statement. By default, source directories and
+      pre-processing stage declarations are inherited from pre-compiled
+      builds, while build targets are not. Use the value 1 to switch on
+      inheritance, or 0 to switch off. For source directories and
+      pre-processing stage declarations, the name of a sub-package
+      &lt;pcks&gt; can be specified. If a sub-package pcks is specified, the
+      declaration applies only to the files and directories under the
+      sub-package. Otherwise, the declaration applies globally.</td>
+    </tr>
+
+    <tr>
+      <th>Example</th>
+
+      <td>
+        <pre>
+inherit::target   1
+inherit::src      0
+inherit::pp::gen  0
+</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <th rowspan="2">%&lt;name&gt;</th>
+
+      <th>Description</th>
+
+      <td>%&lt;name&gt; declares an internal variable &lt;name&gt; that
+      can later be re-used.</td>
+    </tr>
+
+    <tr>
+      <th>Example</th>
+
+      <td>
+        <pre>
+%my_variable  foo
+src::bar      %my_variable
+src::egg      %my_variable
+src::ham      %my_variable
+</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <th>Label</th>
+
+      <th colspan="2">Content</th>
+    </tr>
+  </table>
+
+  <p><a name="tools-list"></a>The following is a list of &lt;label&gt; fields
+  that can be used with a TOOL declaration. Those marked with an asterisk (*)
+  accept declarations at sub-package levels.</p>
+
+  <table class="pad" summary="list of tools" width="100%" border="1">
+    <tr>
+      <th>Label</th>
+
+      <th>Description</th>
+
+      <th>Default</th>
+    </tr>
+
+    <tr>
+      <th>FC</th>
+
+      <td>The Fortran compiler.</td>
+
+      <td class="mono">"f90"</td>
+    </tr>
+
+    <tr>
+      <th>FFLAGS *</th>
+
+      <td>Options used by the Fortran compiler.</td>
+
+      <td class="mono">""</td>
+    </tr>
+
+    <tr>
+      <th>FC_COMPILE</th>
+
+      <td>The option used by the Fortran compiler to suppress the
+      linking stage.</td>
+
+      <td class="mono">"-c"</td>
+    </tr>
+
+    <tr>
+      <th>FC_INCLUDE</th>
+
+      <td>The option used by the Fortran compiler to specify the
+      "include" search path.</td>
+
+      <td class="mono">"-I"</td>
+    </tr>
+
+    <tr>
+      <th>FC_DEFINE</th>
+
+      <td>The option used by the Fortran compiler to define a
+      pre-processor definition macro.</td>
+
+      <td class="mono">"-D"</td>
+    </tr>
+
+    <tr>
+      <th>FC_OUTPUT</th>
+
+      <td>The option used by the Fortran compiler to specify the output
+      file name.</td>
+
+      <td class="mono">"-o"</td>
+    </tr>
+
+    <tr>
+      <th>CC</th>
+
+      <td>The C compiler.</td>
+
+      <td class="mono">"cc"</td>
+    </tr>
+
+    <tr>
+      <th>CFLAGS *</th>
+
+      <td>Options used by the C compiler.</td>
+
+      <td class="mono">""</td>
+    </tr>
+
+    <tr>
+      <th>CC_COMPILE</th>
+
+      <td>The option used by the C compiler to suppress the
+      linking stage.</td>
+
+      <td class="mono">"-c"</td>
+    </tr>
+
+    <tr>
+      <th>CC_INCLUDE</th>
+
+      <td>The option used by the C compiler to specify the
+      "include" search path.</td>
+
+      <td class="mono">"-I"</td>
+    </tr>
+
+    <tr>
+      <th>CC_DEFINE</th>
+
+      <td>The option used by the C compiler to define a
+      pre-processor definition macro.</td>
+
+      <td class="mono">"-D"</td>
+    </tr>
+
+    <tr>
+      <th>CC_OUTPUT</th>
+
+      <td>The option used by the C compiler to specify the output
+      file name.</td>
+
+      <td class="mono">"-o"</td>
+    </tr>
+
+    <tr>
+      <th>LD *</th>
+
+      <td>Name of the linker or loader for linking object files into an
+      executable.</td>
+
+      <td class="mono">"ld"</td>
+    </tr>
+
+    <tr>
+      <th>LDFLAGS *</th>
+
+      <td>The flags used by the linker or loader.</td>
+
+      <td class="mono">""</td>
+    </tr>
+
+    <tr>
+      <th>LD_OUTPUT</th>
+
+      <td>The option used by the linker or loader for the output file name
+      (other than the default "a.out").</td>
+
+      <td class="mono">"-o"</td>
+    </tr>
+
+    <tr>
+      <th>LD_LIBSEARCH</th>
+
+      <td>The option used by the linker or loader for specifying the
+      search path for link libraries.</td>
+
+      <td class="mono">"-L"</td>
+    </tr>
+
+    <tr>
+      <th>LD_LIBLINK</th>
+
+      <td>The option used by the linker or loader command for linking
+      with a library.</td>
+
+      <td class="mono">"-l"</td>
+    </tr>
+
+    <tr>
+      <th>AR</th>
+
+      <td>The archive command.</td>
+
+      <td class="mono">"ar"</td>
+    </tr>
+
+    <tr>
+      <th>ARFLAGS</th>
+
+      <td>The options used for the archive command to create a
+      library.</td>
+
+      <td class="mono">"rs"</td>
+    </tr>
+
+    <tr>
+      <th>FPP</th>
+
+      <td>The Fortran pre-processor command.</td>
+
+      <td class="mono">"cpp"</td>
+    </tr>
+
+    <tr>
+      <th>FPPKEYS *</th>
+
+      <td>The Fortran pre-processor will pre-define each word in this
+      setting as a macro.</td>
+
+      <td class="mono">""</td>
+    </tr>
+
+    <tr>
+      <th>FPPFLAGS *</th>
+
+      <td>The options used by the Fortran pre-processor.</td>
+
+      <td class="mono">"-P -traditional"</td>
+    </tr>
+
+    <tr>
+      <th>FPP_DEFINE</th>
+
+      <td>The option used by the Fortran pre-processor to define a
+      macro.</td>
+
+      <td class="mono">"-D"</td>
+    </tr>
+
+    <tr>
+      <th>FPP_INCLUDE</th>
+
+      <td>The option used by the Fortran pre-processor to specify the
+      "include" search path.</td>
+
+      <td class="mono">"-I"</td>
+    </tr>
+
+    <tr>
+      <th>CPP</th>
+
+      <td>The C pre-processor command.</td>
+
+      <td class="mono">"cpp"</td>
+    </tr>
+
+    <tr>
+      <th>CPPKEYS *</th>
+
+      <td>The C pre-processor will pre-define each word in this
+      setting as a macro.</td>
+
+      <td class="mono">""</td>
+    </tr>
+
+    <tr>
+      <th>CPPFLAGS *</th>
+
+      <td>The options used by the C pre-processor.</td>
+
+      <td class="mono">"-C"</td>
+    </tr>
+
+    <tr>
+      <th>CPP_DEFINE</th>
+
+      <td>The option used by the C pre-processor to define a
+      macro.</td>
+
+      <td class="mono">"-D"</td>
+    </tr>
+
+    <tr>
+      <th>CPP_INCLUDE</th>
+
+      <td>The option used by the C pre-processor to specify the
+      "include" search path.</td>
+
+      <td class="mono">"-I"</td>
+    </tr>
+
+    <tr>
+      <th>MAKE</th>
+
+      <td>The "make" command.</td>
+
+      <td class="mono">"make"</td>
+    </tr>
+
+    <tr>
+      <th>MAKEFLAGS</th>
+
+      <td>The options used by the "make" command</td>
+
+      <td class="mono">""</td>
+    </tr>
+
+    <tr>
+      <th>MAKE_SILENT</th>
+
+      <td>The option used by the "make" command to specify silent
+      operation.</td>
+
+      <td class="mono">"-s"</td>
+    </tr>
+
+    <tr>
+      <th>MAKE_JOB</th>
+
+      <td>The option used by the "make" command to specify the number
+      jobs to run simultaneously.</td>
+
+      <td class="mono">"-j"</td>
+    </tr>
+
+    <tr>
+      <th>GENINTERFACE *</th>
+
+      <td>The command/method for generating interface for Fortran 9X
+      standalone subroutines/functions. Supported values are "ECMWF",
+      "f90aib" and "none". (The keyword "none" is used to switch off
+      interface generation.)</td>
+
+      <td class="mono">"ECMWF"</td>
+    </tr>
+
+    <tr>
+      <th>INTERFACE *</th>
+
+      <td>Generate Fortran 9X interface files with root names according to
+      either the root name of the source "file" or the name of the "program"
+      unit.</td>
+
+      <td class="mono">"file"</td>
+    </tr>
+
+    <tr>
+      <th>Label</th>
+
+      <th>Description</th>
+
+      <th>Default</th>
+    </tr>
+  </table>
+
+  <p class="gray">The following declarations are for reference only. They
+  should not be used in normal operations of the FCM build system:</p>
+
+  <table class="pad" summary="Unused declarations in build configuration file"
+  width="100%" border="1">
+    <tr class="gray">
+      <th>Label</th>
+
+      <th colspan="2">Content</th>
+    </tr>
+
+    <tr class="gray">
+      <th rowspan="2">DIR::BIN</th>
+
+      <th>Description</th>
+
+      <td>This declaration is optional and is not normally required. It is the
+      "bin" directory, container of executable files created by the build.</td>
+    </tr>
+
+    <tr class="gray">
+      <th>Example</th>
+
+      <td>
+        <pre>
+dir::bin  $HOME/my_build/bin
+</pre>
+      </td>
+    </tr>
+
+    <tr class="gray">
+      <th rowspan="2">DIR::BLD</th>
+
+      <th>Description</th>
+
+      <td>This declaration is optional and is not normally required. It is the
+      build directory, container of the <em>Makefile</em> and its fragments
+      created by the build system.</td>
+    </tr>
+
+    <tr class="gray">
+      <th>Example</th>
+
+      <td>
+        <pre>
+dir::bld  $HOME/my_build/bld
+</pre>
+      </td>
+    </tr>
+
+    <tr class="gray">
+      <th rowspan="2">DIR::CACHE</th>
+
+      <th>Description</th>
+
+      <td>This declaration is optional and is not normally required. It is the
+      cache directory, container of internal cache files used by the build
+      system.</td>
+    </tr>
+
+    <tr class="gray">
+      <th>Example</th>
+
+      <td>
+        <pre>
+dir::cache $HOME/my_build/.cache
+</pre>
+      </td>
+    </tr>
+
+    <tr class="gray">
+      <th rowspan="2">DIR::CFG</th>
+
+      <th>Description</th>
+
+      <td>This declaration is optional and is not normally required. It is the
+      configuration directory, container of the build configuration file. Not
+      created by the build system.</td>
+    </tr>
+
+    <tr class="gray">
+      <th>Example</th>
+
+      <td>
+        <pre>
+dir::cfg $HOME/my_build/cfg
+</pre>
+      </td>
+    </tr>
+
+    <tr class="gray">
+      <th rowspan="2">DIR::DONE</th>
+
+      <th>Description</th>
+
+      <td>This declaration is optional and is not normally required. It is the
+      "done" file directory, container of dummy "done" files created by the
+      build process. A "done" file is used to indicate that all the external
+      objects of an object files are compiled and ready to be used by the link
+      process.</td>
+    </tr>
+
+    <tr class="gray">
+      <th>Example</th>
+
+      <td>
+        <pre>
+dir::done $HOME/my_build/done
+</pre>
+      </td>
+    </tr>
+
+    <tr class="gray">
+      <th rowspan="2">DIR::ETC</th>
+
+      <th>Description</th>
+
+      <td>This declaration is optional and is not normally required. It is the
+      miscellaneous file directory, container of "data" files. "Data" files
+      are files in the source sub-package without a registered type. It is
+      possible for the user to tell the build system to copy all "data" files
+      in a sub-package to this directory by "building" a dummy sub-package
+      data file target.</td>
+    </tr>
+
+    <tr class="gray">
+      <th>Example</th>
+
+      <td>
+        <pre>
+dir::etc $HOME/my_build/etc
+</pre>
+      </td>
+    </tr>
+
+    <tr class="gray">
+      <th rowspan="2">DIR::FLAGS</th>
+
+      <th>Description</th>
+
+      <td>This declaration is optional and is not normally required. It is the
+      "flags" file directory, container of dummy "flags" files created by the
+      build process. A "flags" file is used to indicate to <em>make</em> that
+      the compiler flags for a source file or a container package has
+      changed.</td>
+    </tr>
+
+    <tr class="gray">
+      <th>Example</th>
+
+      <td>
+        <pre>
+dir::flags $HOME/my_build/flags
+</pre>
+      </td>
+    </tr>
+
+    <tr class="gray">
+      <th rowspan="2">DIR::INC</th>
+
+      <th>Description</th>
+
+      <td>This declaration is optional and is not normally required. It is the
+      include directory, container of "include" files such as pre-processor
+      header files, Fortran INCLUDE files, Fortran 9X interface files, and
+      Fortran compiled module information files.</td>
+    </tr>
+
+    <tr class="gray">
+      <th>Example</th>
+
+      <td>
+        <pre>
+dir::inc $HOME/my_build/inc
+</pre>
+      </td>
+    </tr>
+
+    <tr class="gray">
+      <th rowspan="2">DIR::LIB</th>
+
+      <th>Description</th>
+
+      <td>This declaration is optional and is not normally required. It is the
+      library directory, container of object library achive files created by
+      the build.</td>
+    </tr>
+
+    <tr class="gray">
+      <th>Example</th>
+
+      <td>
+        <pre>
+dir::lib $HOME/my_build/lib
+</pre>
+      </td>
+    </tr>
+
+    <tr class="gray">
+      <th rowspan="2">DIR::OBJ</th>
+
+      <th>Description</th>
+
+      <td>This declaration is optional and is not normally required. It is the
+      object directory, container of compiled object files created by the
+      build process.</td>
+    </tr>
+
+    <tr class="gray">
+      <th>Example</th>
+
+      <td>
+        <pre>
+dir::obj $HOME/my_build/obj
+</pre>
+      </td>
+    </tr>
+
+    <tr class="gray">
+      <th rowspan="2">DIR::PPSRC</th>
+
+      <th>Description</th>
+
+      <td>This declaration is optional and is not normally required. It is the
+      pre-processed source directory, container of pre-processed source files
+      created by the build process.</td>
+    </tr>
+
+    <tr class="gray">
+      <th>Example</th>
+
+      <td>
+        <pre>
+dir::ppsrc $HOME/my_build/ppsrc
+</pre>
+      </td>
+    </tr>
+
+    <tr class="gray">
+      <th rowspan="2">DIR::SRC</th>
+
+      <th>Description</th>
+
+      <td>This declaration is optional and is not normally required. It is the
+      source directory, container of the source tree. Not created by the build
+      system.</td>
+    </tr>
+
+    <tr class="gray">
+      <th>Example</th>
+
+      <td>
+        <pre>
+dir::src $HOME/my_build/src
+</pre>
+      </td>
+    </tr>
+
+    <tr class="gray">
+      <th rowspan="2">DIR::TMP</th>
+
+      <th>Description</th>
+
+      <td>This declaration is optional and is not normally required. It is the
+      temporary directory, container of temporary files used by the wrapper to
+      the compiler and linker.</td>
+    </tr>
+
+    <tr class="gray">
+      <th>Example</th>
+
+      <td>
+        <pre>
+dir::tmp $HOME/my_build/tmp
+</pre>
+      </td>
+    </tr>
+
+    <tr class="gray">
+      <th>Label</th>
+
+      <th colspan="2">Content</th>
+    </tr>
+  </table>
+
+  <script type="text/javascript" src="maintain.js">
+  </script>
+</body>
+</html>

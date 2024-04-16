@@ -1,0 +1,29 @@
+%ARCH          local
+%INCDIR         -I/Users/Saira/Documents/GCM/trunk/LMDZ.COMMON/libf/aeronostd -I/usr/local/Cellar/netcdf-fortran/4.6.1/include -I/usr/local/Cellar/netcdf-fortran/4.6.1/include
+%LIB            -L/usr/local/Cellar/netcdf-fortran/4.6.1/lib -lnetcdff -lnetcdf -lnetcdf 
+%ROOT_PATH     /Users/Saira/Documents/GCM/trunk/LMDZ.COMMON
+%LIBF          /Users/Saira/Documents/GCM/trunk/LMDZ.COMMON/libf
+%LIBO          /Users/Saira/Documents/GCM/trunk/LMDZ.COMMON/libo
+%DYN           dyn3d
+%DYN_COMMON    /Users/Saira/Documents/GCM/trunk/LMDZ.COMMON/libf/dyn3d_common
+%PHY_COMMON    /Users/Saira/Documents/GCM/trunk/LMDZ.COMMON/libf/phy_common
+%FILTRE        /Users/Saira/Documents/GCM/trunk/LMDZ.COMMON/libf/filtrez
+%PHYS          phystd
+%DYN_PHYS      /Users/Saira/Documents/GCM/trunk/LMDZ.COMMON/libf/dynphy_lonlat
+%DYN_PHYS_SUB  /Users/Saira/Documents/GCM/trunk/LMDZ.COMMON/libf/dynphy_lonlat/phystd
+%RRTM          /Users/Saira/Documents/GCM/trunk/LMDZ.COMMON/.void_dir
+%DUST          /Users/Saira/Documents/GCM/trunk/LMDZ.COMMON/.void_dir
+%STRATAER      /Users/Saira/Documents/GCM/trunk/LMDZ.COMMON/.void_dir
+%SISVAT        /Users/Saira/Documents/GCM/trunk/LMDZ.COMMON/.void_dir
+%COSP          /Users/Saira/Documents/GCM/trunk/LMDZ.COMMON/.void_dir
+%CHEM          /Users/Saira/Documents/GCM/trunk/LMDZ.COMMON/.void_dir
+%CLOUD         /Users/Saira/Documents/GCM/trunk/LMDZ.COMMON/.void_dir
+%MUPHY         /Users/Saira/Documents/GCM/trunk/LMDZ.COMMON/.void_dir
+%AERONO        /Users/Saira/Documents/GCM/trunk/LMDZ.COMMON/libf/aeronostd
+%CPP_KEY        CPP_PHYS
+%EXEC          newstart
+%SUFF_NAME     _112x115x17_phystd_seq.e
+%COMPIL_FFLAGS %PROD_FFLAGS
+%PARA_FFLAGS   
+%PARA_LD       
+%EXT_SRC       

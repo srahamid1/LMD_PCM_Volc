@@ -1,0 +1,316 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html>
+<head>
+  <title>FCM System User Guide Annex: Quick reference</title>
+  <meta name="author" content="FCM development team">
+  <meta name="descriptions" content="User Guide Annex">
+  <meta name="keywords" content="FCM, user guide, annex">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body>
+  <script type="text/javascript">
+  <!--
+    document.write ('<address>')
+    document.write ('<a href="index.html">FCM System User Guide</a>')
+    document.write (' &gt; ')
+    document.write ('Annex: Quick reference')
+    document.write ('<\/address>')
+  //-->
+  </script>
+
+  <h1>Annex:<br>
+  Quick reference</h1>
+
+  <p>Note: some sub-commands can be invoked with alternate names. For example,
+  "fcm help" is the same as "fcm ?". In this annex, some favourite alternate
+  names are listed, separated by a pipe, i.e. the above example will be given as
+  "fcm help|?".</p>
+
+  <a name="help"></a><h2>Getting help</h2>
+
+  <table summary="help" width="100%" border="0">
+    <tr>
+      <td>fcm help|?</td>
+
+      <td width="70%">get list of subcommands</td>
+    </tr>
+
+    <tr>
+      <td>fcm help|? SUBCOMMAND</td>
+
+      <td width="70%">get help on SUBCOMMAND</td>
+    </tr>
+  </table>
+
+  <a name="maintaining-wc"></a><h2>Maintaining the working copy</h2>
+
+  <table summary="maintaining-wc" width="100%" border="0">
+    <tr>
+      <td colspan="2">fcm&nbsp;checkout|co&nbsp;[OPTIONS]&nbsp;URL&nbsp;[DEST]</td>
+
+      <td width="70%">Checkout URL (and create a working copy at DEST)</td>
+    </tr>
+
+    <tr>
+      <td>&nbsp;</td>
+
+      <td width="18%">-r N</td>
+
+      <td width="70%">Checkout revision N of URL</td>
+    </tr>
+
+    <tr>
+      <td colspan="2">fcm info</td>
+
+      <td width="70%">Print working copy information</td>
+    </tr>
+
+    <tr>
+      <td colspan="2">fcm status|st [OPTIONS]</td>
+
+      <td width="70%">Print status of working copy</td>
+    </tr>
+
+    <tr>
+      <td>&nbsp;</td>
+
+      <td width="18%">-u</td>
+
+      <td width="70%">Show update information</td>
+    </tr>
+
+    <tr>
+      <td>&nbsp;</td>
+
+      <td width="18%">-v</td>
+
+      <td width="70%">Show verbose information</td>
+    </tr>
+
+    <tr>
+      <td colspan="2">fcm update|up</td>
+
+      <td width="70%">Update working copy with repository changes</td>
+    </tr>
+
+    <tr>
+      <td colspan="2">fcm switch|sw URL</td>
+
+      <td width="70%">Switch your working copy to point to a branch specified by
+      URL</td>
+    </tr>
+
+    <tr>
+      <td colspan="2">fcm commit|ci</td>
+
+      <td width="70%">Commit local changes back into the repository</td>
+    </tr>
+  </table>
+
+  <a name="preparing-changes"></a><h2>Preparing changes</h2>
+
+  <table summary="preparing-changes" width="100%" border="0">
+    <tr>
+      <td colspan="2">fcm diff|di [OPTIONS]</td>
+
+      <td width="70%">Display working copy changes in unified diff format</td>
+    </tr>
+
+    <tr>
+      <td>&nbsp;</td>
+
+      <td width="18%">-b</td>
+
+      <td width="70%">Show differences relative to the base of the branch</td>
+    </tr>
+
+    <tr>
+      <td>&nbsp;</td>
+
+      <td width="18%">-g</td>
+
+      <td width="70%">Display working copy changes with a graphical diff
+      tool</td>
+    </tr>
+
+    <tr>
+      <td>&nbsp;</td>
+
+      <td width="18%">-r N</td>
+
+      <td width="70%">Display working copy changes against revision N</td>
+    </tr>
+
+    <tr>
+      <td>&nbsp;</td>
+
+      <td width="18%">-t</td>
+
+      <td width="70%">Display differences in Trac, (with -b only)</td>
+    </tr>
+
+    <tr>
+      <td colspan="2">fcm revert [OPTIONS] PATH</td>
+
+      <td width="70%">Restore the file PATH to the pristine copy</td>
+    </tr>
+
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>-R</td>
+
+      <td width="70%">Descend PATH recursively, restoring any modified files to
+      the pristine copy</td>
+    </tr>
+
+    <tr>
+      <td colspan="2">fcm mkdir [PATH]</td>
+
+      <td width="70%">Add a directory PATH under revision control</td>
+    </tr>
+
+    <tr>
+      <td colspan="2">fcm add [OPTIONS] [PATH]</td>
+
+      <td width="70%">Add PATH under revision control</td>
+    </tr>
+
+    <tr>
+      <td>&nbsp;</td>
+
+      <td width="18%">-c</td>
+
+      <td width="70%">Check for items not under revision control and add
+      them</td>
+    </tr>
+
+    <tr>
+      <td colspan="2">fcm&nbsp;delete|del|rm&nbsp;[OPTIONS]&nbsp;[PATH]</td>
+
+      <td width="70%">Remove PATH from revision control</td>
+    </tr>
+
+    <tr>
+      <td>&nbsp;</td>
+
+      <td width="18%">-c</td>
+
+      <td width="70%">Check for missing items and remove them</td>
+    </tr>
+
+    <tr>
+      <td colspan="2">fcm copy|cp SRC DST</td>
+
+      <td width="70%">Duplicate SRC to DST, remembering history</td>
+    </tr>
+
+    <tr>
+      <td colspan="2">fcm&nbsp;move|mv&nbsp;SRC&nbsp;DST</td>
+
+      <td width="70%">Move or rename SRC to DST, remembering history</td>
+    </tr>
+  </table>
+
+  <a name="browse"></a><h2>Browsing</h2>
+
+  <table summary="browse" width="100%" border="0">
+    <tr>
+      <td colspan="2">fcm&nbsp;log&nbsp;[OPTIONS]&nbsp;[TARGET]</td>
+
+      <td width="70%">Show the log message of a TARGET that can either be
+      working copy or URL</td>
+    </tr>
+
+    <tr>
+      <td>&nbsp;</td>
+
+      <td width="18%">-r N[:M]</td>
+
+      <td width="70%">Show the log message of a range of reivsions</td>
+    </tr>
+
+    <tr>
+      <td colspan="2">fcm list|ls [OPTIONS] [TARGET]</td>
+
+      <td width="70%">List directory entries in TARGET</td>
+    </tr>
+
+    <tr>
+      <td>&nbsp;</td>
+
+      <td width="18%">-r N</td>
+
+      <td width="70%">List directory entries of revision N</td>
+    </tr>
+
+    <tr>
+      <td>&nbsp;</td>
+
+      <td width="18%">-v</td>
+
+      <td width="70%">List directory entries in verbose mode</td>
+    </tr>
+
+    <tr>
+      <td>&nbsp;</td>
+
+      <td width="18%">-R</td>
+
+      <td width="70%">List directory entries recursively down the
+      directories</td>
+    </tr>
+
+    <tr>
+      <td colspan="2">fcm trac [TARGET]</td>
+
+      <td width="70%">Open a WWW browser to browse TARGET with Trac</td>
+    </tr>
+  </table>
+
+  <a name="branch"></a><h2>Branching</h2>
+
+  <table summary="browse" width="100%" border="0">
+    <tr>
+      <td colspan="2">fcm branch|br [OPTIONS] [URL]</td>
+
+      <td width="70%">Show branch information of URL or local working
+      copy</td>
+    </tr>
+
+    <tr>
+      <td>&nbsp;</td>
+
+      <td width="18%">-d</td>
+
+      <td width="70%">Show branch information and delete the branch</td>
+    </tr>
+
+    <tr>
+      <td>&nbsp;</td>
+
+      <td width="18%">-c -n NAME</td>
+
+      <td width="70%">Create a branch</td>
+    </tr>
+
+    <tr>
+      <td colspan="2">fcm merge [SOURCE]</td>
+
+      <td width="70%">Merge changes from SOURCE to your working copy</td>
+    </tr>
+
+    <tr>
+      <td colspan="2">fcm conflicts|cf</td>
+
+      <td width="70%">Use xxdiff to resolve conflicts in your working copy</td>
+    </tr>
+  </table>
+
+  <script type="text/javascript" src="maintain.js">
+  </script>
+</body>
+</html>

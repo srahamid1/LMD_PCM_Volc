@@ -1,0 +1,52 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html>
+<head>
+  <title>FCM Detailed Design: Introduction</title>
+  <meta name="author" content="FCM development team">
+  <meta name="descriptions" content="FCM Detailed Design: Introduction">
+  <meta name="keywords" content="FCM, design">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body>
+  <address>
+    <a href="index.html">FCM Detailed Design</a> &gt; Introduction
+  </address>
+
+  <h1>Introduction</h1>
+
+  <p>This document contains the Detailed Design for the <em>Flexible
+  Configuration Management</em> system which is known as <em>FCM</em>.</p>
+
+  <p>A lot of information about the design of FCM can be found within:</p>
+
+  <ul class="pad">
+    <li>The <a href="../user_guide">FCM User Guide</a>. This contains all the
+    information which a user needs to know about FCM, including relevant
+    aspects of the design.</li>
+
+    <li>The FCM source code which is, we hope, well commented.</li>
+  </ul>
+
+  <p>Everything else which you might need to know about the design should be
+  described in the following sections. It includes higher level design
+  information not suited for inclusion in the source code but too detailed to
+  be included in the User Guide. It is intended for those who need to maintain
+  or develop the FCM system or simply for those who wish to obtain a deeper
+  understanding of how the system works. This document consists of the following
+  sections:</p>
+
+  <ul class="pad">
+    <li><a href="code_management.html">Code Management System</a></li>
+
+    <li><a href="extract.html">Extract System</a></li>
+
+    <li><a href="build.html">Build System</a></li>
+  </ul>
+  
+  <script type="text/javascript" src="maintain.js">
+  </script>
+</body>
+</html>

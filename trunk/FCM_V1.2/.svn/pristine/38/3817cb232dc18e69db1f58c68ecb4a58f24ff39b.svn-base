@@ -1,0 +1,183 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html>
+<head>
+  <title>FCM System User Guide Annex: Declarations in FCM build package
+  configuration file</title>
+  <meta name="author" content="FCM development team">
+  <meta name="descriptions" content="User Guide Annex">
+  <meta name="keywords" content="FCM, user guide, annex">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body>
+  <address>
+    <a href="index.html">FCM System User Guide</a> &gt; Annex: Declarations in
+    FCM build package configuration file
+  </address>
+
+  <h1>Annex:<br>
+  Declarations in FCM build package configuration file</h1>
+
+  <p>The following is a list of supported declarations for package
+  configuration files. The package configuration is used by the build system.
+  It must be stored in a file called <tt>@PACKAGE.cfg</tt> in a source
+  directory. The labels in all declarations in a package configuration file
+  contain two fields delimited by the double colon "::". The first field is the
+  name of the label, which is case insensitive. The second field is the name
+  of a file, which the declaration is associated with.</p>
+
+  <table class="pad" summary="Declarations in build package configuration file"
+  width="100%" border="1">
+    <tr>
+      <th>Label</th>
+
+      <th colspan="2">Content</th>
+    </tr>
+
+    <tr>
+      <th rowspan="2">TYPE::<em>file</em></th>
+
+      <th>Description</th>
+
+      <td>This declares the type of <em>file</em>. The value of this
+      declaration is a list of type flags delimited by the double colon "::".
+      Each type flag is used internally to describe the nature of the file.
+      Supported flags are the same as those used in the INFILE_EXT
+      declarations in the build configuration file. For a list of these flags,
+      please see the <a href="annex_bld_cfg.html#infile-ext-types">Input file
+      extension type flags table</a> of the <a href="annex_bld_cfg.html">FCM
+      System User Guide &gt; Annex: Declarations in FCM build configuration
+      file</a> document.</td>
+    </tr>
+
+    <tr>
+      <th>Example</th>
+
+      <td>
+        <pre>
+# Declare a Fortran 9X program source file
+type::MyFortranProg.f90  FORTRAN::FORTRAN9X::SOURCE::PROGRAM
+
+# Declare a target to build a shared object library
+type::libbooks.a         BINARY::LIB
+</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <th rowspan="2">SCAN::<em>file</em></th>
+
+      <th>Description</th>
+
+      <td>This declares a flag to determine whether <em>file</em> needs to be
+      scanned for dependency. Set the value to 1 to switch on, and 0 to switch
+      off. If <em>file</em> is declared a shared library, this flag is
+      automatically set to 0. For all other files, this flag is automatically
+      set to 1.</td>
+    </tr>
+
+    <tr>
+      <th>Example</th>
+
+      <td>
+        <pre>
+scan::MyFortranProg.f90  0
+</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <th rowspan="2">TARGET::<em>file</em></th>
+
+      <th>Description</th>
+
+      <td>This declares the executable name of <em>file</em> if it is a C or
+      Fortran program. If not set, the default executable name of a program is
+      the root name (i.e. base name without the file extension) of
+      <em>file</em> suffixed with the file extension ".exe".</td>
+    </tr>
+
+    <tr>
+      <th>Example</th>
+
+      <td>
+        <pre>
+target::MyFortranProg.f90  hello_world
+</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <th rowspan="2">INTNAME::<em>file</em></th>
+
+      <th>Description</th>
+
+      <td>This declares the internal name of <em>file</em> if it contains a
+      Fortran subroutine, function or module. The internal name determines the
+      name of the compiled object file of <em>file</em>. If not set, the
+      default depends on whether the <em>file</em> will be scanned for
+      dependencies. If so, the name of the first program unit will be used as
+      the internal name. Otherwise, the root name of <em>file</em> will be
+      used.</td>
+    </tr>
+
+    <tr>
+      <th>Example</th>
+
+      <td>
+        <pre>
+intname::YourFortranMod.f90  hello_mod
+</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <th rowspan="2">DEP::<em>file</em></th>
+
+      <th>Description</th>
+
+      <td>This declares a dependency target for <em>file</em>. The value of this
+      declaration must contain two fields separated by the double colon "::".
+      The first field denotes the dependency type, and the second field is the
+      dependency target. Supported dependency types are the same as those used
+      in the EXCL_DEP declarations in the build configuration file. For a list
+      of these flags, please see the <a
+      href="annex_bld_cfg.html#dependency-types">dependency types table</a> of
+      the <a href="annex_bld_cfg.html">FCM System User Guide &gt; Annex:
+      Declarations in FCM build configuration file</a> document.</td>
+    </tr>
+
+    <tr>
+      <th>Example</th>
+
+      <td>
+        <pre>
+dep::MyFortranProg.f90  USE::YourFortranMod
+dep::MyFortranProg.f90  INTERFACE::HerFortran.interface
+dep::MyFortranProg.f90  INC::HisFortranInc.inc
+dep::MyFortranProg.f90  H::TheirHeader.h
+dep::MyFortranProg.f90  OBJ::ItsObject.o
+
+dep::libbooks.a         OBJ::MyObject.o
+dep::libbooks.a         OBJ::YourObject.o
+dep::libbooks.a         OBJ::HisObject.o
+dep::libbooks.a         OBJ::HerObject.o
+dep::libbooks.a         OBJ::TheirObject.o
+dep::libbooks.a         OBJ::ItsObject.o
+</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <th>Label</th>
+
+      <th colspan="2">Content</th>
+    </tr>
+  </table>
+
+  <script type="text/javascript" src="maintain.js">
+  </script>
+</body>
+</html>

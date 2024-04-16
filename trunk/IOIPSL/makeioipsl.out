@@ -1,0 +1,57 @@
+Warning: /Users/Saira/Documents/GCM/IOIPSL/bld.cfg: variable "%FPP_DEF" not expanded.
+Warning: /Users/Saira/Documents/GCM/IOIPSL/bld.cfg: variable "%FPP" not expanded.
+Build command started on Mon Dec  7 14:16:33 2020.
+->Setup              : start
+# Config file (bld): /Users/Saira/Documents/GCM/IOIPSL/bld.cfg
+# Config file (bld): arch.fcm
+# Config file (bld): config.fcm
+Make directory: /Users/Saira/Documents/GCM/IOIPSL/build/.cache
+->Setup              : 0 second
+->Pre-process        : start
+->Pre-process        : 0 second
+->Scan dependency    : start
+Scanned files in 2 package(s) for dependency
+Updated make rules for 2 package(s).
+Updated Makefile: /Users/Saira/Documents/GCM/IOIPSL/build/bld/Makefile
+->Scan dependency    : 1 second
+->Generate interface : start
+->Generate interface : 0 second
+->Make               : start
+gfortran -o defprec.o -I/Users/Saira/Documents/GCM/IOIPSL/build/inc -c -fdefault-real-8 -fdefault-double-8 -ffree-line-length-none -fno-align-commons -fcray-pointer -O3 -I/include /Users/Saira/Documents/GCM/IOIPSL/src/defprec.f90
+gfortran -o stringop.o -I/Users/Saira/Documents/GCM/IOIPSL/build/inc -c -fdefault-real-8 -fdefault-double-8 -ffree-line-length-none -fno-align-commons -fcray-pointer -O3 -I/include /Users/Saira/Documents/GCM/IOIPSL/src/stringop.f90
+gfortran -o errioipsl.o -I/Users/Saira/Documents/GCM/IOIPSL/build/inc -c -fdefault-real-8 -fdefault-double-8 -ffree-line-length-none -fno-align-commons -fcray-pointer -O3 -I/include /Users/Saira/Documents/GCM/IOIPSL/src/errioipsl.f90
+f951: Warning: Nonexistent include directory '/include' [-Wmissing-include-dirs]
+f951: Warning: Nonexistent include directory '/include' [-Wmissing-include-dirs]
+f951: Warning: Nonexistent include directory '/include' [-Wmissing-include-dirs]
+gfortran -o calendar.o -I/Users/Saira/Documents/GCM/IOIPSL/build/inc -c -fdefault-real-8 -fdefault-double-8 -ffree-line-length-none -fno-align-commons -fcray-pointer -O3 -I/include /Users/Saira/Documents/GCM/IOIPSL/src/calendar.f90
+gfortran -o mathelp.o -I/Users/Saira/Documents/GCM/IOIPSL/build/inc -c -fdefault-real-8 -fdefault-double-8 -ffree-line-length-none -fno-align-commons -fcray-pointer -O3 -I/include /Users/Saira/Documents/GCM/IOIPSL/src/mathelp.f90
+gfortran -o getincom.o -I/Users/Saira/Documents/GCM/IOIPSL/build/inc -c -fdefault-real-8 -fdefault-double-8 -ffree-line-length-none -fno-align-commons -fcray-pointer -O3 -I/include /Users/Saira/Documents/GCM/IOIPSL/src/getincom.f90
+f951: Warning: Nonexistent include directory '/include' [-Wmissing-include-dirs]
+f951: Warning: Nonexistent include directory '/include' [-Wmissing-include-dirs]
+f951: Warning: Nonexistent include directory '/include' [-Wmissing-include-dirs]
+gfortran -o flincom.o -I/Users/Saira/Documents/GCM/IOIPSL/build/inc -c -fdefault-real-8 -fdefault-double-8 -ffree-line-length-none -fno-align-commons -fcray-pointer -O3 -I/include /Users/Saira/Documents/GCM/IOIPSL/src/flincom.f90
+gfortran -o fliocom.o -I/Users/Saira/Documents/GCM/IOIPSL/build/inc -c -fdefault-real-8 -fdefault-double-8 -ffree-line-length-none -fno-align-commons -fcray-pointer -O3 -I/include /Users/Saira/Documents/GCM/IOIPSL/src/fliocom.f90
+f951: Warning: Nonexistent include directory '/include' [-Wmissing-include-dirs]
+f951: Warning: Nonexistent include directory '/include' [-Wmissing-include-dirs]
+/Users/Saira/Documents/GCM/IOIPSL/src/flincom.f90:8:7:
+
+    8 |   USE netcdf
+      |       1
+Fatal Error: Cannot open module file 'netcdf.mod' for reading at (1): No such file or directory
+compilation terminated.
+fcm_internal compile failed (256)
+make: *** [flincom.o] Error 1
+make: *** Waiting for unfinished jobs....
+/Users/Saira/Documents/GCM/IOIPSL/src/fliocom.f90:8:5:
+
+    8 | USE netcdf
+      |     1
+Fatal Error: Cannot open module file 'netcdf.mod' for reading at (1): No such file or directory
+compilation terminated.
+fcm_internal compile failed (256)
+make: *** [fliocom.o] Error 1
+make -s -j 8 all failed (512) at /Users/Saira/Documents/GCM/IOIPSL/tools/FCM_V1.2/lib/Fcm/Build.pm line 1922.
+Build command failed on Mon Dec  7 14:16:39 2020.
+->Make               : 5 seconds
+->TOTAL              : 6 seconds
+makeioipsl_fcm: Error in compiling IOIPSL : 1

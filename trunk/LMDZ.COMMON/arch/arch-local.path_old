@@ -1,0 +1,8 @@
+NETCDF_LIBDIR="-L/home/jsmekens/Documents/LMDZtrunk/netcdf-4.0.1/lib -lnetcdff -lnetcdf"
+NETCDF_INCDIR=-I/home/jsmekens/Documents/LMDZtrunk/netcdf-4.0.1/include
+IOIPSL_INCDIR=$LMDGCM/../../lib
+IOIPSL_LIBDIR=$LMDGCM/../../lib
+XIOS_INCDIR=$LMDGCM/../XIOS/inc
+XIOS_LIBDIR=$LMDGCM/../XIOS/lib
+ORCH_INCDIR=$LMDGCM/../../lib
+ORCH_LIBDIR=$LMDGCM/../../lib

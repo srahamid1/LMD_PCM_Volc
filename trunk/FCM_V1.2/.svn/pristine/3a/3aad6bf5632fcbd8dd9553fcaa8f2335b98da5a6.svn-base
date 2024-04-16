@@ -1,0 +1,388 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html>
+<head>
+  <title>FCM Detailed Design: Extract System</title>
+  <meta name="author" content="FCM development team">
+  <meta name="descriptions" content="FCM Detailed Design: Extract System">
+  <meta name="keywords" content="FCM, design">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body>
+  <address>
+    <a href="index.html">FCM Detailed Design</a> &gt; Extract System
+  </address>
+
+  <h1>Extract System</h1>
+  
+  <p>In this chapter, we shall discuss in detail the design of the extract
+  system. For information of how to use the extract system, please see: <a
+  href="../user_guide/extract.html">FCM System User Guide &gt; The Extract
+  System</a>.</p>
+
+  <p>The extract system extracts source directories from different branches of
+  Subversion repositories, combining them with source directories from the
+  local file system to give a source directory tree suitable for feeding into
+  the build system. The system is written in a set of Perl modules. The extract
+  system uses a similar interface to the build system. It shares the same
+  command line interface and many other utilities with the code management
+  system and the build system.</p>
+
+  <h2><a name="io">Input and Output</a></h2>
+
+  <p>The extract system should provide the following outputs:</p>
+
+  <ul class="pad">
+    <li>a directory tree with the extracted source code suitable for feeding
+    into the build system.</li>
+
+    <li>a configuration file for the build system.</li>
+
+    <li>an expanded version of the current configuration file, so that the
+    current extraction can be re-used.</li>
+  </ul>
+
+  <p>The following inputs are required by the extract system:</p>
+
+  <ul class="pad">
+    <li>the location of the destination.</li>
+
+    <li>the location of the source, e.g a repository URL or a local file
+    system path.</li>
+
+    <li>the revision of the source, if applicable.</li>
+
+    <li>extra configuration settings to be exported to the build system.</li>
+
+    <li>the location of previous extractions, if the current extract is to be
+    based on them.</li>
+  </ul>
+
+  <h2><a name="component">Components</a></h2>
+
+  <p>The extract system uses the following commands, modules and tools:</p>
+
+  <table class="pad" summary="build system components" border="1">
+    <tr>
+      <th>Name</th>
+
+      <th>Category</th>
+
+      <th>Description</th>
+    </tr>
+
+    <tr>
+      <th>fcm</th>
+
+      <td>Perl executable</td>
+
+      <td>Top level command line interface of the FCM system.</td>
+    </tr>
+
+    <tr>
+      <th>Fcm::CfgFile</th>
+
+      <td>Perl module</td>
+
+      <td>A class for reading from and writing to configuration files.</td>
+    </tr>
+
+    <tr>
+      <th>Fcm::Config</th>
+
+      <td>Perl module</td>
+
+      <td>A class that contains the configuration settings shared by all
+      FCM components.</td>
+    </tr>
+
+    <tr>
+      <th>Fcm::Extract</th>
+
+      <td>Perl module</td>
+
+      <td>Main class that controls the running of the extract system.</td>
+    </tr>
+
+    <tr>
+      <th>Fcm::ReposBranch</th>
+
+      <td>Perl module</td>
+
+      <td>A class that stores and processes information of a repository
+      branch.</td>
+    </tr>
+
+    <tr>
+      <th>Fcm::SrcDirLayer</th>
+
+      <td>Perl module</td>
+
+      <td>A class that stores and processes information of a "layer" in the
+      extraction sequence of a source directory.</td>
+    </tr>
+
+    <tr>
+      <th>Fcm::Util</th>
+
+      <td>Perl module</td>
+
+      <td>A collection of utilities shared by all FCM components.</td>
+    </tr>
+
+    <tr>
+      <th>svn</th>
+
+      <td>Subversion client</td>
+
+      <td>The following sub-commands are used: "info", "list", "export" and
+      "cat".</td>
+    </tr>
+
+    <tr>
+      <th>ksh</th>
+
+      <td>Unix shell</td>
+
+      <td>The following shell commands are used: "cp", "rm" and "mkdir".</td>
+    </tr>
+
+    <tr>
+      <th>rdist</th>
+
+      <td>Unix utility</td>
+
+      <td>A remote distribution tool for mirror the extracted source
+      directory to a remote host.</td>
+    </tr>
+
+    <tr>
+      <th>rsync</th>
+
+      <td>Unix utility</td>
+
+      <td>A remote synchronisation tool for mirror the extracted source
+      directory to a remote host.</td>
+    </tr>
+
+    <tr>
+      <th>remsh</th>
+
+      <td>Unix command</td>
+
+      <td>A command to invoke a shell on a remote host.</td>
+    </tr>
+  </table>
+
+  <h2><a name="task">Task</a></h2>
+  
+  <p>To do its job, the extract system executes the following tasks in
+  order:</p>
+
+  <ul class="pad">
+    <li>parse/decipher the extract configuration file.</li>
+
+    <li>establish the extraction sequence when dealing with extraction of
+    multiple branches of the same package.</li>
+
+    <li>extract or copy individual files from the source to the
+    destination.</li>
+
+    <li>generate of an expanded extraction configuration file to allow another
+    extraction to be based on the current one.</li>
+
+    <li>generate of a build configuration file.</li>
+
+    <li>mirror extracted source code and configuration files to a remote build
+    machine.</li>
+  </ul>
+
+  <h3><a name="task_cfg">The extract configuration</a></h3>
+
+  <p>When we invoke the FCM command, it creates a new instance of Fcm::Config,
+  which reads, processes and stores information from the central and user
+  configuration file. Configuration settings in Fcm::Config are then
+  accessible by all other modules used by the extract system.</p> 
+
+  <p>When we invoke the extract command, it creates a new instance of
+  Fcm::Extract, which automatically creates a new instance of the
+  Fcm::CfgFile. If an argument is specified in the command line, the argument
+  is used as the "basis". Otherwise, the current working directory is taken as
+  the basis. If the basis is a directory, Fcm::CfgFile will attempt to locate
+  a file called "ext.cfg" under this directory. If such a file is not found,
+  it will attempt to locate it under "cfg/ext.cfg". If the basis is a regular
+  file, the file itself is used.</p>
+  
+  <p>Once a file is located, Fcm::CfgFile will attempt to parse it. This is
+  done by reading and processing each line of the configuration file into
+  separate label, value and comment fields. If an INC declaration is
+  encountered, a new instance of Fcm::CfgFile is created to read the included
+  file as specified. The included lines are then added to the current array.
+  Each line is then pushed into an array that can be fetched as a property of
+  Fcm::CfgFile. Internally, each line is recorded as a reference to a hash
+  table with the following keys:</p>
+
+  <ul class="pad">
+    <li>LABEL: the label of a declaration.</li>
+
+    <li>VALUE: the value of a declaration.</li>
+
+    <li>COMMENT: the comment following a declaration or the comment in a
+    comment line.</li>
+
+    <li>NUMBER: the line number of the current line in the source file.</li>
+
+    <li>SRC: the name of the source file.</li>
+  </ul>
+  
+  <p>The information given by each line is "deciphered" by Fcm::Extract. The
+  information is processed in the following ways:</p>
+
+  <ul class="pad">
+    <li>The configuration file type and version declarations are stored as
+    properties of the Fcm::CfgFile instance. Fcm::Extract uses the
+    information to ensure that it is reading an extract configuration
+    file.</li>
+
+    <li>The destination directory declarations are stored in a hash table,
+    which is a property of the Fcm::Extract instance.</li>
+
+    <li>The remote destionation machine, logname and directory declarations
+    are stored in a hash table, which is another property of the Fcm::Extract
+    instance.</li>
+
+    <li>Build configuration declarations are stored in a hash table, which is
+    yet another property of the Fcm::Extract instance.</li>
+
+    <li>For each declaration of a repository branch, a new instance of
+    Fcm::ReposBranch is created, if it does not already exist. (A
+    Fcm::ReposBranch instance is identified by a "tag" property, which is the
+    combination of its package name and its branch name.) The REPOS, VERSION,
+    SRC and EXPSRC declarations set the "repos", "version", "dir" and "expdir"
+    properties of the Fcm::ReposBranch instance.</li>
+
+    <li>The override mode flag is stored as a property of the Fcm::Extract
+    instance.</li>
+
+    <li>For each declaration to USE a previous extract, a new instance of
+    Fcm::Extract is created, with its "extracted" property set to true. The
+    instance Fcm::Extract for the previous extraction creates a new instance of
+    Fcm::CfgFile for its configuration file. The configuration of the previous
+    extract is read and processed similarly to what was described above. The
+    current instance of Fcm::Extract will then attempt to inherit the settings
+    of the previous extraction where appropriate. The instances of the
+    previous extractions are stored in an array, which can be fetched as a
+    property of the current Fcm::Extract instance.</li>
+
+    <li>The INC declaration is ignored, as it is already processed by
+    Fcm::CfgFile.</li>
+
+    <li>The MIRROR declaration changes the setting (TOOL, MIRROR) in the
+    Fcm::Config instance.</li>
+  </ul>
+
+  <p>If a full extraction is required, Fcm::Extract will attempt to remove any
+  sub-directories created by previous extractions in the same location.
+  Destination directories are (re-)created as they are required.</p>
+
+  <p>For each repository branch, if the REPOS declaration is a file system
+  path, the VERSION declaration will be set automatically to the word "USER".
+  If the REPOS declaration matches a FCM URL keyword pattern, it is expanded
+  to the full URL. If REPOS is not in the local file system and the VERSION
+  declaration is not a number, the system will attempt to convert the keyword
+  back to a number. If the keyword is "HEAD", the system will use <tt>"svn
+  info"</tt> to determine the revision number. Otherwise, it will attempt to
+  match the keyword with a pre-defined FCM revision keyword. If there are any
+  expanded source directory (EXPSRC) declarations, the system will use
+  <tt>"svn ls -R"</tt> to search recursively for all normal source directories
+  containing regular files. These directories are then added to the "dir"
+  property of the Fcm::ReposBranch instance.</p>
+
+  <h3><a name="task_seq">The extraction sequence</a></h3>
+
+  <p>In the next step, the extract system converts the information given in
+  the list of repository branches into a list of source directory sub-package.
+  Each source directory sub-package will have a destination and a "stack" of
+  extraction sequence. The sequence is basically a list for locating the
+  source directories in the repository branches. The order of the sequence is
+  based on the order in which a repository branch is declared. The logic has
+  already been discussed in the user guide.</p>
+
+  <p>The sequence is implemented by a list of Fcm::SrcDirLayer instances. For
+  each Fcm::SrcDirLayer instance in an extraction sequence of a source
+  directory, the system will attempt to find out its "last commit" revision,
+  using the <tt>"svn info"</tt> command on the particular revision on the
+  given URL. This information is normally cached in a file called ".config" in
+  the cache sub-directory of the extraction destination root. For an
+  incremental extraction, the system will consult the cache to obtain the list
+  of "last commit" revisions for the source directories, instead of having to
+  go through a large number of <tt>"svn info"</tt> commands again. The cache
+  file is read/written using a temporary instance of Fcm::CfgFile. The label
+  in each line consists of the package name of the sub-package, its URL and a
+  revision number. The corresponding value is the "last commit" revision at
+  the given revision number.</p>
+
+  <h3><a name="task_ext">The extraction</a></h3>
+
+  <p>With the extraction sequence in place for each source directory, the
+  extraction itself can now take place. There are two steps in this
+  process.</p>
+
+  <p>For each "layer" in the extraction sequence of each source directory, if
+  the "layer" contains a repository URL, the system extracts from that URL the
+  source directory and place the resulting source files in a cache. From the
+  cache sub-directory of the destination root, the cache for each source
+  directory is placed under a relative path that reflects the sub-package name
+  of the source directory. Underneath this path is a list of directories
+  with names reflecting the name of the branch and the "last commit"
+  revision, (separated by double underscore "__"). These are where the cache of
+  the source files for the "layers" of the source directory are placed.</p>
+
+  <p>It is also worth noting that source files from the local file system are
+  not cached. They will be taken directly from their locations.</p>
+
+  <p>Once we have the cached "layers" (or branches) of the source directories,
+  the system will select the source files from the correct cache before
+  updating the destinations. The logic of which has already been discussed in
+  the user guide.</p>
+
+  <p>At the end of this stage, we should have a directory tree in the
+  destination source sub-directory, with the relative paths to the extracted
+  files reflecting the sub-package names of those files.</p>
+
+  <h3><a name="task_gen">The extract/build configuration generator</a></h3>
+
+  <p>If extraction completes without any error, the system will attempt to
+  write an expanded extract configuration file, where all revision keywords
+  are expanded into numbers, and all source directory packages are declared.
+  Subsequent dependent extractions will be able to re-use this configuration
+  without having to invoke the Subversion client for repository and revision
+  information.</p>
+
+  <p>The system will also attempt to produce a build configuration file for
+  feeding to the build system. The following "conversions" are performed:</p>
+
+  <ul>
+    <li>The destination root becomes the build root.</li>
+
+    <li>The destination directories are all are declared as the source
+    directories.</li>
+
+    <li>All BLD declarations are unchanged, except that the BLD prefixes are
+    removed from the label.</li>
+
+    <li>All USE extract configuration statements are converted to USE build
+    configuration statements.</li>
+  </ul>
+
+  <h3><a name="task_mir">The mirror interface</a></h3>
+
+  <p>The system uses "rdist" or "rsync" to mirror the extracted source code
+  and the generated configuration files to a remote machine.</p>
+  
+  <script type="text/javascript" src="maintain.js">
+  </script>
+</body>
+</html>

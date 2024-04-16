@@ -1,0 +1,488 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html>
+<head>
+  <title>FCM 1.1 Release Notes</title>
+  <meta name="author" content="FCM development team">
+  <meta name="descriptions" content="FCM Release Notes">
+  <meta name="keywords" content="FCM, release">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body>
+  <h1>FCM 1.1 Release Notes<br>
+  06 November 2006</h1>
+
+  <p>These are the release notes for FCM release 1.1. You can use this release
+  of FCM freely under the terms of the <a href="../../LICENSE.html">FCM
+  LICENSE</a>, which you should receive with this distribution. Release 1.1 is
+  the first external release of FCM. (Release 1.0, 30 November 2005, was an
+  internal Met Office release which marked the start of the main migration of
+  systems into FCM.)</p>
+
+  <p>FCM is maintained by the FCM team at the Met Office. Please feedback any
+  bug reports or feature requests to us by <a href=
+  "mailto:fcm-team@metoffice.gov.uk">e-mail</a>.</p>
+
+  <h2>Contents</h2>
+
+  <ul>
+    <li><a href="#new">What's New?</a></li>
+
+    <li><a href="#fix">Minor Enhancements &amp; Bug Fixes</a></li>
+
+    <li><a href="#req">System Requirements</a></li>
+
+    <li><a href="#ins">Installation</a></li>
+  </ul>
+
+  <h2><a name="new" id="new">What's New?</a></h2>
+
+  <p>Build system:</p>
+
+  <ul>
+    <li>Support building of Fortran <span class="mono">BLOCKDATA</span> program
+    units.</li>
+
+    <li>Option to generate Fortran interface files in lower case names after
+    their program units.</li>
+
+    <li>Allow renaming of main program targets using the build configuration
+    file.</li>
+
+    <li>The <span class="mono">fcm_env.ksh</span> file now provides an
+    environment variable for the <span class="mono">etc/</span> sub-directory
+    of the build which can be used if you are "building" data files.</li>
+
+    <li>The build root directory is now locked while a build is running. This
+    prevents multiple instances of build running in the same directory.
+    However, you can bypass the lock if you specify the new <span class=
+    "mono">--ignore-lock</span> option with <span class="mono">fcm
+    build</span>.</li>
+  </ul>
+
+  <p>Extract system:</p>
+
+  <ul>
+    <li>The destination root directory is now locked while an extract is
+    running. This prevents multiple instances of extract running in the same
+    directory. However, you can bypass the lock if you specify the new
+    <span class="mono">--ignore-lock</span> option with <span class="mono">fcm
+    extract</span>.</li>
+  </ul>
+
+  <p>Code management commands:</p>
+
+  <ul>
+    <li><span class="mono">fcm merge</span> now supports custom and reverse
+    modes.</li>
+
+    <li><span class="mono">fcm merge</span> now allows automatic merges in
+    sub-trees if it is safe.</li>
+
+    <li><span class="mono">fcm merge</span> now handles automatic merges from
+    sibling branches that are created at different revisions of the
+    parent.</li>
+
+    <li><span class="mono">fcm branch, fcm diff --branch</span> and
+    <span class="mono">fcm merge</span> can now handle creation, diff and
+    automatic merge of a branch of a branch.</li>
+
+    <li><span class="mono">fcm switch</span> is improved to allow safer
+    switches of your working copy to point to different branches in your
+    project.</li>
+
+    <li><span class="mono">fcm commit</span> now displays your location in the
+    branch, and extra warning when you are committing to the trunk of a
+    project.</li>
+
+    <li>New <span class="mono">fcm mkpatch</span> command.</li>
+  </ul>
+
+  <p>General:</p>
+
+  <ul>
+    <li>Error handling is improved.</li>
+
+    <li>The User Guide is now complete, with a much improved tutorial.</li>
+
+    <li>New document: Fortran coding standard for FCM.</li>
+  </ul>
+
+  <h2><a name="fix" id="fix">Minor Enhancements &amp; Bug Fixes</a></h2>
+
+  <p>Build system:</p>
+
+  <ul>
+    <li>Ignore empty Fortran source files, so that alternate sections can be
+    handled correctly.</li>
+
+    <li>Handle recursive header file dependency correctly in pre-processing
+    stage.</li>
+
+    <li>Identify changes in pre-processed source file, the pre-processor
+    options and "keys" correctly in incremental builds.</li>
+
+    <li>Improve speed of pre-processing in incremental builds by not performing
+    any unnecessary null-action pre-processing.</li>
+
+    <li>Load archiver no longer includes main program objects.</li>
+
+    <li>It is now possible for a sub-package to exclude particular types of
+    dependencies.</li>
+  </ul>
+
+  <p>Extract system:</p>
+
+  <ul>
+    <li>Sub-directories are now extracted with the non-recursive mode of
+    <span class="mono">svn export</span>.</li>
+
+    <li>Peg revisions should now be handled correctly in <span class=
+    "mono">INC</span> extract declarations.</li>
+
+    <li>The command should now fail if a declared source directory does not
+    exist or if the update of an extract destination fails.</li>
+  </ul>
+
+  <p>Code management commands:</p>
+
+  <ul>
+    <li><span class="mono">fcm branch --info</span> and <span class="mono">fcm
+    diff</span> can now take a <span class="mono">PATH</span> as an
+    argument.</li>
+
+    <li>The <span class="mono">--ticket</span> option of <span class="mono">fcm
+    branch --create</span> can now accept multiple tickets.</li>
+
+    <li><span class="mono">fcm branch --info</span> and <span class="mono">fcm
+    diff --branch</span> should now work correctly in a sub-tree of a
+    branch.</li>
+
+    <li><span class="mono">fcm branch --create</span> no longer offers to
+    checkout the branch.</li>
+
+    <li><span class="mono">fcm commit</span> no longer fails when adding a new
+    symbolic link.</li>
+
+    <li>The <span class="mono">--password</span> option is now supported by the
+    <span class="mono">fcm branch --create, fcm branch --delete, fcm
+    commit</span> and <span class="mono">fcm delete</span> commands.</li>
+
+    <li>Empty arguments to code management commands are now parsed
+    correctly.</li>
+
+    <li>The <span class="mono">fcm diff --graphical</span> option no longer
+    fails with binary files.</li>
+
+    <li>FCM will always set the environment variable <span class=
+    "mono">LANG=en_GB</span> before running Subversion commands. This prevents
+    failure of FCM when it attempts to parse output from Subversion commands
+    when a different <span class="mono">LANG</span> setting is used.</li>
+  </ul>
+
+  <p>General:</p>
+
+  <ul>
+    <li>Various other very minor enhancements and bug fixes.</li>
+  </ul>
+
+  <h2><a name="req" id="req">System Requirements</a></h2>
+
+  <h3><a name="req_perl" id="req_perl">Perl</a></h3>
+
+  <p>The core part of FCM is a set of Perl scripts and modules. For the build
+  system to work, you need the following modules installed:</p>
+
+  <ul>
+    <li class="mono">Carp</li>
+
+    <li class="mono">Cwd</li>
+
+    <li class="mono">File::Basename</li>
+
+    <li class="mono">File::Compare</li>
+
+    <li class="mono">File::Find</li>
+
+    <li class="mono">File::Path</li>
+
+    <li class="mono">File::Spec::Functions</li>
+
+    <li class="mono">File::Spec</li>
+
+    <li class="mono">FindBin</li>
+
+    <li class="mono">Getopt::Long</li>
+
+    <li class="mono">POSIX</li>
+  </ul>
+
+  <p>The code management commands and extract system need the following
+  additional modules installed:</p>
+
+  <ul>
+    <li class="mono">File::Temp</li>
+
+    <li class="mono">Getopt::Long</li>
+
+    <li class="mono">HTTP::Date</li>
+
+    <li class="mono">XML::DOM</li>
+  </ul>
+
+  <p>To use the simple GUI for some of the code management commands, you also
+  need the following modules:</p>
+
+  <ul>
+    <li class="mono">Tk::ROText</li>
+
+    <li class="mono">Tk</li>
+  </ul>
+
+  <p>At the Met Office we are currently using the complete FCM system with Perl
+  5.8.x. In addition the build system is being used with Perl 5.6.x.</p>
+
+  <h3><a name="req_svn" id="req_svn">Subversion</a></h3>
+
+  <p>To use the code management commands (and relevant parts of the extract
+  system) you need to have <a href=
+  "http://subversion.tigris.org/">Subversion</a> installed.</p>
+
+  <ul>
+    <li>FCM makes extensive use of peg revisions in both the code management
+    and extract systems. This requires Subversion 1.2.0.</li>
+
+    <li>At the Met Office we are currently using Subversion 1.3.2 (although
+    1.2.3 was used until very recently).</li>
+  </ul>
+
+  <p>Note that the extract system can mirror extracted code to a remote
+  platform for building. Therefore it is only necessary to have Subversion
+  installed on the platform where you do your code development. If you use
+  other platforms purely for building and running then you do not need to have
+  Subversion installed on these platforms.</p>
+
+  <h3><a name="req_trac" id="req_trac">Trac</a></h3>
+
+  <p>The use of <a href="http://projects.edgewall.com/trac/">Trac</a> is
+  entirely optional (although highly recommended if you are using Subversion).
+  At the Met Office we are currently using version 0.9.6.</p>
+
+  <h3><a name="req_other" id="req_other">Other Requirements</a></h3>
+
+  <p>The <tt>fcm diff --graphical</tt> and <tt>fcm conflicts</tt> commands
+  require <a href="http://furius.ca/xxdiff/">xxdiff</a>. At the Met Office we
+  are currently using version 3.1.</p>
+
+  <p>The build system requires <a href=
+  "http://www.gnu.org/software/make/make.html">GNU make</a>. At the Met Office
+  we are currently using version 3.79.x and 3.80.</p>
+
+  <p>Optionally, the build system can use <a href=
+  "http://www.ifremer.fr/ditigo/molagnon/fortran90">f90aib</a> to generate
+  interface files. However, there is also a built in Perl based interface file
+  generator which is quicker and better in most cases so you are unlikely to
+  need f90aib unless you hit a problem with some particular code.</p>
+
+  <p>FCM is intended to run on a Unix/Linux system. It is currently used at the
+  Met Office on Linux (Red Hat 9 and Red Hat Enterprise 2.1 and 4.4) and HP-UX
+  11.00.</p>
+
+  <h2><a name="ins" id="ins">Installation</a></h2>
+
+  <p>FCM is distributed in the form of a compressed tar file. Un-pack the tar
+  file into an appropriate location on your system. Then add the <tt>bin</tt>
+  directory into your PATH. Once you have done this you should now have full
+  access to the FCM system, assuming that you have met the requirements
+  described in the previous section.</p>
+
+  <p>If you wish to define keywords for your systems you will need to create a
+  file <tt>etc/fcm.cfg</tt>. An example file, <tt>fcm.cfg.eg</tt>, is provided
+  which is a copy of the file currently used at the Met Office. For further
+  details please refer to the section <a href=
+  "../user_guide/system_admin.html#fcm-keywords">FCM keywords</a> in the System
+  Admin chapter of the User Guide.</p>
+
+  <p>The <tt>doc</tt> directory contains all the system documentation.</p>
+
+  <ul>
+    <li><tt>doc/release_notes</tt> contains these release notes. It also
+    contains the release notes for all previous versions which may be useful if
+    you have skipped any versions.</li>
+
+    <li><tt>doc/user_guide</tt> contains the FCM User Guide in both <a href=
+    "../user_guide/index.html">HTML</a> and <a href=
+    "../user_guide/fcm-user-guide.pdf">PDF</a> form.</li>
+
+    <li><tt>doc/design</tt> contains the <a href="../design/index.html">FCM
+    Detailed Design</a> document (currently in draft form).</li>
+
+    <li><tt>doc/standards</tt> contains the FCM <a href=
+    "../standards/perl_standard.html">Perl</a> and <a href=
+    "../standards/fortran_standard.html">Fortran</a> coding standards. The Perl
+    standard describes the standards followed by the FCM code. The Fortran
+    standard contains some <a href=
+    "../standards/fortran_standard.html#fcm">specific advice</a> on the best
+    way of writing Fortran code for use with FCM as well as more general advice
+    on good practise.</li>
+  </ul>
+
+  <p>The <tt>tutorial</tt> directory contains the files necessary to set up a
+  tutorial repository. This will allow you to follow the <a href=
+  "../user_guide/getting_started.html#tutorial">tutorial section</a> in the
+  User Guide.</p>
+
+  <ul>
+    <li>The file <tt>tutorial/repos/tutorial.dump</tt> should be loaded into an
+    empty repository using the <tt>svnadmin load</tt> command.</li>
+
+    <li>The hook scripts in <tt>tutorial/hook</tt> should then be installed in
+    this repository in order to prevent any commits to the trunk. Note that the
+    configuration file <tt>svnperms.conf</tt> assumes that the tutorial
+    repository is called <tt>tutorial_svn</tt>. Please edit this file if you
+    use a different name.</li>
+
+    <li>The repository should be configured to allow users write access. You
+    may find it easiest to simply allow anonymous access.</li>
+
+    <li>A Trac system should be configured associated with the Tutorial
+    repository. You then need to allow users write access. You may find it
+    easiest to set up a number of guest accounts for this purpose.</li>
+  </ul>
+
+  <p>The <tt>templates</tt> directory contains various example scripts which
+  you may find useful. Note that these scripts are all specific to the Met
+  Office and may contain hard coded paths and email addresses. They are
+  provided in the hope that you may find them useful as templates for setting
+  up similar scripts of your own. However, they should only be used after
+  careful review to adapt them to your environment. The contents are as
+  follows:</p>
+
+  <table summary="list of template scripts" border="1" width="100%">
+    <tr>
+      <th>Script</th>
+
+      <th>Description</th>
+    </tr>
+
+    <tr>
+      <th>templates/hook/pre-commit</th>
+
+      <td>
+        This script restricts write-access to the repository by checking the
+        following:
+
+        <ul>
+          <li>It executes the Subversion utility <tt>svnperms.py</tt> if it
+          exists. This utility checks whether the author of the current
+          transaction has enough permission to write to particular paths in the
+          repository.</li>
+
+          <li>It checks the disk space required by the current transaction. It
+          fails the commit if it requires more than 5Mb of disk space.</li>
+        </ul>
+      </td>
+    </tr>
+
+    <tr>
+      <th>templates/hook/post-commit</th>
+
+      <td>A simple post-commit hook script which runs the script
+      <tt>post-commit-background</tt> in the background.</td>
+    </tr>
+
+    <tr>
+      <th>templates/hook/post-commit-background</th>
+
+      <td>
+        This script runs in the background after each commit
+
+        <ul>
+          <li>It updates a <tt>&lt;repos&gt;.latest</tt> file with the latest
+          revision number.</li>
+
+          <li>It creates a dump of the new revision.</li>
+
+          <li>It calls the script <tt>background_updates.pl</tt> if it
+          exists.</li>
+        </ul>This script is installed as standard in all our repositories.
+      </td>
+    </tr>
+
+    <tr>
+      <th>templates/hook/background_updates.pl</th>
+
+      <td>An example of how you may want to set up a
+      <tt>background_updates.pl</tt> script to perform post-commit tasks for a
+      specific repository. This script uses a lock file to prevent multiple
+      commits in quick succession from causing problems.</td>
+    </tr>
+
+    <tr>
+      <th>templates/hook/pre-revprop-change</th>
+
+      <td>A simple pre-revprop-change hook script which runs the script
+      <tt>pre-revprop-change.pl</tt>.</td>
+    </tr>
+
+    <tr>
+      <th>templates/hook/pre-revprop-change.pl</th>
+
+      <td>If a user attempts to modify the log message of a changeset and
+      he/she is not the original author of the changeset, this script will
+      e-mail the original author. You can also set up a watch facility to
+      monitor changes of log messages that affect particular paths in the
+      repository. For further details please refer to the section <a href=
+      "../user_guide/system_admin.html#svn_watch">Watching changes in log
+      messages</a> in the System Admin chapter of the User Guide.</td>
+    </tr>
+
+    <tr>
+      <th>templates/hook/post-revprop-change</th>
+
+      <td>A simple post-revprop-change hook script which runs the script
+      <tt>post-revprop-change.py</tt>.</td>
+    </tr>
+
+    <tr>
+      <th>templates/hook/post-revprop-change.py</th>
+
+      <td>This hook script updates the Trac SQLite database following a
+      successful change in the log message.</td>
+    </tr>
+
+    <tr>
+      <th>templates/utils/cron_template.ksh</th>
+
+      <td>An example of how you might set up a cron job to make use of the
+      <tt>&lt;repos&gt;.latest</tt> file.</td>
+    </tr>
+
+    <tr>
+      <th>templates/utils/daily_cron</th>
+
+      <td>The cron job which we run each night. It verifies and backs up each
+      of our repositories, housekeeps the revision dumps created by
+      <tt>post-commit-background</tt> and backs up each of our Trac systems. It
+      also handles the distribution of FCM to various platforms at the Met
+      Office.</td>
+    </tr>
+
+    <tr>
+      <th>templates/utils/fcm_add_trac.pl</th>
+
+      <td>This script sets up a new Trac system and applies some configuration
+      options which we use by default at the Met Office.</td>
+    </tr>
+
+    <tr>
+      <th>templates/utils/recover_svn.pl</th>
+
+      <td>This script allows us to recover all of our Subversion repositories
+      by using the nightly backups and the repository dumps.</td>
+    </tr>
+  </table>
+</body>
+</html>

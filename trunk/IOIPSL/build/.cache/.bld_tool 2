@@ -1,0 +1,39 @@
+FPPKEYS      CPP_NONE %FPP_DEF
+FPP_DEFINE   -D
+AR           ar
+FPP_INCLUDE  -I
+FPP          %FPP
+CC           cc
+FC_OUTPUT    -o
+LDFLAGS       -L/lib -lnetcdff
+LD_OUTPUT    -o
+ARFLAGS      rs
+CC_OUTPUT    -o
+GRAPHIC_DIFF xxdiff
+LD_LIBSEARCH -L
+REMOTE_SHELL remsh
+MAKEFLAGS    
+CPP_DEFINE   -D
+CPPKEYS      
+LD           gfortran
+MIRROR       rsync
+CPP_INCLUDE  -I
+CPP          cpp
+FC           gfortran
+FC_INCLUDE   -I
+FPPFLAGS     -P -traditional
+INTERFACE    file
+CC_COMPILE   -c
+CC_DEFINE    -D
+FFLAGS       -c -fdefault-real-8 -fdefault-double-8 -ffree-line-length-none -fno-align-commons -fcray-pointer -O3 -I/include
+LD_LIBLINK   -l
+SHELL        /bin/bash
+FC_COMPILE   -c
+FC_DEFINE    -D
+MAKE_SILENT  -s
+CFLAGS       
+GENINTERFACE ECMWF
+CC_INCLUDE   -I
+MAKE_JOB     -j
+MAKE         make
+CPPFLAGS     -C

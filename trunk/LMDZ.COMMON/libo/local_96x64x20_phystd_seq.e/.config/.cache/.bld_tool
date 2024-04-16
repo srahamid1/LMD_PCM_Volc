@@ -1,0 +1,40 @@
+CPPKEYS       CPP_PHYS %CPP_DEF
+AR            ar
+CPP           cpp
+LD_OUTPUT     -o
+MAKEFLAGS     
+LDFLAGS       -Wl,-rpath,/usr/lib:/home/jsmekens/Documents/LMDZtrunk/netcdf-4.0.1/lib  -L/home/jsmekens/Documents/LMDZtrunk/netcdf-4.0.1/lib -lnetcdff -lnetcdf
+FPP_INCLUDE   -I
+REMOTE_SHELL  remsh
+SHELL         /bin/bash
+FC_INCLUDE    -I
+FPP           cpp
+CC_INCLUDE    -I
+CPPFLAGS      %CPP_FLAGS %INCDIR
+MAKE_JOB      -j
+CFLAGS        %C_OPTIM %INCDIR
+CC_DEFINE     -D
+FC            /usr/bin/mpif90
+FC_COMPILE    -c
+CC_OUTPUT     -o
+GENINTERFACE  none
+MIRROR        rsync
+GRAPHIC_DIFF  xxdiff
+CC_COMPILE    -c
+CPP_DEFINE    -D
+LD            /usr/bin/mpif90
+FC_DEFINE     -D
+ARFLAGS       rs
+FPPKEYS       CPP_PHYS NC_DOUBLE
+MAKE_SILENT   -s
+FC_OUTPUT     -o
+FPPFLAGS      -P -traditional -I/home/jsmekens/Documents/GCM/trunk/LMDZ.COMMON/libf/aeronostd -I/home/jsmekens/Documents/LMDZtrunk/netcdf-4.0.1/include
+INTERFACE     file
+CPP_INCLUDE   -I
+FPP_DEFINE    -D
+FFLAGS__muphy -c -I/home/jsmekens/Documents/GCM/trunk/LMDZ.COMMON/libf/aeronostd -I/home/jsmekens/Documents/LMDZtrunk/netcdf-4.0.1/include -O3 
+LD_LIBSEARCH  -L
+MAKE          make
+FFLAGS        -cpp -ffree-line-length-0 -fdefault-real-8 -DNC_DOUBLE -fdefault-double-8 -O3  -I/home/jsmekens/Documents/GCM/trunk/LMDZ.COMMON/libf/aeronostd -I/home/jsmekens/Documents/LMDZtrunk/netcdf-4.0.1/include
+CC            %C_COMPILER
+LD_LIBLINK    -l

@@ -1,0 +1,277 @@
+#!/bin/ksh
+
+out=~fcm/FCM/daily_cron.out
+svn_live=/data/local/fcm/svn/live
+svn_backup=~fcm/svn/backups
+svn_tmp=/var/tmp/fcm/svn/backups
+svn_dump=~fcm/svn/dumps
+trac_live=~fcm/trac/live
+trac_backup=~fcm/trac/backups
+trac_tmp=/var/tmp/fcm/trac/backups
+err=''
+
+export RSYNC_RSH=rsh # remote shell for "rsync"
+
+{
+
+  # Verify and backup Subversion repository database
+  # ----------------------------------------------------------------------------
+  cd $svn_live
+  tmpfile=/tmp/${USER}.$$
+  now=$(date +%s)
+  for dir in *; do
+    if [[ ! -d $dir ]]; then continue; fi
+
+    # Verify
+    # --------------------------------------------------------------------------
+    echo "$(date): Verifying $dir ..."
+    sed '/^\* Verified revision [0-9][0-9]*\./d'<<EOF
+$(svnadmin verify $dir 2>&1; echo $? > $tmpfile)
+EOF
+    RC=$(cat $tmpfile)
+
+    if ((RC != 0)); then
+      err="${err}Error in $dir repository integrity. "
+      continue
+    fi
+
+    # Backup
+    # --------------------------------------------------------------------------
+    # Create the temporary backup location if it does not exists
+    if [[ ! -d $svn_tmp ]]; then
+      mkdir -p $svn_tmp
+
+      if (($? != 0)); then
+        err="${err}Error creating $svn_tmp. "
+        break
+      fi
+    fi
+
+    # Hotcopy to temporary location
+    tmp_backup_dir=$svn_tmp/$dir
+    echo "$(date): Hotcopying $dir SVN repository to $tmp_backup_dir ..."
+    svnadmin hotcopy $dir $tmp_backup_dir
+
+    if (($? != 0)); then
+      err="${err}Error hotcopying $dir SVN repository to $tmp_backup_dir. "
+      continue
+    fi
+
+    # Create the backup location if it does not exists
+    if [[ ! -d $svn_backup ]]; then
+      mkdir -p $svn_backup
+
+      if (($? != 0)); then
+        err="${err}Error creating $svn_backup. "
+        break
+      fi
+    fi
+
+    # Tar and gzip the backup
+    new_backup=$svn_backup/$dir.$(date +%Y%m%d).tgz
+    echo "$(date): Creating tar archive in $new_backup ..."
+    tar -C $svn_tmp -c -z -f $new_backup $(basename $tmp_backup_dir)
+
+    if (($? != 0)); then
+      err="${err}Error creating tar archive in $new_backup. "
+      continue
+    fi
+
+    # Remove the temporary hotcopy
+    rm -rf $tmp_backup_dir
+
+    if (($? != 0)); then
+      err="${err}Error removing $tmp_backup_dir. "
+    fi
+
+    # Remove the old backup, if necessary
+    backup=$svn_backup/$dir.tgz
+
+    if [[ -f $backup ]]; then
+      rm -f $backup
+
+      if (($? != 0)); then
+        err="${err}Error removing old copy of $backup. "
+        continue
+      fi
+    fi
+
+    # Move today's backup to the final location
+    echo "$(date): Renaming $new_backup to $backup ..."
+    mv $new_backup $backup
+
+    if (($? != 0)); then
+      err="${err}Error renaming $new_backup to $backup. "
+    fi
+
+    # Housekeep the revision dumps
+    # --------------------------------------------------------------------------
+    if [[ -d $svn_dump/$dir ]]; then
+      # Keep dumps created in the last 3 days
+      echo "$(date): Housekeeping dumps in $svn_dump/$dir ..."
+
+      cd $svn_dump/$dir
+      for rev in *; do
+        # Check that $rev is a regular file
+        if [[ ! -f $rev ]]; then
+          continue
+        fi
+
+        # 3 days = 24 * 60 * 60 * 3 = 259200 seconds
+        if (($now - $(stat -c %Y $rev) > 259200)); then
+          echo "$(date): Removing $svn_dump/$dir/$rev ..."
+          rm -f $rev
+          if (($? != 0)); then
+            err="${err}Error removing dump $svn_dump/$dir/$rev. "
+          fi
+        fi
+      done
+
+      cd $OLDPWD
+    fi
+  done
+
+  # Backing up Trac systems
+  # ----------------------------------------------------------------------------
+  cd $trac_live
+  for dir in *; do
+    if [[ ! -d $dir ]]; then continue; fi
+
+    # Backup
+    # --------------------------------------------------------------------------
+    # Create the temporary backup location if it does not exists
+    if [[ ! -d $trac_tmp ]]; then
+      mkdir -p $trac_tmp
+
+      if (($? != 0)); then
+        err="${err}Error creating $trac_tmp. "
+        break
+      fi
+    fi
+
+    # Hotcopy to temporary location
+    tmp_backup_dir=$trac_tmp/$dir
+    echo "$(date): Hotcopying $dir Trac system to $tmp_backup_dir ..."
+    trac-admin $dir hotcopy $tmp_backup_dir
+
+    if (($? != 0)); then
+      err="${err}Error hotcopying $dir Trac system to $tmp_backup_dir. "
+      continue
+    fi
+
+    # Create the backup location if it does not exists
+    if [[ ! -d $trac_backup ]]; then
+      mkdir -p $trac_backup
+
+      if (($? != 0)); then
+        err="${err}Error creating $trac_backup. "
+        break
+      fi
+    fi
+
+    # Tar and gzip the backup
+    new_backup=$trac_backup/$dir.$(date +%Y%m%d).tgz
+    echo "$(date): Creating tar archive in $new_backup ..."
+    tar -C $trac_tmp -c -z -f $new_backup $(basename $tmp_backup_dir)
+
+    if (($? != 0)); then
+      err="${err}Error creating tar archive in $new_backup. "
+      continue
+    fi
+
+    # Remove the temporary hotcopy
+    rm -rf $tmp_backup_dir
+
+    if (($? != 0)); then
+      err="${err}Error removing $tmp_backup_dir. "
+    fi
+
+    # Rename backups on success
+    # --------------------------------------------------------------------------
+    # Shift backup "1" to backup "2", and then backup "0" to backup "1"
+    for i in 1 0; do
+      old_file=$trac_backup/$dir.$i.tgz
+      new_file=$trac_backup/$dir.$((i + 1)).tgz
+
+      # Check if move is necessary
+      if [[ ! -f $old_file ]]; then
+        continue
+      fi
+
+      if [[ -f $new_file ]]; then
+        echo "$(date): Removing $new_file ..."
+        rm -f $new_file
+
+        if (($? != 0)); then
+          err="${err}Error removing $new_file. "
+          break
+        fi
+      fi
+
+      echo "$(date): Renaming $old_file to $new_file ..."
+      mv $old_file $new_file
+      if (($? != 0)); then
+        err="${err}Error renaming $old_file. "
+        break
+      fi
+    done
+
+    # Move today's backup to "0", if possible
+    backup=$trac_backup/$dir.0.tgz
+    if [[ ! -f $backup ]]; then
+      echo "$(date): Renaming $new_backup to $backup ..."
+      mv $new_backup $backup
+      if (($? != 0)); then
+        err="${err}Error renaming $new_backup to $backup. "
+      fi
+    fi
+  done
+
+  # Update the Trac password file and databases with latest login information
+  # ----------------------------------------------------------------------------
+  echo "$(date): Updating password files and Trac databases ..."
+  $(dirname $0)/fcm_manage_login.py
+  if (($? != 0)); then
+    err="${err} Error updating Trac password file and databases. "
+  fi
+
+  # Sync the working copy to the NEC
+  # ----------------------------------------------------------------------------
+  echo "$(date): Updating NEC ..."
+  rsync -a -v --timeout=1800 --exclude='.*' --exclude='FCM/doc' \
+    --delete-excluded ~/FCM/work/FCM fcm@tx01:~/FCM/work
+  if (($? != 0)); then
+    err="${err}Error updating NEC. "
+  fi
+
+  # Update "synch" path from "synch" machine
+  # ----------------------------------------------------------------------------
+  echo "$(date): Updating synch machine ..."
+  for subdir in bin lib etc; do
+    rsync -a -v --timeout=1800 --exclude='.*' ~/FCM/work/FCM/src/$subdir/* \
+      fcm@hc0100:/opt/ukmo/utils/supported/portable/$subdir/
+
+    if (($? != 0)); then
+      err="${err}Error updating $subdir/ on synch machine. "
+    fi
+  done
+
+  # Final report
+  # ----------------------------------------------------------------------------
+  if [[ -n $err ]]; then
+    subject="$(basename $0) finished with errors: $err"
+
+  else
+    subject="$(basename $0) finished normally."
+  fi
+
+  echo "$(date): $subject"
+} 1>$out 2>&1
+
+# Report completion via e-mail
+# ------------------------------------------------------------------------------
+mail -s "$subject" my.name@somewhere.org <<EOF
+$(<$out)
+EOF
+
+# EOF

@@ -1,0 +1,29 @@
+/* Configuration file for html2ps on the FCM user guide */
+
+h1 {
+  color: navy;
+  text-align: center;
+}
+
+h2 {
+  color: navy;
+}
+
+h3 {
+  color: #40668c;
+}
+
+h4 {
+  font-size: 12pt;
+}
+
+a:link {
+  color: blue;
+}
+
+@page {
+  margin-left: 2cm;
+  margin-right: 2cm;
+  margin-top: 2cm;
+  margin-bottom: 2cm;
+}

@@ -1,0 +1,128 @@
+/* New stylesheet for FCM - created by Jim Bolton, 18 April 2005
+   Needs to be reviewed. */
+
+@media screen {
+  body {
+    background-color: #ffffcc;
+    color: black;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12pt;
+  }
+}
+@media print {
+  body {
+    color: black;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12pt;
+  }
+}
+h1 {
+  background-color: #ccccff;
+  color: navy;
+  font-size: 200%;
+  font-weight: bold;
+  text-align: center;
+  padding: 20px;
+}
+h2 {
+  background-color: #ccccff;
+  color: navy;
+  font-size: 175%;
+  font-weight: bold;
+  padding: 15px;
+}
+h3 {
+  background-color: #ccccff;
+  color: #40668c;
+  font-size: 150%;
+  font-weight: bold;
+  padding: 10px;
+}
+h4 {
+  color: #40668c;
+  font-size: medium;
+  font-weight: bold;
+}
+h5 {
+  background-color: #ccccff;
+  color: #40668c;
+  font-size: medium;
+  font-weight: bold;
+}
+table {
+  margin-top: 5px;
+  margin-bottom: 10px;
+}
+
+th {
+  background-color: #ccccff;
+}
+
+td {
+  background-color: transparent;
+}
+
+li {
+  padding: 5px;
+}
+
+img {
+  margin: 5px;
+}
+
+:link {
+  color: blue;
+  text-decoration: underline;
+}
+
+:visited {
+  color: purple;
+  text-decoration: none;
+}
+
+:active, :hover {
+  color: blue;
+  text-decoration: underline;
+}
+
+address {
+  text-align: right;
+  font-size: small;
+  font-style: normal;
+}
+
+code {
+  font-family: "Courier New", Courier, monospace;
+}
+
+pre {
+  background-color: #ffffcc;
+  font-family: "Courier New", Courier, monospace;
+  padding: 10px;
+}
+
+.yell {
+  background-color: #ffffcc;
+  padding: 5px;
+}
+
+.yell td {
+  background-color: transparent;
+}
+
+.image {
+  text-align: center;
+  font-weight: bold;
+}
+
+.gray {
+  color: gray;
+}
+
+.mono {
+  font-family: "Courier New", Courier, monospace;
+}
+
+.pad th, .pad td {
+  padding: 5px;
+}

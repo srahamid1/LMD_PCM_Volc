@@ -1,0 +1,40 @@
+CC_DEFINE     -D
+FC_INCLUDE    -I
+MAKE          make
+CC_COMPILE    -c
+FC_COMPILE    -c
+FC_DEFINE     -D
+CC_INCLUDE    -I
+CPP           cpp
+INTERFACE     file
+FC_OUTPUT     -o
+REMOTE_SHELL  remsh
+MIRROR        rsync
+ARFLAGS       rs
+CC_OUTPUT     -o
+AR            ar
+GRAPHIC_DIFF  xxdiff
+LD_LIBSEARCH  -L
+LD_OUTPUT     -o
+FPP           cpp
+LDFLAGS       -Wl,-rpath,/usr/local/lib:/usr/local/Cellar/netcdf-fortran/4.6.1/lib  -L/usr/local/Cellar/netcdf-fortran/4.6.1/lib -lnetcdff -lnetcdf -lnetcdf
+FPPFLAGS      -P -traditional -I/Users/Saira/Documents/GCM/trunk/LMDZ.COMMON/libf/aeronostd -I/usr/local/Cellar/netcdf-fortran/4.6.1/include -I/usr/local/Cellar/netcdf-fortran/4.6.1/include
+LD            /usr/local/bin/mpif90
+MAKEFLAGS     
+CC            %C_COMPILER
+SHELL         /bin/bash
+FC            /usr/local/bin/mpif90
+FFLAGS__muphy -c -I/Users/Saira/Documents/GCM/trunk/LMDZ.COMMON/libf/aeronostd -I/usr/local/Cellar/netcdf-fortran/4.6.1/include -I/usr/local/Cellar/netcdf-fortran/4.6.1/include -O3 
+CPPFLAGS      %CPP_FLAGS %INCDIR
+CPP_DEFINE    -D
+FPP_INCLUDE   -I
+GENINTERFACE  none
+FPPKEYS       CPP_PHYS NC_DOUBLE
+FFLAGS        -cpp -ffree-line-length-0 -fdefault-real-8 -DNC_DOUBLE -fdefault-double-8 -fallow-argument-mismatch -O3  -I/Users/Saira/Documents/GCM/trunk/LMDZ.COMMON/libf/aeronostd -I/usr/local/Cellar/netcdf-fortran/4.6.1/include -I/usr/local/Cellar/netcdf-fortran/4.6.1/include
+LD_LIBLINK    -l
+CFLAGS        %C_OPTIM %INCDIR
+CPPKEYS       CPP_PHYS %CPP_DEF
+MAKE_SILENT   -s
+MAKE_JOB      -j
+FPP_DEFINE    -D
+CPP_INCLUDE   -I

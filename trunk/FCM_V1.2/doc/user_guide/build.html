@@ -1,0 +1,1976 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html>
+<head>
+  <title>FCM System User Guide: The Build System</title>
+  <meta name="author" content="FCM development team">
+  <meta name="descriptions" content="User Guide - The Build System">
+  <meta name="keywords" content="FCM, user guide, extract, build">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body>
+  <address>
+    <a href="index.html">FCM System User Guide</a> &gt; The Build System
+  </address>
+
+  <h1>The Build System</h1>
+
+  <p>The build system analyses the directory tree containing a set of source
+  code, processes the configuration, and invokes <em>make</em> to compile/build
+  the source code into the project executables. In this chapter, we shall use
+  many examples to explain how to use the build system. At the end of this
+  chapter, you should be able to use the build system, either by defining the
+  build configuration file directly or by using the extract system to generate
+  a suitable build configuration file.</p>
+
+  <h2><a name="command">The Build Command</a></h2>
+
+  <p>To invoke the build system, simply issue the command:</p>
+  <pre>
+fcm build
+</pre>
+
+  <p>By default, the build system searches for a build configuration file
+  "bld.cfg" in "$PWD" and then "$PWD/cfg". If a build configuration file is
+  not found in these directories, the command fails with an error. If a build
+  configuration file is found, the system will use the configuration specified
+  in the file to perform the build. If you use the extract system to extract
+  your source tree, a build configuration should be written for you
+  automatically at the "cfg/" sub-directory of the destination root
+  directory.</p>
+
+  <p>If the root directory of the build does not exist, the system performs a
+  new full build at this directory. If a previous build already exists at this
+  directory, the system performs an incremental build. If a full (fresh) build
+  is required for whatever reason, you can invoke the build system using the
+  "-f" option, (i.e. the command becomes "fcm build -f").</p>
+
+  <p>The build system uses GNU <em>make</em> to perform the majority of the
+  build. GNU <em>make</em> has a "-j &lt;jobs&gt;" option to specify the
+  number of &lt;jobs&gt; to run simultaneously. Invoking the build system with
+  the same option triggers this option when the build system invokes the
+  <em>make</em> command. The argument to the option &lt;jobs&gt; must be an
+  integer. The default is 1. For example, the command "fcm build -j 4"
+  will allow <em>make</em> to perform 4 jobs simultaneously.</p>
+
+  <p>For further information on the build command, please see <a href=
+  "command_ref.html#fcm_bld">FCM Command Reference &gt; fcm build</a>.</p>
+
+  <h2><a name="basic">Basic Features</a></h2>
+
+  <p>The build configuration file is the user interface of the build system. It
+  is a line based text file. You can create your own build configuration file
+  or you can use the extract system to create one for you.  For a complete set
+  of build configuration file declarations, please refer to the <a
+  href="annex_bld_cfg.html">Annex: Declarations in FCM build configuration
+  file</a>.</p>
+
+  <h3><a name="basic_build">Basic build configuration</a></h3>
+
+  <p>Suppose we have a directory at "$HOME/example". Its sub-directory
+  at "$HOME/example/src" contains a source tree to be built. You may
+  want to have a build configuration file "$HOME/example/cfg/bld.cfg",
+  which may contain:</p>
+
+  <table class="pad" summary="build_example1" border="1" width="100%">
+    <tr>
+      <th>Build configuration example 1 - basic build configuration</th>
+    </tr>
+
+    <tr>
+      <td>
+        <pre>
+cfg::type     bld                           # line 1
+cfg::version  1.0                           # line 2
+
+dir::root     $HOME/example                 # line 4
+
+target        foo.exe bar.exe               # line 6
+
+tool::fc      ifc                           # line 8
+tool::fflags  -O3                           # line 9
+tool::cc      gcc                           # line 10
+tool::cflags  -O3                           # line 11
+tool::ld      ifc                           # line 12
+tool::ldflags -O3 -L$(HOME)/lib -legg -lham # line 13
+</pre>
+      </td>
+    </tr>
+  </table>
+
+  <p>Here is an explanation of what each line does:</p>
+
+  <ul>
+    <li>line 1: the label CFG::TYPE declares the type of the configuration
+    file. The value "bld" tells the system that it is a build configuration
+    file.</li>
+
+    <li>line 2: the label CFG::VERSION declares the version of the build
+    configuration file. The current default is "1.0". Although it is not
+    currently used, if we have to change the format of the configuration file
+    at a later stage, we shall be able to use this number to determine whether
+    we are reading a file with an older format or one with a newer
+    format.</li>
+
+    <li>line 4: the label DIR::ROOT declares the root directory of the current
+    build.</li>
+
+    <li>line 6: the label TARGET declares a list of "default" targets. The
+    default targets of the current build will be "foo.exe" and "bar.exe".</li>
+
+    <li>line 8: the label TOOL::FC declares the Fortran compiler command.</li>
+
+    <li>line 9: the label TOOL::FFLAGS declares the options to be used when
+    invoking the Fortran compiler command.</li>
+
+    <li>line 10: the label TOOL::CC declares the C compiler command.</li>
+
+    <li>line 11: the label TOOL::CFLAGS declares the options to be used when
+    invoking the C compiler command.</li>
+
+    <li>line 12: the label TOOL::LD declares the linker command.</li>
+
+    <li>line 13: the label TOOL::LDFLAGS declares the options to be used when
+    invoking the linker command.</li>
+  </ul>
+
+  <p>When we invoke the build system, it reads the above configuration file.  It
+  will go through various internal processes, such as dependency generations, to
+  obtain the required information to prepare the <em>Makefile</em> of the build.
+  (All of which will be described in later sections.) The <em>Makefile</em> of
+  the build will be placed at "$HOME/example/bld". The system will then invoke
+  <em>make</em> to build the targets specified in line 6, i.e. "foo.exe" and
+  "bar.exe" using the build tools specified between line 8 to line 13. On a
+  successful build, the target executables will be sent to "$HOME/example/bin/".
+  The build system also creates a shell script called "fcm_env.ksh" in
+  "$HOME/example/". If you source the shell script, it will export your PATH
+  environment variable to search the "$HOME/example/bin/" directory for
+  executables.</p>
+
+  <p>N.B. You may have noticed that the "-c" (compile to object file only)
+  option is missing from the compiler flags declarations. This is because the
+  option is inserted automatically by the build system, unless it is already
+  declared.</p>
+
+  <table class="pad" summary=
+  "note - declaration of source directories for build" border="1" width="100%">
+    <tr>
+      <th>Note - declaration of source directories for build</th>
+    </tr>
+
+    <tr>
+      <td>
+        Source directories do not have to reside in the source sub-directory
+        of the build root directory. They can be anywhere, but you will have to
+        declare them individually, using the label SRC::&lt;pcks&gt;, where
+        &lt;pcks&gt; is the sub-package name in which the source directory
+        belongs. E.g.
+
+        <pre>
+# Declare a source directory in the sub-package "foo::bar"
+src::foo::bar  $HOME/foo/bar
+</pre>
+
+        <p>By default, the build system searches the "src/"
+        sub-directory of the build root directory for sub-package source
+        directories. If all source directories are already declared
+        explicitly, you can switch off the automatic directory search by
+        setting the SEARCH_SRC flag to 0. E.g.</p>
+
+        <pre>
+search_src  0
+</pre>
+
+        <p>As mentioned in the previous chapter, the name of a sub-package
+        &lt;pcks&gt; provides a unique namespace for a file container. The
+        name of a sub-package is a list of words delimited by the double
+        colons "::", which is turned into the double underscores "__" by
+        the build system internally. Please avoid using "::" and "__" for
+        naming your files and directories.</p>
+        
+        <p>In the build system, the sub-package name also provides an
+        "inheritance" relationship for sub-packages. For instance, we may
+        have a sub-package called "foo::bar::egg", which belongs to the
+        sub-package "foo::bar", which belongs to the package "foo".</p>
+        
+        <ul>
+          <li>If we declare a global build tool, it applies to all
+          packages.</li>
+          
+          <li>If we declare a build tool for "foo", it applies also to the
+          sub-package "foo::bar" and "foo::bar::egg".</li>
+          
+          <li>If we declare a build tool for "foo::bar", it applies also to
+          "foo::bar::egg", but not to other sub-packages in "foo".</li>
+        </ul>
+      </td>
+    </tr>
+  </table>
+
+  <h3><a name="basic_extract">Build configuration via the extract
+  system</a></h3>
+
+  <p>As mentioned earlier, you can obtain a build configuration file through
+  the extract system. The following example is what you may have in your
+  extract configuration in order to obtain a similar configuration as example
+  1:</p>
+
+  <table class="pad" summary="build_example2" border="1" width="100%">
+    <tr>
+      <th>Build configuration example 2 - created by the extract system</th>
+    </tr>
+
+    <tr>
+      <td>
+        <pre>
+cfg::type          ext                           # line 1
+cfg::version       1.0                           # line 2
+
+dest::rootdir      $HOME/example                 # line 4
+
+bld::target        foo.exe bar.exe               # line 6
+
+bld::tool::fc      ifc                           # line 8
+bld::tool::fflags  -O3                           # line 9
+bld::tool::cc      gcc                           # line 10
+bld::tool::cflags  -O3                           # line 11
+bld::tool::ld      ifc                           # line 12
+bld::tool::ldflags -O3 -L$(HOME)/lib -legg -lham # line 13
+
+# ... and other declarations for repositories and source directories ...
+</pre>
+      </td>
+    </tr>
+  </table>
+
+  <p>It is easy to note the similarities and differences between example 1 and
+  example 2. Example 2 is an extract configuration file. It extracts to a
+  destination root directory that will become the root directory of the build.
+  Line 6 to line 13 are the same declarations, except that they are now
+  prefixed with "BLD::". In an extract configuration file, any lines prefixed
+  with "BLD::" means that they are build configuration setting. These lines
+  are "ignored" by the extract system but are parsed down to the output build
+  configuration file, with the "BLD::" prefix removed. (Note: the "BLD::" prefix
+  is optional for declarations in a build configuration file.)</p>
+
+  <p>N.B. If you use the extract system to mirror an extraction to a remote
+  machine, the extract system will assume that the root directory of the
+  remote destination is the root directory of the build, and that the build
+  will be carried out in the remote machine.</p>
+
+  <h3><a name="basic_exename">Naming of executables</a></h3>
+
+  <p>If a source file called "foo.f90" contains a main program, the default
+  behaviour of the system is to name its executable "foo.exe". The root name of
+  the executable is the same as the original file name, but its file extension
+  is replaced with ".exe". The output extension can be altered by re-registering
+  the extension for output EXE files. How this can be done will be discussed
+  later in the sub-section <a href="#advanced_file-type">File Type</a>.</p>
+  
+  <p>If you need to alter the full name of the executable, you can use the
+  "EXE_NAME::" declaration. For example, the declaration:</p>
+
+  <pre>
+bld::exe_name::foo  bar
+</pre>
+
+  <p>will rename the executable of "foo.f90" from "foo.exe" to "bar".</p>
+
+  <p>Note: the declaration label is "bld::exe_name::foo" (not
+  "bld::exe_name::foo.exe") and the executable will be named "bar" (not
+  "bar.exe").</p>
+  
+  <p>Another way to alter the full name of the executable is to use the package
+  configuration file, which will be discussed later in the sub-section <a
+  href="#other_pckcfg">Using a package configuration file</a>.</p>
+
+  <h3><a name="basic_flags">Setting the compiler flags</a></h3>
+
+  <p>As discussed in the first example, the compiler commands and their flags
+  can be set via the "TOOL::" declarations. A simple "TOOL::FFLAGS"
+  declaration, for example, alters the compiler options for compiling all
+  Fortran source files in the build. If you need to alter the compiler options
+  only for the source files in a particular sub-package, it is possible to do so
+  by adding the sub-package name to the declaration label. For example, the
+  declaration label "TOOL::FFLAGS::ops::code::OpsMod_Control" will ensure that
+  the declaration only applies to the code in the sub-package
+  "ops::code::OpsMod_Control". You can even make declarations down to the
+  individual source file level. For example, the declaration label
+  "TOOL::FFLAGS::ops::code::OpsMod_Control::Ops_Switch" will ensure that the
+  declaration applies only for the file "Ops_Switch.f90".</p>
+  
+  <p>N.B. Although the prefix "TOOL::" and the tool names are
+  case-insensitive, sub-package names are case sensitive in the declarations.
+  Internally, tool names are turned into uppercase, and the sub-package
+  delimiters are changed from the double colons "::" to the double underscores
+  "__". When the system generates the <em>Makefile</em> for the build, each
+  "TOOL" declaration will be exported as an environment variable. For example,
+  the declaration "tool::fflags::ops::code::OpsMod_Control" will be exported
+  as "FFLAGS__ops__code__OpsMod_Control".</p>
+
+  <p>N.B. TOOL declarations for sub-packages are only accepted by the system
+  when it is sensible to do so. For example, it allows you to declare different
+  compiler flags, linker commands and linker flags for different sub-packages,
+  but it does not accept different compilers for different sub-packages.</p>
+
+  <!--table class="pad" summary="note - TOOL declarations" border="1"
+  width="100%">
+    <tr>
+      <th>Note - TOOL declarations</th>
+    </tr>
+
+    <tr>
+      <td>The system does not stop you from making TOOL declarations that are
+      not supported, but it will only use the ones that are supported. For
+      example, you can define a compiler command for a sub-package, but it
+      will be ignored.</td>
+    </tr>
+  </table-->
+
+  <p>The following is an example setting in an extract configuration file
+  based on example 2:</p>
+
+  <table class="pad" summary="build_example3" border="1" width="100%">
+    <tr>
+      <th>Build configuration example 3 - compiler flags for different
+      sub-packages</th>
+    </tr>
+
+    <tr>
+      <td>
+        <pre>
+cfg::type              ext
+cfg::version           1.0
+
+dest::rootdir          $HOME/example
+
+bld::target            foo.exe bar.exe
+
+bld::tool::fc          ifc
+bld::tool::fflags      -O3    # line 9
+bld::tool::cc          gcc
+bld::tool::cflags      -O3
+bld::tool::ld          ifc
+bld::tool::ldflags     -L$(HOME)/lib -legg -lham
+
+bld::tool::fflags::ops -O1 -C # line 15
+bld::tool::fflags::gen -O2    # line 16
+
+# ... and other declarations for repositories and source directories ...
+</pre>
+      </td>
+    </tr>
+  </table>
+
+  <p>In the example above, line 15 alters the Fortran compiler flags for "ops",
+  so that all source files in "ops" will be compiled with optimisation level
+  1 and will have runtime error checking switched on. Line 16, alters the
+  Fortran compiler flags for "gen", so that all source files in "gen" will be
+  compiled with optimisation level 2. All other Fortran source files will use
+  the global setting declared at line 9, so they they will all be compiled
+  with optimisation level 3.</p>
+
+  <table class="pad" summary=
+  "note - changing compiler flags in incremental builds" border="1"
+  width="100%">
+    <tr>
+      <th>Note - changing compiler flags in incremental builds</th>
+    </tr>
+
+    <tr>
+      <td>
+        Suppose you have performed a successful build using the configuration
+        in example 3, and you have decided to change some of the compiler
+        flags, you can do so by altering the appropriate flags in the build
+        configuration file.  When you trigger an incremental build, the system
+        will detect changes in compiler flags automatically, and update only
+        the required targets. The following hierarchy is followed:
+
+        <ul>
+          <li>If the compiler flags for a particular source file change, only
+          that source file and any targets depending on that source file are
+          re-built.</li>
+
+          <li>If the compiler flags for a particular sub-package change, only
+          source files within that sub-package and any targets depending on
+          those source files are re-built.</li>
+
+          <li>If the global compiler flags change, all source files are
+          re-built.</li>
+
+          <li>If the compiler command changes, all source files are
+          re-built.</li>
+        </ul>
+
+        <!--p>The build system implements the above hierarchy using a "flags"
+        file system, which are dummy files created in the "flags/"
+        sub-directory of the build root. They are updated by the "touch"
+        command. The following dependencies are followed:</p>
+
+        <ul>
+          <li>Source files are dependent on its own "flags" file. E.g. the file
+          Ops_Switch in sub-package ":ops::code::OpsMod_Control" is dependent
+          on "FFLAGS__ops__code__OpsMod_Control__Ops_Switch.flags".</li>
+
+          <li>The "flags" file of a source file is dependent on the "flags" file
+          of its container sub-package. E.g. the above flags file is dependent
+          on "FFLAGS__ops__code__OpsMod_Control.flags".</li>
+
+          <li>The "flags" file of a sub-package is dependent on the "flags"
+          file of its container sub-package. E.g. the above is dependent on
+          "FFLAGS__ops__code.flags", which is dependent on
+          "FFLAGS__ops.flags".</li>
+
+          <li>The "flags" file of a top-level package is dependent on the
+          "flags" file of the global flags. E.g. "FFLAGS__ops.flags" is
+          dependent on "FFLAGS.flags".</li>
+
+          <li>The "flags" file of the global "flags" file is dependent on the
+          "flags" file of the compiler command. E.g. "FFLAGS.flags" is
+          dependent on "FC.flags".</li>
+        </ul>
+        
+        <p>The system records changes in declared tools using a cache file,
+        (called ".bld_tool", located at the ".cache/" sub-directory of the
+        built root). It is basically a list of "TOOL::" declarations for the
+        latest build.  When an incremental build is invoked, the list is
+        compared against the current set. If there are changes (modification,
+        addition and deletion) in any declarations, the timestamp of the
+        corresponding "flags" files will be updated. Files depending on the
+        updated "flags" file will then be considered out of date by
+        <em>make</em>, triggering a re-build of those files.</p-->
+      </td>
+    </tr>
+  </table>
+
+  <p>N.B. For a full list of build tools declarations, please see <a
+  href="annex_bld_cfg.html#tools-list">Annex: Declarations in FCM build
+  configuration file &gt; list of tools</a>.</p>
+
+  <h3><a name="basic_interface">Automatic Fortran 9X interface block</a></h3>
+
+  <p>For each Fortran 9X source file containing standalone subroutines and/or
+  functions, the system generates an interface file and sends it to the "inc/"
+  sub-directory of the build root. An interface file contains the interface
+  blocks for the subroutines and functions in the original source file. In an
+  incremental build, if you have modified a Fortran 9X source file, its
+  interface file will only be re-generated if the content of the interface has
+  changed.</p>
+  
+  <p>Consider a source file "foo.f90" containing a subroutine called "foo". In a
+  normal operation, the system writes the interface file to "foo.interface" in
+  the "inc/" sub-directory of the build root. By default, the root name of the
+  interface file is the same as that of the source file, and is case sensitive.
+  You can change this behaviour using a "TOOL::INTERFACE" declaration. E.g.:</p>
+
+  <pre>
+bld::tool::interface  program # The default is "file"
+</pre>
+
+  <p>In such case, the root name of the interface file will be named in lower
+  case after the first program unit in the file.</p>
+  
+  <p>The default extension for an interface file is ".interface". This can be
+  modified through the input and output file type register, which will be
+  discussed in a later section on <a href="#advanced_file-type">File
+  Type</a>.</p>
+  
+  <p>In most cases, we modify procedures without altering their calling
+  interfaces. Consider another source file "bar.f90" containing a subroutine
+  "bar". If "bar" calls "foo", it is good practice for "bar" to have an explicit
+  interface for "foo". This can be achieved if the subroutine "bar" has the
+  following within its declaration section:</p>
+
+  <pre>
+INCLUDE 'foo.interface'
+</pre>
+
+  <p>The source file "bar.f90" is now dependent on the interface file
+  "foo.interface". This can make incremental build very efficient, as changes
+  in the "foo.f90" file will not normally trigger the re-compilation of
+  "bar.f90", provided that the interface of the subroutine "foo" remains
+  unchanged. (However, the system is clever enough to know that it needs to
+  re-link any executables that are dependent on the object file for the
+  subroutine "bar".)</p>
+
+  <p>The default interface block generator is a piece of "plugged-in" Perl
+  code originally developed by the ECMWF. It has been modified at the Met
+  Office to work with FCM. Currently, the system can also work with the
+  interface generator <em>f90aib</em>, which is a freeware obtained from <a
+  href="http://www.ifremer.fr/ditigo/molagnon/fortran90/contenu.html">Fortran
+  90 texts and programs, assembled by Michel Olagnon</a> at the French
+  Research Institute for Exploitation of the Sea. To do so, you need to make a
+  declaration in the build configuration file using the label
+  "TOOL::GENINTERFACE". As for any other TOOL declarations, you can attach a
+  sub-package name to the label. The change will then apply only to source
+  files within that sub-package. If "TOOL::GENINTERFACE" is declared to have
+  the value "NONE", interface generation will be switched off. The following
+  are some examples:</p>
+
+  <table class="pad" summary="build_example4" border="1" width="100%">
+    <tr>
+      <th>Build configuration example 4 - Fortran 9X interface block
+      generator</th>
+    </tr>
+
+    <tr>
+      <td>
+        <pre>
+# This is an EXTRACT configuration file ...
+
+# ... some other declarations ...
+
+bld::tool::geninterface       f90aib # line 5
+bld::tool::geninterface::foo  ECMWF  # line 6
+bld::tool::geninterface::bar  none   # line 7
+
+# ... some other declarations ...
+</pre>
+      </td>
+    </tr>
+  </table>
+
+  <p>In line 5, the global interface generator is now set to <em>f90aib</em>.
+  In line 6, the interface generator for the package "foo" is set to the ECMWF
+  one. In line 7, by setting the interface generator for the package "bar" to
+  the "none" keyword, no interface file will be generated for source files
+  under the package "bar".</p>
+
+  <p>Switching off the interface block generator can be useful in many
+  circumstances. For example, if the interface block is already provided
+  manually within the source tree, or if the interface block is never used by
+  other program units, it is worth switching off the interface generator for
+  the source file to speed up the build process.</p>
+
+  <h3><a name="basic_dependency">Automatic dependency</a></h3>
+
+  <p>The build system has a built-in dependency scanner, which works out the
+  dependency relationship between source files, so that they can be built in
+  the correct order. The system scans all source files of known types for all
+  supported dependency patterns. Dependencies of source files in a sub-package
+  are written in a cache, which can be retrieved for incremental builds. (In
+  an incremental build, only changed source files need to be re-scanned for
+  dependency information. Dependency information for other files are retrieved
+  from the cache.) The dependency information is parsed to the <em>make</em>
+  rule generator, which writes the <em>Makefile</em> fragment for building the
+  source files in the sub-package. In an incremental build, a
+  <em>Makefile</em> fragment for a sub-package is only re-generated if a
+  source file in the sub-package has changed.</p>
+
+  <p>The <em>make</em> rule generator generates different <em>make</em> rules
+  for different dependency types. The following dependency patterns are
+  automatically detected by the current system:</p>
+
+  <ul>
+    <li>The [USE &lt;module&gt;] statement in a Fortran source file is the first
+    pattern. The statement has two implications: 1) The current file compiles
+    only if the module has been successfully compiled, and needs to be
+    re-compiled if the module has changed. 2) The executable depending on the
+    current file can only resolve all its externals by linking with the object
+    file of the compiled module. The executable needs to be re-linked if the
+    module and its dependencies has changed.</li>
+
+    <li>The [INCLUDE '&lt;name&gt;.interface'] statement in a Fortran source
+    file is the second pattern. (The default extension for an interface file is
+    ".interface". This can be modified through the input and output file type
+    register, which will be discussed in a later section on <a href=
+    "#advanced_file-type">File Type</a>.) It has two implications: 1) The
+    current file compiles only if the included interface file is in the INCLUDE
+    search path, and needs to be re-compiled if the interface file changes. 2)
+    The executable depending on the current file can only resolve all its
+    externals by linking with the object file of the source file that generates
+    the interface file. The executable needs to be re-linked if the source file
+    (and its dependencies) associated with the interface file has changed. It is
+    worth noting that for this dependency to work, the root &lt;name&gt; of the
+    interface file should match with that of the source file associated with the
+    interface file. (Please note that you can use pre-processor [#include
+    "&lt;name&gt;.interface] instead of Fortran INCLUDE, but it will not work
+    if you switch on the <a href="#advanced_pp">pre-processing</a> stage, which
+    will be discussed in a later section.)</li>
+
+    <li>The [INCLUDE '&lt;file&gt;'] statement (excluding the INCLUDE
+    interface file statement) in a Fortran source file is the third pattern.
+    It has two implications: 1) The current file compiles only if the included
+    file is in the INCLUDE search path, and needs to be re-compiled if the
+    include file changes. 2) The executable needs to be linked with any
+    objects the include file is dependent on. It needs to be re-linked if
+    these objects have changed.</li>
+
+    <li>The [#include '&lt;file&gt;'] statement in a Fortran/C source or header
+    file is the fourth pattern. It has similar implications as the Fortran
+    INCLUDE statement. However, they have to be handled differently because
+    "#include" statements are processed by the pre-processor, which may be
+    performed in a separate stage of the FCM build process. This will be
+    further discussed in a later sub-section on <a
+    href="#advanced_pp">Pre-processing</a>.</li>
+  </ul>
+
+  <p>If you want your code to be built automatically by the FCM build system,
+  you should also design your code to conform to the following rules:</p>
+
+  <ol>
+    <li>Single compilable program unit, (i.e. program, subroutine, function or
+    module), per file.</li>
+
+    <li>Unique name for each compilable program unit.</li>
+
+    <li>Always supply an interface for subroutines and functions, i.e.:
+      <ul>
+        <li>Put them in modules.</li>
+
+        <li>Put them in the CONTAINS section within the main program unit.</li>
+
+        <li>Use interface files.</li>
+      </ul>
+    </li>
+
+    <li>If interface files are used, it is good practise to name each source
+    file after the program unit it contains. It will make life a lot simpler
+    when using the <a href="#basic_interface">Automatic Fortran 9X interface
+    block</a> feature, which has already been discussed in the previous
+    section.
+      <ul>
+        <li>The problem is that, by default, the root name of the interface file
+	    is the same as that of the source file rather than the program unit.
+	    If they differ then the build system will create a dependency on the
+	    wrong object file (since the object files are named according to the
+	    program unit).</li>
+	<li>This problem can be avoided by changing the behaviour of the interface
+	    file generator to use the name of the program unit instead (using a
+	    "TOOL::INTERFACE" declaration).</li>
+      </ul>
+    </li>
+  </ol>
+
+  <table class="pad" summary=
+  "note - setting build targets" border="1" width="100%">
+    <tr>
+      <th>Note - setting build targets</th>
+    </tr>
+
+    <tr>
+      <td>
+        The <em>Makefile</em> (and its include fragments) generated by the
+        build system contains a list of targets that can be built. The build
+        system allows you to build (or perform the actions of) any targets that
+        are present in the generated <em>Makefile</em>. There are two ways to
+        specify the targets to be built. Firstly, you can use the TARGET
+        declarations in your build configuration file to specify the default
+        targets to be built.  These targets will be set as dependencies of the
+        "all" target in the generated <em>Makefile</em>, which is the default
+        target to be built when <em>make</em> is invoked by FCM. Alternatively,
+        you can use the "-t" option when you invoke the "fcm build" command. The
+        option takes an argument, which should be a colon ":" separated list of
+        targets to be built. When the "-t" option is set, FCM invokes
+        <em>make</em> to build these targets instead. (E.g. if we invoke the
+        build system with the command "fcm build -t foo.exe:bar.exe", it will
+        invoke <em>make</em> to build "foo.exe" and "bar.exe".)
+
+        <p>If you do not specify any explicit targets, the system will search
+        your source tree for main programs:</p>
+        
+        <ul>
+          <li>If there are main programs in your source tree, they will be set
+          as the default targets automatically.</li>
+
+          <li>Otherwise, the default is to build the top level library archive
+          containing objects compiled from the source files in the current
+          source tree. (For more information on building library archives,
+          please see the section on <a href="#advanced_library">Creating
+          library archives</a>.)</li>
+        </ul>
+      </td>
+    </tr>
+  </table>
+
+  <h2><a name="advanced">Advanced Features</a></h2>
+
+  <h3><a name="advanced_dependency">Further dependency features</a></h3>
+
+  <p>Apart from the usual dependency patterns described in the previous
+  sub-section, the automatic dependency scanner also recognises two special
+  directives when they are inserted into a source file:</p>
+
+  <ul>
+    <li>The directive [DEPENDS ON: &lt;object&gt;] in a comment line of a
+    Fortran/C source file: It states that the current file is dependent on the
+    declared external object. The executable depending on the current file
+    needs to link with this external object in order to resolve all its
+    external references. It needs to be re-linked if the declared external
+    object (and its dependencies) has changed.</li>
+
+    <li>The directive [CALLS: &lt;executable&gt;] in a comment line of a
+    script: It states that the current script is dependent on the declared
+    executable file, which can be another script or a binary executable. The
+    current script can only function correctly if the declared executable is
+    found in the search path. This directive is useful to ensure that all
+    dependent executables are built or copied to the correct path.</li>
+  </ul>
+
+  <p>There are situations when you need to bypass the automatic dependency
+  scanner. In such case, you may need to use a package configuration file. For
+  further information, please refer to the sub-section on <a href=
+  "#advanced_pckcfg">Using a package configuration file</a>.</p>
+
+  <p>Another way to specify external dependency is to use the EXE_DEP
+  declaration to declare extra dependencies. The declaration normally applies to
+  all main programs, but if the the form EXE_DEP::&lt;target&gt; is used, it
+  will only apply to &lt;target&gt;, (which must be the name of a main program
+  target). If the declaration is made without a value, the main programs will be
+  set to depend on all object files. Otherwise, the value can be supplied as a
+  space delimited list of items. Each item can be either the name of a
+  sub-package or an object target. For the former, the main programs will be set
+  to depend on all object files within the sub-package. For the latter, the main
+  programs will be set to depend on the object target. The following are some
+  examples:</p>
+
+  <table class="pad" summary="build_example5" border="1" width="100%">
+    <tr>
+      <th>Build configuration example 5 - extra executable dependency</th>
+    </tr>
+
+    <tr>
+      <td>
+        <pre>
+cfg::type          ext
+cfg::version       1.0
+
+bld::exe_dep::foo.exe  foo::bar egg.o # line 4
+bld::exe_dep                          # line 5
+# ... some other declarations ...
+</pre>
+      </td>
+    </tr>
+  </table>
+
+  <p>Here is an explanation of what each line does:</p>
+
+  <ul>
+    <li>line 4: this line declares the dependency on the sub-package "foo::bar"
+    and the object target "egg.o" for building the main program target
+    "foo.exe". The target "foo.exe" will now depends on all object files in the
+    "foo::bar" sub-package as well as the object target "egg.o".</li>
+
+    <li>line 5: this line declares that all other main program targets will
+    depend on all (non-program) object files in the build.</li>
+  </ul>
+
+  <table class="pad" summary="note - naming of object files" border="1"
+  width="100%">
+    <tr>
+      <th>Note - naming of object files</th>
+    </tr>
+
+    <tr>
+      <td>By default, object files are named with the suffix ".o". For a
+      Fortran source file, the build system uses the lower case name of the
+      first program unit within the file to name its object file. For example,
+      if the first program unit in the Fortran source file "foo.f90" is
+      "PROGRAM Bar", the object file will be "bar.o". For a C source file, the
+      build system uses the lower case root name of the source file to name
+      its object file. For example, a C source file called "egg.c" will have
+      its object file named "egg.o".
+      
+        <p>The reason for using lower case to name the object files is because
+        Fortran is a case insensitive language. Its symbols can either be in
+        lower or upper case. E.g. the SUBROUTINE "Foo" is the same as the
+        SUBROUTINE "foo". It can be rather confusing if the subroutines are
+        stored in different files. When they are compiled and archived into a
+        library, there will be a clash of namespace, as the Fortran compiler
+        thinks they are the same. However, this type of error does not normally
+        get reported. If "Foo" and "foo" are very different code, the user may
+        end up using the wrong subroutine, which may lead to a very long
+        debugging session. By naming all object files in lower case, this type
+        of situation can be avoided. If there is a clash in names due to the use
+        of upper/lower cases, it will be reported as warnings by <em>make</em>,
+        (as "duplicated targets" for building "foo.o").</p>
+      </td>
+    </tr>
+  </table>
+  
+  <p>It is realised that there are situations when an automatically detected
+  dependency should not be written into the <em>Makefile</em>. For example,
+  the dependency may be a standard module provided by the Fortran compiler,
+  and does not need to be built in the usual way. In such case, we need to
+  have a way to exclude this module during an automatic dependency scan.</p>
+
+  <p>The EXCL_DEP declaration can be used to do just that. The following
+  extract configuration contains some examples of the basic usage of the
+  EXCL_DEP declaration:</p>
+
+  <table class="pad" summary="build_example6" border="1" width="100%">
+    <tr>
+      <th>Build configuration example 6 - exclude dependency</th>
+    </tr>
+
+    <tr>
+      <td>
+        <pre>
+cfg::type          ext
+cfg::version       1.0
+
+bld::excl_dep  USE::YourFortranMod             # line 4
+bld::excl_dep  INTERFACE::HerFortran.interface # line 5
+bld::excl_dep  INC::HisFortranInc.inc          # line 6
+bld::excl_dep  H::TheirHeader.h                # line 7
+bld::excl_dep  OBJ::ItsObject.o                # line 8
+
+# ... some other declarations ...
+</pre>
+      </td>
+    </tr>
+  </table>
+
+  <p>Here is an explanation of what each line does:</p>
+
+  <ul>
+    <li>line 4: this line declares that the Fortran module "YourFortranMod"
+    should be excluded. The value of each EXCL_DEP declaration has two parts.
+    The first part is a label that is used to define the type of dependency to
+    be excluded. For a full list of these labels, please see the <a
+    href="annex_bld_cfg.html#dependency-types">dependency types table</a> in
+    the <a href="annex_bld_cfg.html">Annex:
+    Declarations in FCM build configuration file</a>. The label "USE"
+    denotes a Fortran module. The second part of the label is the dependency
+    itself. For instance, if a Fortran source file contains the line: "USE
+    YourFortranMod", the dependency scanner will ignore it.</li>
+
+    <li>line 5: this line declares that the include statement for the Fortran
+    9X interface file "HerFortran.interface" should be excluded. The label
+    "INTERFACE" denotes a Fortran INCLUDE statement for a Fortran 9X interface
+    block file. For example, if a Fortran source file contains the line:
+    "INCLUDE 'HerFortran.interface'", the dependency scanner will
+    ignore it.</li>
+
+    <li>line 6: this line declares that the include statement for
+    "HisFortranInc.inc" should be excluded. The label "INC" denotes a Fortran
+    INCLUDE statement other than an INCLUDE statement for an interface block
+    file. For example, if a Fortran source file contains the line:
+    "INCLUDE 'HisFortranInc.inc'", the dependency scanner will ignore
+    it.</li>
+
+    <li>line 7: this line declares that the header include statement
+    "TheirHeader.h" should be excluded. The label "H" denotes a pre-processing
+    #include statement. For example, if a source file contains the line:
+    "#include 'TheirHeader.h'", the dependency scanner will ignore
+    it.</li>
+
+    <li>line 8: this line declares that the external dependency for
+    "ItsObject.o" should be excluded. The label "OBJ" denotes a compiled
+    binary object. These dependencies are normally inserted into the source
+    files as special comments. For example, if a source file contains the line:
+    "! depends on: ItsObject.o", the dependency scanner will ignore
+    it.</li>
+  </ul>
+
+  <p>An EXCL_DEP declaration normally applies to all files in the build.
+  However, you can suffix it with the name of a sub-package, i.e.
+  EXCL_DEP::&lt;pcks&gt;. In such case, the declaration will only apply while
+  scanning for dependencies in the source files in the sub-package named
+  &lt;pcks&gt;.</p>
+
+  <p>You can also exclude all dependency scan of a particular type. To do so,
+  simply declare the type in the value. For example, if you do not want the
+  build system to scan for the [CALLS: &lt;executable&gt;] directive in the
+  comment lines of your scripts, you can make the following declaration:</p>
+
+  <pre>
+bld::excl_dep  EXE
+</pre>
+
+  <p>N.B. Currently, the build system is unable to detect changes in EXCL_DEP
+  declarations. Therefore, you will need to invoke the build system in full
+  build mode if you have changed these settings.</p>
+
+  <h3><a name="advanced_blockdata">Linking a Fortran executable with a BLOCKDATA
+  program unit</a></h3>
+
+  <p>If it is required to link Fortran executables with BLOCKDATA program units,
+  you must declare the executable targets and the objects containing the
+  BLOCKDATA program units using the BLOCKDATA::&lt;target&gt; declarations. For
+  example, if "foo.exe" is an executable target depending on the objects of the
+  BLOCKDATA program units "blkdata.o" and "fbk.o", you will make the following
+  declarations:</p>
+
+  <pre>
+bld::blockdata::foo.exe  blkdata fbk
+</pre>
+
+  <p>If all your executables are dependent on "blkdata.o" and "fbk.o", you will
+  make the following declarations:</p>
+
+  <pre>
+bld::blockdata  blkdata fbk
+</pre>
+
+  <h3><a name="advanced_library">Creating library archives</a></h3>
+
+  <p>If you are interested in building library archives, the build system allows
+  you to do it in a relatively simple way. For each sub-package in the source
+  tree, there is a target to build a library containing all the objects compiled
+  from the source files (that are not main programs) within the sub-package. If
+  the sub-package contains children sub-packages, the object files of the
+  children will also be included recursively. By default, the library archive is
+  named after the sub-package, in the format "lib&lt;pcks&gt;.a". (For example,
+  the library archive for the package "foo::bar::egg" will be named
+  "libfoo__bar__egg.a" by default.) If you do not like the default name for the
+  sub-package library, you can use the LIB::&lt;pcks&gt; declaration to rename
+  it, as long as the new name does not clash with other targets. For example, to
+  rename "libfoo__bar__egg.a" to "libham.a", you will make the following
+  declaration in your extract configuration file:</p>
+
+  <pre>
+bld::lib::foo::bar::egg  ham
+</pre>
+
+  <p>In addition to sub-package libraries, you can also build a global library
+  archive for the whole source tree. By default, the library is named
+  "libfcm_default.a", but you can rename it using the LIB declaration as above.
+  For example, to rename the library to "libmy-lib.a", you will make the
+  following declaration in your extract configuration file:</p>
+
+  <pre>
+bld::lib  my-lib
+</pre>
+
+  <p>When a library archive is created successfully, the build system will
+  automatically generate the relevant exclude dependency configurations in the
+  "etc/" sub-directory of the build root. You will be able to include these
+  configurations in subsequent builds that utilise the library. The root names
+  of the configuration files match those of the library archives that you can
+  create in the current build, but the extension "*.a" is replaced with "*.cfg".
+  For example, the exclude dependency configuration for "libmy-lib.a"
+  is "libmy-lib.cfg".</p>
+
+  <h3><a name="advanced_pp">Pre-processing</a></h3>
+
+  <p>As most modern compilers can handle pre-processing, the build system
+  leaves pre-processing to the compiler by default. However, it is recognised
+  that there are code written with pre-processor directives that can alter the
+  argument list of procedures and/or their dependencies. If a source file
+  requires pre-processing in such a way, we have to pre-process before running
+  the interface block generator and the dependency scanner. The PP declaration
+  can be used to switch on this pre-processing stage. The pre-processing stage
+  can be switched on globally or for individual sub-packages only. The
+  following is an example, using an extract configuration file:</p>
+
+  <table class="pad" summary="build_example7" border="1" width="100%">
+    <tr>
+      <th>Build configuration example 7 - pre-processing switch</th>
+    </tr>
+
+    <tr>
+      <td>
+        <pre>
+cfg::type          ext
+cfg::version       1.0
+
+bld::pp::gen       1                     # line 4
+bld::pp::var::foo  1                     # line 5
+
+bld::tool::cppkeys GOOD WEATHER FORECAST # line 7
+bld::tool::fppkeys FOO BAR EGG HAM       # line 8
+
+# ... some other declarations ...
+</pre>
+      </td>
+    </tr>
+  </table>
+
+  <p>Here is an explanation of what each line does:</p>
+
+  <ul>
+    <li>line 4 to 5: these switches on the pre-processing stage for all
+    sub-packages under "gen" and "var::foo".</li>
+
+    <li>line 7: this declares a list of pre-defined macros "GOOD", "WEATHER"
+    and "FORECAST" for pre-processing all C files.</li>
+
+    <li>line 8: this declares a list of pre-defined macros "FOO", "BAR",
+    "EGG" and "HAM" for pre-processing all Fortran files that require
+    processing.</li>
+  </ul>
+
+  <p>Source files requiring pre-processing may contain "#include" statements to
+  include header files. For including a local file, its name should be embedded
+  within a pair of quotes, i.e. 'file.h' or "file.h". If the header file is
+  embedded within a pair of "&lt;file.h&gt;" angle brackets, the system will
+  assume that the file can be found in a standard location.</p>
+
+  <p>The build system allows header files to be placed anywhere within the
+  declared source tree. The system uses the dependency scanner, as described
+  in the previous sub-section to scan for any header file dependencies. All
+  source files requiring pre-processing and all header files are scanned. Header
+  files that are required are copied to the "inc/" subdirectory of the build
+  root, which is automatically added to the pre-processor search path via the
+  "-I&lt;dir&gt;" option. The build system uses an internal logic similar to
+  <em>make</em> to perform pre-processing. Header files are only copied to the
+  "inc/" sub-directory if they are used in "#include" statements.</p>
+  
+  <p>Unlike <em>make</em>, which only uses the timestamp to determine whether an
+  item is out of date, the internal logic of the build system does this by
+  inspecting the content of the file as well. In an incremental build, the
+  pre-processed file is only updated if its content has changed. This avoids
+  unnecessary updates (and hence unnecessary re-compilation) in an incremental
+  build if the changed section of the code does not affect the output file.</p>
+
+  <p>Pre-processed code generated during the pre-processing stage are sent to
+  the "ppsrc/" sub-directory of the build root. It will have a relative path
+  that reflects the name of the declared sub-package. The pre-processed source
+  file will have the same root name as the original source file. For C files,
+  the same extension ".c" will be used. For Fortran files, the case of the
+  extension will normally be dropped, e.g. from ".F90" to ".f90".</p>
+  
+  <p>Following pre-processing, the system will use the pre-processed source
+  file as if it is the original source file. The interface generator will
+  generate the interface file using the pre-processed file, the dependency
+  scanner will scan the pre-processed file for dependencies, and the compiler
+  will compile the pre-processed source.</p>
+
+  <p>The TOOL::CPPKEYS and TOOL::FPPKEYS declarations are used to pre-define
+  macros in the C and Fortran pre-processor respectively. This is implemented
+  by the build system using the pre-processor "-D" option on each word in the
+  list. The use of these declarations are not confined to the pre-process
+  stage. If any source files requiring pre-processing are left to the compiler,
+  the declarations will be used to set up the commands for compiling these
+  source files.</p>
+
+  <p>The TOOL::CPPKEYS and TOOL::FPPKEYS declarations normally applies
+  globally, but like any other TOOL declarations, they can be suffixed with
+  sub-package names. In such cases, the declarations will apply only to the
+  specified sub-packages.</p>
+
+  <table class="pad" summary="note - changing pre-processor flags" border="1"
+  width="100%">
+    <tr>
+      <th>Note - changing pre-processor flags</th>
+    </tr>
+
+    <tr>
+      <td>
+        As for compiler flags, the build system detects changes in
+        pre-processor flags (TOOL::CPPFLAGS and TOOL::FPPFLAGS) and macro
+        definitions (TOOL::CPPKEYS and TOOL::FPPKEYS). If the pre-processor
+        flags or the macro definitions have changed in an incremental build,
+        the system will re-do all the necessary pre-processing. The following
+        hierarchy is followed:
+
+        <ul>
+          <li>If the pre-processor flags or macro definitions for a particular
+          source file change, only that source file will be pre-processed
+          again.</li>
+
+          <li>If the pre-processor flags or macro definitions for a particular
+          sub-package change, only source files within that sub-package will
+          be pre-processed again.</li>
+
+          <li>If the global pre-processor flags or macro definitions change,
+          all source files will be pre-processed again.</li>
+
+          <li>If the pre-processor command changes, all source files are
+          pre-processed again.</li>
+        </ul>
+      </td>
+    </tr>
+  </table>
+
+  <h3><a name="advanced_file-type">File type</a></h3>
+
+  <p>The build system only knows what to do with an input source file if it
+  knows what type of file it is. The type of a source file is normally
+  determined automatically using one of the following three methods (in
+  order):</p>
+
+  <ol>
+    <li>If the file is named with an extension, its extension will be matched
+    against a set of registered file extensions. If a match is found, the file
+    type will be set according to the register.</li>
+
+    <li>If a file does not have an extension or does not match with a
+    registered extension, its name is compared with a set of pre-defined
+    patterns. If a match is found, the file type will be set according to the
+    file type associated with the pattern.</li>
+
+    <li>If the above two methods failed and if the file is a text file, the
+    system will attempt to read the first line of the file. If the first line
+    begins with a "#!" pattern, the line will be compared with a set of
+    pre-defined patterns. If a match is found, the file type will be set
+    according to the file type associated with the pattern.</li>
+  </ol>
+
+  <p>In addition to the above, if a file is a Fortran or C source file, the
+  system will attempt to open the source file to determine whether it contains
+  a main program, module (Fortran only) or just standalone procedures. All
+  these information will be used later by the build system to process the
+  source file.</p>
+
+  <p>The build system registers a file type with a set of type flags
+  delimited by the double colons "::". For example, a Fortran 9X source file is
+  registered as "FORTRAN::FORTRAN9X::SOURCE". (Please note that the
+  order of the type flags in the list is insignificant. For example,
+  "FORTRAN::SOURCE" is the same as "SOURCE::FORTRAN".) For a list of all the
+  type flags used by the build system, please see the <a
+  href="annex_bld_cfg.html#infile-ext-types">input file extension type
+  flags table</a> in the <a href="annex_bld_cfg.html">
+  Annex: Declarations in FCM build configuration file</a>.</p>
+  
+  <p>The following is a list of default input file extensions and their
+  associated types:</p>
+
+  <table class="pad" summary="list of known file extensions" border="1">
+    <tr>
+      <th>Extensions</th>
+
+      <th>Type flags</th>
+
+      <th>Description</th>
+    </tr>
+
+    <tr>
+      <td class="mono">.f .for .ftn .f77</td>
+
+      <td class="mono">FORTRAN::SOURCE</td>
+
+      <td>Fortran 77 source file (assumed to be fixed format)</td>
+    </tr>
+
+    <tr>
+      <td class="mono">.f90 .f95</td>
+
+      <td class="mono">FORTRAN::FORTRAN9X::SOURCE</td>
+
+      <td>Fortran 9X source file (assumed to be free format)</td>
+    </tr>
+
+    <tr>
+      <td class="mono">.F .FOR .FTN .F77</td>
+
+      <td class="mono">FPP::SOURCE</td>
+
+      <td>Fortran 77 source file (assumed to be fixed format) that requires
+      pre-processing</td>
+    </tr>
+
+    <tr>
+      <td class="mono">.F90 .F95</td>
+
+      <td class="mono">FPP::FPP9X::SOURCE</td>
+
+      <td>Fortran 9X source file (assumed to be free format) that requires
+      pre-processing</td>
+    </tr>
+
+    <tr>
+      <td class="mono">.c</td>
+
+      <td class="mono">C::SOURCE</td>
+
+      <td>C source file</td>
+    </tr>
+
+    <tr>
+      <td class="mono">.h .h90</td>
+
+      <td class="mono">CPP::INCLUDE</td>
+
+      <td>Pre-processor "#include" header file</td>
+    </tr>
+
+    <tr>
+      <td class="mono">.o .obj</td>
+
+      <td class="mono">BINARY::OBJ</td>
+
+      <td>Compiled binary object</td>
+    </tr>
+
+    <tr>
+      <td class="mono">.exe</td>
+
+      <td class="mono">BINARY::EXE</td>
+
+      <td>Binary executable</td>
+    </tr>
+
+    <tr>
+      <td class="mono">.a</td>
+
+      <td class="mono">BINARY::LIB</td>
+
+      <td>Binary object library archive</td>
+    </tr>
+
+    <tr>
+      <td class="mono">.sh .ksh .bash .csh</td>
+
+      <td class="mono">SHELL::SCRIPT</td>
+
+      <td>Unix shell script</td>
+    </tr>
+
+    <tr>
+      <td class="mono">.pl .pm</td>
+
+      <td class="mono">PERL::SCRIPT</td>
+
+      <td>Perl script</td>
+    </tr>
+
+    <tr>
+      <td class="mono">.py</td>
+
+      <td class="mono">PYTHON::SCRIPT</td>
+
+      <td>Python script</td>
+    </tr>
+
+    <tr>
+      <td class="mono">.tcl</td>
+
+      <td class="mono">TCL::SCRIPT</td>
+
+      <td>Tcl/Tk script</td>
+    </tr>
+
+    <tr>
+      <td class="mono">.pro</td>
+
+      <td class="mono">PVWAVE::SCRIPT</td>
+
+      <td>PVWave program</td>
+    </tr>
+
+    <tr>
+      <td class="mono">.cfg</td>
+
+      <td class="mono">CFGFILE</td>
+
+      <td>FCM configuration file</td>
+    </tr>
+
+    <tr>
+      <td class="mono">.inc</td>
+
+      <td class="mono">FORTRAN::FORTRAN9X::INCLUDE</td>
+
+      <td>Fortran INCLUDE file</td>
+    </tr>
+
+    <tr>
+      <td class="mono">.interface</td>
+
+      <td class="mono">FORTRAN::FORTRAN9X::INCLUDE::INTERFACE</td>
+
+      <td>Fortran 9X INCLUDE interface block file</td>
+    </tr>
+  </table>
+
+  <p>N.B. The extension must be unique. For example, the system does not
+  support the use of ".inc" files for both "#include" and Fortran
+  "INCLUDE".</p>
+
+  <p>The following is a list of supported file name patterns and their
+  associated types:</p>
+
+  <table class="pad" summary="list of known file name patterns" border="1">
+    <tr>
+      <th>Patterns</th>
+
+      <th>Type flags</th>
+
+      <th>Description</th>
+    </tr>
+
+    <tr>
+      <td class="mono">*Scr_* *Comp_* *IF_* *Suite_* *Interface_*</td>
+
+      <td class="mono">SHELL::SCRIPT</td>
+
+      <td>Unix shell script, GEN-based project naming conventions</td>
+    </tr>
+
+    <tr>
+      <td class="mono">*List_*</td>
+
+      <td class="mono">SHELL::SCRIPT::GENLIST</td>
+
+      <td>Unix shell script, GEN "list" file</td>
+    </tr>
+
+    <tr>
+      <td class="mono">*Sql_*</td>
+
+      <td class="mono">SCRIPT::SQL</td>
+
+      <td>SQL script, GEN-based project naming conventions</td>
+    </tr>
+  </table>
+
+  <p>The following is a list of supported "#!" line patterns and their
+  associated types:</p>
+
+  <table class="pad" summary="list of known file name patterns" border="1">
+    <tr>
+      <th>Patterns</th>
+
+      <th>Type flags</th>
+
+      <th>Description</th>
+    </tr>
+
+    <tr>
+      <td class="mono">*sh* *ksh* *bash* *csh*</td>
+
+      <td class="mono">SHELL::SCRIPT</td>
+
+      <td>Unix shell script</td>
+    </tr>
+
+    <tr>
+      <td class="mono">*perl*</td>
+
+      <td class="mono">PERL::SCRIPT</td>
+
+      <td>Perl script</td>
+    </tr>
+
+    <tr>
+      <td class="mono">*python*</td>
+
+      <td class="mono">PYTHON::SCRIPT</td>
+
+      <td>Python script</td>
+    </tr>
+
+    <tr>
+      <td class="mono">*tclsh* *wish*</td>
+
+      <td class="mono">TCL::SCRIPT</td>
+
+      <td>Tcl/Tk script</td>
+    </tr>
+  </table>
+
+  <p>The build system allows you to add or modify the register for input file
+  extensions and their associated type using the INFILE_EXT::&lt;ext&gt;
+  declaration, where &lt;ext&gt; is a file name extension without the leading
+  dot. For example, in an extract configuration file, you may have:</p>
+
+  <table class="pad" summary="build_example8" border="1" width="100%">
+    <tr>
+      <th>Build configuration example 8 - add/modify input file extension
+      types</th>
+    </tr>
+
+    <tr>
+      <td>
+        <pre>
+cfg::type             ext
+cfg::version          1.0
+
+bld::infile_ext::foo  CPP::INCLUDE                # line 4
+bld::infile_ext::bar  FORTRAN::FORTRAN9X::INCLUDE # line 5
+
+# ... some other declarations ...
+</pre>
+      </td>
+    </tr>
+  </table>
+
+  <p>Here is an explanation of what each line does:</p>
+
+  <ul>
+    <li>line 4: this line registers the extension ".foo" to be of type
+    "CPP::INCLUDE". This means that any input files with ".foo"
+    extension will be treated as if they are pre-processor header files.</li>
+
+    <li>line 5: this line registers the extension ".bar" to be of type
+    "FORTRAN::FORTRAN9X::INCLUDE". This means that any input file
+    with ".bar" extension will be treated as if they are Fortran 9X INCLUDE
+    files.</li>
+  </ul>
+
+  <p>The INFILE_EXT declarations deal with extensions of input files. There is
+  also a OUTFILE_EXT::&lt;type&gt; declaration that deals with extensions of
+  output files. The declaration is opposite that of INFILE_EXT. The file
+  &lt;type&gt; is now declared with the label, and the extension is declared
+  as the value. It is worth noting that OUTFILE_EXT declarations use very
+  different syntax for &lt;type&gt;, and the declared extension must include
+  the leading dot. For a list of output types used by the build system,
+  please see the <a href="annex_bld_cfg.html#outfile-ext-types">output file
+  extension types table</a> in the <a href="annex_bld_cfg.html">
+  Annex: Declarations in FCM build configuration file</a>.
+  An example is given below:</p>
+
+  <table class="pad" summary="build_example9" border="1" width="100%">
+    <tr>
+      <th>Build configuration example 9 - modify output file extensions</th>
+    </tr>
+
+    <tr>
+      <td>
+        <pre>
+cfg::type                   ext
+cfg::version                1.0
+
+bld::outfile_ext::mk        .rule  # line 4
+bld::outfile_ext::mod       .MOD   # line 5
+bld::outfile_ext::interface .intfb # line 6
+
+# ... some other declarations ...
+</pre>
+      </td>
+    </tr>
+  </table>
+
+  <p>Here is an explanation of what each line does:</p>
+
+  <ul>
+    <li>line 4: this line modifies the extension of output <em>Makefile</em>
+    fragments, output of the dependency scanner, from the default ".mk" to
+    ".rule".</li>
+
+    <li>line 5: this line modifies the extension of compiled Fortran 9X module
+    information files from the default ".mod" to ".MOD".</li>
+
+    <li>line 6: this line modifies the extension of INCLUDE Fortran 9X
+    interface block files from the default ".interface" to ".intfb".</li>
+  </ul>
+
+  <p>N.B. If you have made changes to the file type registers, whether it is
+  for input files or output files, it is always worth re-building your code in
+  full-build mode to avoid unexpected behaviour.</p>
+
+  <h3><a name="advanced_incremental">Incremental build based on a pre-compiled
+  build</a></h3>
+
+  <p>As you can perform incremental extractions against pre-extracted source
+  code, you can perform incremental builds against pre-compiled builds. The
+  very same USE statement can be used to declare a build, which the current
+  build will depend on. The only difference is that the declared location must
+  contain a valid build configuration file. In fact, if you use the extract
+  system to obtain your build configuration file, any USE declarations in the
+  extract configuration file will also be USE declarations in the output
+  build configuration file.</p>
+
+  <p>By declaring a USE statement, the current build automatically inherits
+  settings from the pre-compiled build. The following points are worth
+  noting:</p>
+
+  <ul>
+    <li>
+      Build targets are not normally inherited. However, you can switch on
+      inheritance of build targets using an INHERIT::TARGET declaration, such
+      as:
+      <pre>
+inherit::target  1
+</pre>
+    </li>
+
+    <li> The build root directory and its sub-directories of the pre-compiled
+    build are placed into the search paths. For example, if we have a
+    pre-compiled build at "/path/to/pre/compiled", and it is used by an
+    incremental build at "/path/to/incremental", the search path of executable
+    files will become "/path/to/incremental/bin:/path/to/pre/compiled/bin", so
+    that the "bin/" sub-directory of the incremental build is searched before
+    the "bin/" sub-directory of the pre-compiled build. If two or more USE
+    statements are declared, the USE statement declared last will have higher
+    priority. For example, if the current build is "C", and it USEs build "A"
+    before build "B", the search path will be "C:B:A".</li>
+
+    <li>
+      Sub-package source directories are inherited by default. If a source
+      directory is declared in the current build that has the same sub-package
+      name as a source directory of the pre-compiled build, any source files in
+      the source directory of the current build will override those in the
+      source directory of the pre-compiled build. Any source files missing
+      from the source directory of the current build will be taken from the
+      source directory of the pre-compiled build.
+
+      <p>For example, if build "B" USEs build "A", and both of them have a
+      sub-package called "basic::element". In build "A", the sub-package
+      contains the source files "earth.f90", "wind.f90" and "water.f90". In
+      build "B", the sub-package contains "earth.f90" and "fire.f90". When the
+      system searches for source files, it will look for source files in "B"
+      before "A". Therefore, the source file "earth.f90" in "B" will override
+      that of "A", and the files used for the build will be "earth.f90" and
+      "fire.f90" from "B" and "wind.f90" and "water.f90" from "A".</p>
+      
+      <p>You can switch off inheritance of source directories using an
+      INHERIT::SRC declaration.  This declaration can be suffixed with the
+      name of a sub-package. In such case, the declaration applies only to the
+      inheritance of the sub-package. Otherwise, it applies to all source
+      directories. For example:</p>
+
+      <pre>
+# Switch off inheritance of source directories in the "gen" sub-package
+inherit::src::gen  0
+</pre>
+    </li>
+
+    <li>All build tools are automatically inherited. If the same tool is
+    declared in the current incremental build, it overrides the declaration in
+    the pre-compiled build.</li>
+
+    <li>"PP", "EXCL_DEP", "INFILE_EXT" and "OUTFILE_EXT" declarations are
+    inherited using a similar mechanism as build tool declarations.</li>
+  </ul>
+
+  <p>As an example, suppose we have already performed an extract and build based
+  on the configuration in example 2, we can set up an extract configuration
+  file as follows:</p>
+
+  <table class="pad" summary="build_example10" border="1" width="100%">
+    <tr>
+      <th>Build configuration example 10 - "USE" a pre-compiled
+      build</th>
+    </tr>
+
+    <tr>
+      <td>
+        <pre>
+cfg::type            ext
+cfg::version         1.0
+
+use                  $HOME/example               # line 4
+
+dest::rootdir        $HOME/example9              # line 6
+
+bld::inherit::target 1                           # line 8 
+bld::target          ham.exe egg.exe             # line 9
+
+bld::tool::fflags    -O2 -w                      # line 11
+bld::tool::cflags    -O2                         # line 12
+
+# ... and other declarations for repositories and source directories ...
+</pre>
+      </td>
+    </tr>
+  </table>
+
+  <p>Here is an explanation of what each line does:</p>
+
+  <ul>
+    <li>line 4: this line declares a previous extraction at
+    "$HOME/example" which the current extraction will be based on. The
+    same line will be written to the output build configuration file at
+    "$HOME/example9/cfg/bld.cfg". The subsequent build will then be
+    based on the build at "$HOME/example".</li>
+
+    <li>line 6: this declares the destination root directory of the current
+    extraction, which will become the root directory of the current build.
+    Search paths of the build sub-directories will be set automatically. For
+    example, the search path for executable files created by the current build
+    will be "$HOME/example9/bin:$HOME/example/bin".</li>
+
+    <li>line 8: this line switches on inheritance of build targets. The build
+    targets in example 1, i.e. "foo.exe" and "bar.exe" will be built as part
+    of the current build.</li>
+
+    <li>line 9: this declares two new build targets "ham.exe" and "egg.exe" to
+    be added to the inherited ones. The default build targets of the current
+    build will now be "foo.exe", "bar.exe", "ham.exe" and "egg.exe".</li>
+
+    <li>line 11-12: these lines modify options used by the Fortran and the C
+    compilers, overriding those inherited from example 1.</li>
+  </ul>
+
+  <h3><a name="advanced_pckcfg">Using a package configuration file</a></h3>
+
+  <p>It is recognised that the build system needs to be able to work with code
+  that is not designed to work with the automatic dependency scanner. There are
+  various techniques which can be used to achieve this, some of which are
+  already described. However, it should be noted that these techniques are
+  simply designed to allow code to be successfully built. They will not
+  necessarily result in a good environment for developing such code, since for
+  example, dependencies need to be manually maintained by the developer.</p>
+
+  <p>The final technique is the package configuration file. The package
+  configuration file is a special source file to inform the build system about
+  any additional information of the source files in the package. It must be a
+  file called "@PACKAGE.cfg" in a source directory. For a full list of available
+  declarations in the package configuration file, please refer to the <a
+  href="annex_pck_cfg.html">Annex: Declarations in FCM build package
+  configuration file</a>.</p>
+
+  <p>The following is an example of how a package configuration file can be
+  used to provide additional information to the build system for a source
+  file:</p>
+
+  <table class="pad" summary="package_example1" border="1" width="100%">
+    <tr>
+      <th>Package configuration example 1 - dependency information for a
+      source file</th>
+    </tr>
+
+    <tr>
+      <td>
+        <pre>
+type::MyFortranProg.f90    FORTRAN::FORTRAN9X::SOURCE::PROGRAM # line 1
+scan::MyFortranProg.f90    0                                   # line 2
+intname::MyFortranProg.f90 myprog                              # line 3
+target::MyFortranProg.f90  hello_world                         # line 4
+
+dep::MyFortranProg.f90     USE::YourFortranMod                 # line 6
+dep::MyFortranProg.f90     INTERFACE::HerFortran.interface     # line 7
+dep::MyFortranProg.f90     INC::HisFortranInc.inc              # line 8
+dep::MyFortranProg.f90     H::TheirHeader.h                    # line 9
+dep::MyFortranProg.f90     OBJ::ItsObject.o                    # line 10
+
+# ... some other declarations ...
+</pre>
+      </td>
+    </tr>
+  </table>
+
+  <p>Here is an explanation of what each line does:</p>
+
+  <ul>
+    <li>line 1: this declares a source file "MyFortranProg.f90" in the package
+    of type "FORTRAN::FORTRAN9X::SOURCE::PROGRAM", i.e. a Fortran 9X source
+    file containing a main program. The list of type flags used in the value
+    is the same list of type flags used in the INFILE_EXT declaration of a
+    build configuration file. For a list of  these flags, please see the <a
+    href="annex_bld_cfg.html#infile-ext-types">Input file extension type flags
+    table</a> in the <a href="annex_bld_cfg.html">
+    Annex: Declarations in FCM build configuration file</a>.</li>
+
+    <li>line 2: this declaration switches off (0) automatic dependency scan for
+    this source file. If this switch is not declared, it is automatically set
+    to on (1) for a source file. If the switch is on, the dependency scanner
+    will scan the source file for further dependencies. Otherwise, dependency
+    information for this source file will only be read from this configuration
+    file.</li>
+
+    <li>line 3: this declares the internal name of the source file to be
+    "myprog". If this is not set and the dependency scanner is switched on,
+    the internal name of the source file will be taken from the first program
+    unit of the source file. The resulting object file will be named after
+    the internal name, plus the ".o" extension. If internal name is not set
+    and cannot be determined automatically, the default is to use the root
+    name of the source file to name the object file.</li>
+
+    <li>line 4: this declares the executable target name of a main program.
+    This declaration is only used when the source file contains a main
+    program. If the target name is not set, the name of the executable will be
+    named after the root name of the source file plus the ".exe" extension. In
+    the above example, the executable will be named "hello_world".</li>
+
+    <li>line 6-10: these lines declare the dependencies of the source file.
+    The syntax of the values are exactly the same as those used in the
+    EXCL_DEP declarations in the build configuration file. For a list of these
+    flags, please see the <a
+    href="annex_bld_cfg.html#dependency-types">dependency types table</a> in
+    the <a href="annex_bld_cfg.html">Annex:
+    Declarations in FCM build configuration file</a>. In the example,
+    the source file is dependent on a Fortran module called "YourFortranMod",
+    a Fortran INCLUDE interface block file called "HerFortran.interface", a
+    Fortran INCLUDE file called "HistFortran.inc, a pre-processor header file
+    called "TheirHeader.h", and an object file called "ItsObject.o".</li>
+  </ul>
+
+  <h3><a name="advanced_data">Building data files</a></h3>
+
+  <p>While the usual targets to be built are the executables associated with
+  source files containing main programs, libraries or scripts, the build system
+  also allows you to build "data" files. All files with no registered type are
+  considered to be "data" files.  For each sub-package, there is an automatic
+  target for copying all "data" files to the "etc/" sub-directory of the build
+  root. The name of the target has the form "&lt;pcks&gt;.etc", where
+  &lt;pcks&gt; is the name of the sub-package (with package names delimited by
+  the double underscore "__"). For example, the target name for sub-package
+  "foo::bar" is "foo__bar.etc". This target is particularly useful for copying,
+  say, all namelists in a sub-package to the "etc/" sub-directory of the build
+  root.</p>
+
+  <p>At the end of a successful build, if the "etc/" sub-directory is not empty,
+  the "fcm_env.ksh" script will export the environment variable FCM_ETCDIR to
+  point to the "etc/" sub-directory. You should be able to use this environment
+  variable to locate your data files.</p>
+
+  <h2><a name="verbose">Diagnostic verbose level</a></h2>
+
+  <p>The amount of diagnostic messages generated by the build system is
+  normally set to a level suitable for normal everyday operation. This is the
+  default diagnostic verbose level 1. If you want a minimum amount of
+  diagnostic messages, you should set the verbose level to 0. If you want more
+  diagnostic messages, you can set the verbose level to 2 or 3. You can modify
+  the verbose level in two ways. The first way is to set the environment
+  variable FCM_VERBOSE to the desired verbose level. The second way is to
+  invoke the build system with the "-v &lt;level&gt;" option. (If set, the
+  command line option overrides the environment variable.)</p>
+
+  <p>The following is a list of diagnostic output at each verbose level:</p>
+
+  <table class="pad" summary="List of diagnostic verbose output" border="1">
+    <tr>
+      <th>Verbose level</th>
+
+      <th>Possible output</th>
+    </tr>
+
+    <tr>
+      <th>0</th>
+
+      <td>
+        <ul>
+          <li>Report the time taken at the end of each stage of the build
+          process.</li>
+
+          <li>Run the <em>make</em> command in silent mode.</li>
+        </ul>
+      </td>
+    </tr>
+
+    <tr>
+      <th>1</th>
+
+      <td>
+        <ul>
+          <li>Everything at verbose level 0.</li>
+
+          <li>Report the name of the build configuration file.</li>
+
+          <li>Report date/time at the beginning of each stage of the build
+          process.</li>
+
+          <li>Report removed directories.</li>
+
+          <li>Report number of pre-processed files.</li>
+
+          <li>Report number of generated F9X interface files.</li>
+
+          <li>Report number of sub-packages that have source files scanned
+          for dependencies.</li>
+
+          <li>Report number of generated/updated sub-package <em>make</em>
+          rule fragment files.</li>
+
+          <li>Report name of updated <em>Makefile</em>.</li>
+
+          <li>Print compiler/linker commands.</li>
+
+          <li>Report total time.</li>
+        </ul>
+      </td>
+    </tr>
+
+    <tr>
+      <th>2</th>
+
+      <td>
+        <ul>
+          <li>Everything at verbose level 1.</li>
+
+          <li>For incremental build in archive mode, report the commands used
+          to extract the archives.</li>
+
+          <li>Report creation and removal of directories.</li>
+
+          <li>Report pre-processor commands.</li>
+
+          <li>Report number of files scanned for dependency in each
+          sub-package.</li>
+
+          <li>Report names of generated/updated sub-package <em>make</em> rule
+          fragment files.</li>
+
+          <li>Print compiler/linker commands with timestamps.</li>
+
+          <li>Print usage of the runtime environment set up script.</li>
+        </ul>
+      </td>
+    </tr>
+
+    <tr>
+      <th>3</th>
+
+      <td>
+        <ul>
+          <li>Everything at verbose level 2.</li>
+
+          <li>Report update of dummy files.</li>
+
+          <li>Report all shell commands.</li>
+
+          <li>Report pre-processor commands with timestamps.</li>
+
+          <li>If F9X interface is generated by <em>f90aib</em>, print commands
+          with timestamps.</li>
+
+          <li>If F9X interface is generated by ECMWF code, report start
+          date/time and time taken to generate each interface file.</li>
+
+          <li>Report start date/time and time taken of dependency scan for each
+          source file.</li>
+
+          <li>Run <em>make</em> on normal mode (as opposed to silent mode).</li>
+
+          <li>Report start date/time and time taken of <em>make</em>
+          commands.</li>
+        </ul>
+      </td>
+    </tr>
+  </table>
+
+  <h2><a name="overview">Overview of the build process</a></h2>
+
+  <p>The FCM build process can be summarised in five stages. Here is a summary
+  of what is done in each stage:</p>
+
+  <ol>
+    <li><strong>Setup</strong>: in this first stage, the build system reads
+    and processes the configuration file. The source sub-directory is searched
+    recursively for source directories. For full builds, it ensures that the
+    sub-directories created by the build system are removed. For inherited
+    (i.e. pre-compiled) builds, it sets up the search paths for the
+    sub-directories, inherits the targets, source directories, etc. For
+    incremental builds, the system also works out whether the current list of
+    build tools have changed.</li>
+
+    <li><strong>Pre-process</strong>: if any files in any source directories
+    require pre-processing, they will be pre-processed at this stage. The
+    resulting pre-processed source files will be sent to the "ppsrc/"
+    sub-directory of the build root.</li>
+
+    <li><strong>Generate dependency</strong>: the system scans source files of
+    registered types for dependency information. For an incremental build, the
+    information is only updated if a source file is changed. The system then
+    uses the information to write a <em>Makefile</em> for the main build. The
+    <em>Makefile</em> and any of its included fragments are generated in the
+    "bld/" sub-directory of the build root.</li>
+
+    <li><strong>Generate interface</strong>: if there are Fortran 9X source
+    files with standalone subroutines and functions, the build system
+    generates interface blocks for them. The result of which will be written
+    to the interface files in the "inc/" sub-directory of the build root.</li>
+
+    <li>
+      <strong>Make</strong>: the system invokes <em>make</em> on the
+      <em>Makefile</em> generated in the previous stage to perform the main
+      build. Following a build, the "root" directory of the build may contain
+      the following sub-directories (empty ones are removed automatically at the
+      end of the build process):
+
+      <table summary="list of build sub-directories" border="1" width="100%">
+        <tr>
+          <th>Sub-directory</th>
+
+          <th>Contents</th>
+
+          <th>Note</th>
+        </tr>
+
+        <tr>
+          <th>.cache/</th>
+
+          <td>&lt;cache files&gt;</td>
+
+          <td>used internally by FCM</td>
+        </tr>
+
+        <tr>
+          <th>bin/</th>
+
+          <td>&lt;executable binaries and scripts&gt;</td>
+
+          <td>-</td>
+        </tr>
+
+        <tr>
+          <th>bld/</th>
+
+          <td>Makefile and &lt;Makefile include files&gt;</td>
+
+          <td>-</td>
+        </tr>
+
+        <tr>
+          <th>cfg/</th>
+
+          <td>bld.cfg</td>
+
+          <td>this directory is not changed by the build system</td>
+        </tr>
+
+        <tr>
+          <th>done/</th>
+
+          <td>&lt;dummy "done" files&gt;</td>
+
+          <td>used internally by the Makefile generated by FCM</td>
+        </tr>
+
+        <tr>
+          <th>etc/</th>
+
+          <td>&lt;miscellaneous data files&gt;</td>
+
+          <td>-</td>
+        </tr>
+
+        <tr>
+          <th>flags/</th>
+
+          <td>&lt;dummy "flags" files&gt;</td>
+
+          <td>used internally by the Makefile generated by FCM</td>
+        </tr>
+
+        <tr>
+          <th>inc/</th>
+
+          <td>&lt;include files&gt;</td>
+
+          <td>such as *.h, *.inc, *.interface and *.mod files</td>
+        </tr>
+
+        <tr>
+          <th>lib/</th>
+
+          <td>&lt;object library archives&gt;</td>
+
+          <td>-</td>
+        </tr>
+
+        <tr>
+          <th>obj/</th>
+
+          <td>&lt;compiled object files&gt;</td>
+
+          <td>-</td>
+        </tr>
+
+        <tr>
+          <th>ppsrc/</th>
+
+          <td>&lt;source directories with pre-processed files&gt;</td>
+
+          <td>-</td>
+        </tr>
+
+
+        <tr>
+          <th>src/</th>
+
+          <td>&lt;source directories&gt;</td>
+
+          <td>this directory is not changed by the build system</td>
+        </tr>
+        <tr>
+          <th>tmp/</th>
+
+          <td>&lt;temporary objects and binaries&gt;</td>
+
+          <td>files generated by the compiler/linker may be left here</td>
+        </tr>
+      </table>
+    </li>
+  </ol>
+
+  <script type="text/javascript" src="maintain.js">
+  </script>
+</body>
+</html>

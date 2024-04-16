@@ -1,0 +1,16 @@
+%COMPILER            /usr/local/bin/mpif90
+%LINK                /usr/local/bin/mpif90
+%AR                  ar
+%ARFLAGS          rs
+%MAKE                make
+%FPP_FLAGS           -P -traditional
+%FPP_DEF             NC_DOUBLE
+%BASE_FFLAGS          -cpp -ffree-line-length-0 -fdefault-real-8 -DNC_DOUBLE -fdefault-double-8 -fallow-argument-mismatch
+%PROD_FFLAGS         -O3
+%DEV_FFLAGS          -Wall -fbounds-check
+%DEBUG_FFLAGS        -g3 -Wall -fbounds-check -ffpe-trap=invalid,zero,overflow -O0 -fstack-protector-all -fbacktrace -finit-real=nan
+%MPI_FFLAGS          -fcray-pointer
+%OMP_FFLAGS          -fopenmp -fcray-pointer
+%BASE_LD             -Wl,-rpath,/usr/local/lib:/usr/local/Cellar/netcdf-fortran/4.6.1/lib
+%MPI_LD
+%OMP_LD              -fopenmp

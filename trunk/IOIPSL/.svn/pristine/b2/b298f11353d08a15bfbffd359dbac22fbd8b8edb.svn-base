@@ -1,0 +1,6 @@
+# Compile options for Spirit and Spiritx at IPSL ESPRI Mesocenter 
+NETCDF_INCDIR="-I${NETCDF_FORTRAN_ROOT}/include "
+NETCDF_LIBDIR="-L${NETCDF_FORTRAN_ROOT}/lib"
+NETCDF_LIB="-L${NETCDF_FORTRAN_ROOT}/lib -lnetcdff"
+
+
