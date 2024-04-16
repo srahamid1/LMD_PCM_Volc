@@ -1,0 +1,4 @@
+cd /home/sshamid1/GCM/trunk/LMDZ.COMMON
+/home/sshamid1/GCM/trunk/LMDZ.COMMON/makelmdz_fcm -arch local -p std -d 32x32x15 -full -t 9 -s 3 -b 32x36 -io noioipsl -j 8 -fcm_path /home/sshamid1/GCM/trunk/FCM_V1.2/bin newstart
+
+cp /home/sshamid1/GCM/trunk/LMDZ.COMMON/bin/newstart_32x32x15_phystd_seq.e /path/to/working/directory/

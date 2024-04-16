@@ -1,0 +1,3 @@
+mv restart.nc start.nc
+mv restartfi.nc startfi.nc
+
