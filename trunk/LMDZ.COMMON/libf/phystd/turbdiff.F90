@@ -508,11 +508,11 @@
                ! compute evaporation efficiency
                do ig=1,ngrid
                   if(nint(rnat(ig)).eq.1)then
-!                     dryness(ig)=0 ! [1] uncomment this line & comment lines 512-514 to turn off sublimation completely
+!                     dryness(ig)=0 ! [1] uncomment this line & comment lines 512-514 to turn off sublimation on whole planet
                      dryness(ig)=pqsurf(ig,iliq_surf)+pqsurf(ig,iice_surf) 
                      dryness(ig)=MIN(1.,2*dryness(ig)/mx_eau_sol)
                      dryness(ig)=MAX(0.,dryness(ig))
-!                     [2] Turn off all H2O sublimation when volcano is passively degassing
+!                     [2] Turn off H2O sublimation when volcano is passively degassing
 !                     --------------------------------------------------------------------
 !                     if (callvolcano) then
 !                       dryness(ig)=0  
