@@ -319,12 +319,49 @@ CONTAINS
      callsoil=.true. ! default value
      call getin_p("callsoil",callsoil)
      write(*,*) " callsoil = ",callsoil
-     
+!=================================
+! Volcano stuff     
      write(*,*)"Erupt volcano ?"
      callvolcano=.true. ! default value
      call getin_p("callvolcano",callvolcano)
      write(*,*) " callvolcano = ",callvolcano
-         
+
+     write(*,*)"Volcano Longitude ?"
+     lon_volc=178 ! default value
+     call getin_p("lon_volc",lon_volc)
+     write(*,*) "Volcano Longitude = ",lon_volc
+
+     write(*,*)"Volcano Latitude ?"
+     lat_volc=-8.5 ! default value
+     call getin_p("lat_volc",lat_volc)
+     write(*,*) "Volcano Latitude = ",lat_volc
+
+     write(*,*)"Volcano Dropheight GCM Level ?"
+     dropheight =14 ! default value
+     call getin_p("dropheight", dropheight)
+     write(*,*) "Volcano Dropheight GCM Level = ", dropheight
+
+     write(*,*)"Ash Mass Eruption Rate ?"
+     mmsource =1E8 ! default value
+     call getin_p("mmsource",mmsource)
+     write(*,*) "Ash Mass Eruption Rate (kg/s) = ",mmsource
+
+     write(*,*)"Water Mass Eruption Rate ?"
+     wsource =1E6 ! default value
+     call getin_p("wsource",wsource)
+     write(*,*) "Water Mass Eruption Rate (kg/s) = ",wsource
+
+     write(*,*)"H2SO4 Mass Eruption Rate ?"
+     h2so4source =1E5 ! default value
+     call getin_p("h2so4source",h2so4source)
+     write(*,*) "H2SO4 Mass Eruption Rate (kg/s) = ",h2so4source
+
+     write(*,*)"Volcanic Ash Density (kg/m3)?"
+     rho_volc =2980 ! default value
+     call getin_p("rho_volc",rho_volc)
+     write(*,*) "Volcanic Ash Density (kg/m3) = ",rho_volc
+
+!=================================        
      write(*,*)"Rad transfer is computed every iradia", &
                    " physical timestep"
      iradia=1 ! default value
@@ -534,15 +571,25 @@ CONTAINS
      call getin_p("dusttau",dusttau)
      write(*,*)" dusttau = ",dusttau
 
+     write(*,*)"Height in km of dusttau (if used):"
+     topdust=30. ! default value
+     call getin_p("topdust", topdust)
+     write(*,*)" topdust = ",topdust
+
      write(*,*)"Radiatively active CO2 aerosols?"
      aeroco2=.false.     ! default value
      call getin_p("aeroco2",aeroco2)
      write(*,*)" aeroco2 = ",aeroco2
 
      write(*,*)"Radiatively active ash aerosols?"
-     aeroash=.true.     ! default value
+     aeroash=.false.     ! default value
      call getin_p("aeroash",aeroash)
      write(*,*)" aeroash = ",aeroash
+
+     write(*,*)"Fixed Ash aerosol distribution?"
+     aerofixash=.false.     ! default value
+     call getin_p("aerofixash",aerofixash)
+     write(*,*)" aerofixash = ",aerofixash
 
      write(*,*)"Fixed CO2 aerosol distribution?"
      aerofixco2=.false.     ! default value
@@ -563,6 +610,16 @@ CONTAINS
      aeroh2so4=.false.     ! default value
      call getin_p("aeroh2so4",aeroh2so4)
      write(*,*)" aeroh2so4 = ",aeroh2so4
+
+     write(*,*)"Opacity of H2SO4 (if used):"
+     h2so4tau=0. ! default value
+     call getin_p("h2so4tau",h2so4tau)
+     write(*,*)" h2so4tau = ",h2so4tau
+
+     write(*,*)"Height in km of h2so4tau (if used):"
+     top_h2so4=30. ! default value
+     call getin_p("top_h2so4", top_h2so4)
+     write(*,*)" top_h2so4 = ",top_h2so4
 	 
 !=================================
 
